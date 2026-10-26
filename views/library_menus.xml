@@ -1,7 +1,11 @@
+
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <menuitem id="menu_library_root" name="Library" sequence="50"/>
     <menuitem id="menu_library_books" name="Books"
               parent="menu_library_root"
               action="action_library_book" sequence="10"/>
+    <menuitem id="menu_library_loans" name="Loans"
+              parent="menu_library_root"
+              action="action_library_loan" sequence="20"/>
 </odoo>

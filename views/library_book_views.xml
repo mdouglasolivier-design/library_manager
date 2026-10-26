@@ -62,7 +62,25 @@
                         <page string="Description">
                             <field name="description"/>
                         </page>
+                        <page string="Loan History">
+    <field name="loan_ids" readonly="1">
+        <list>
+            <field name="borrower_id"/>
+            <field name="borrow_date"/>
+            <field name="due_date"/>
+            <field name="return_date"/>
+            <field name="days_late"/>
+            <field name="state" widget="badge"/>
+        </list>
+    </field>
+</page>
                     </notebook>
+                    <div class="oe_button_box" name="button_box">
+    <button name="action_view_loans" type="object"
+            class="oe_stat_button" icon="fa-history">
+        <field name="loan_count" widget="statinfo" string="Loans"/>
+    </button>
+</div>
                 </sheet>
                 <div class="oe_chatter">
                     <field name="message_follower_ids"/>

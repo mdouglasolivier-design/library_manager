@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- LIST VIEW -->
+    <record id="view_library_loan_list" model="ir.ui.view">
+        <field name="name">library.loan.list</field>
+        <field name="model">library.loan</field>
+        <field name="arch" type="xml">
+            <list create="0" decoration-danger="is_overdue" decoration-muted="state == 'returned'">
+                <field name="book_id"/>
+                <field name="borrower_id"/>
+                <field name="borrow_date"/>
+                <field name="due_date"/>
+                <field name="return_date"/>
+                <field name="days_late"/>
+                <field name="is_overdue" column_invisible="1"/>
+                <field name="state" widget="badge"
+                       decoration-warning="state == 'borrowed'"
+                       decoration-success="state == 'returned'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- FORM VIEW -->
+    <record id="view_library_loan_form" model="ir.ui.view">
+        <field name="name">library.loan.form</field>
+        <field name="model">library.loan</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <header>
+                    <button name="action_mark_returned" string="Mark as Returned" type="object"
+                            class="btn-primary" invisible="state != 'borrowed'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="book_id" readonly="1"/>
+                            <field name="borrower_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="borrow_date" readonly="1"/>
+                            <field name="due_date" readonly="state == 'returned'"/>
+                            <field name="return_date" readonly="1"/>
+                            <field name="days_late"/>
+                            <field name="is_overdue" invisible="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- SEARCH VIEW -->
+    <record id="view_library_loan_search" model="ir.ui.view">
+        <field name="name">library.loan.search</field>
+        <field name="model">library.loan</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="book_id"/>
+                <field name="borrower_id"/>
+                <filter name="open" string="Open" domain="[('state', '=', 'borrowed')]"/>
+                <filter name="returned" string="Returned" domain="[('state', '=', 'returned')]"/>
+                <filter name="overdue" string="Overdue" domain="[('is_overdue', '=', True)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_borrower" string="Borrower" context="{'group_by': 'borrower_id'}"/>
+                    <filter name="group_book" string="Book" context="{'group_by': 'book_id'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_library_loan" model="ir.actions.act_window">
+        <field name="name">Loans</field>
+        <field name="res_model">library.loan</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_open': 1}</field>
+    </record>
+
+</odoo>
