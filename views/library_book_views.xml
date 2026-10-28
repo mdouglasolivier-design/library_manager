@@ -2,7 +2,7 @@
 <odoo>
 
     <!-- LIST VIEW -->
-    <record id="view_library.book.list" model="ir.ui.view">
+    <record id="view_library_book_list" model="ir.ui.view">
         <field name="name">library.book.list</field>
         <field name="model">library.book</field>
         <field name="arch" type="xml">

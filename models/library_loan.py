@@ -76,4 +76,13 @@ class LibraryLoan(models.Model):
                 raise ValidationError("This book already has an open loan.")
 
     def action_mark_returned(self):
-        self.write({'state': 'returned', 'return_date': fields.Date.today()})
+        today = fields.Date.today()
+        for loan in self.filtered(lambda l: l.state == 'borrowed'):
+            loan.write({'state': 'returned', 'return_date': today})
+            if loan.book_id.state == 'borrowed':
+                loan.book_id.write({
+                    'state': 'available',
+                    'borrower_id': False,
+                    'borrow_date': False,
+                    'due_date': False,
+                })
