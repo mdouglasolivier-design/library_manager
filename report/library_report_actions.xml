@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- LOAN RECEIPT (Print menu on a loan) -->
+    <record id="action_report_loan_receipt" model="ir.actions.report">
+        <field name="name">Loan Receipt</field>
+        <field name="model">library.loan</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">library_manager.report_loan_receipt</field>
+        <field name="report_file">library_manager.report_loan_receipt</field>
+        <field name="print_report_name">'Loan Receipt - LN%05d' % object.id</field>
+        <field name="binding_model_id" ref="model_library_loan"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- OVERDUE LIST (wizard or Print menu on selected loans) -->
+    <record id="action_report_overdue_list" model="ir.actions.report">
+        <field name="name">Overdue Loans List</field>
+        <field name="model">library.loan</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">library_manager.report_overdue_list</field>
+        <field name="report_file">library_manager.report_overdue_list</field>
+        <field name="print_report_name">'Overdue Loans'</field>
+        <field name="binding_model_id" ref="model_library_loan"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- MEMBER CARD (Print menu on a contact) -->
+    <record id="action_report_member_card" model="ir.actions.report">
+        <field name="name">Library Member Card</field>
+        <field name="model">res.partner</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">library_manager.report_member_card</field>
+        <field name="report_file">library_manager.report_member_card</field>
+        <field name="print_report_name">'Member Card - %s' % (object.name or '')</field>
+        <field name="binding_model_id" ref="base.model_res_partner"/>
+        <field name="binding_type">report</field>
+    </record>
+
+</odoo>

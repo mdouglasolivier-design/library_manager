@@ -3,10 +3,19 @@
     <menuitem id="menu_library_root" name="Library"
               web_icon="library_manager,static/description/icon.png"
               sequence="50"/>
+
     <menuitem id="menu_library_books" name="Books"
               parent="menu_library_root"
               action="action_library_book" sequence="10"/>
+
     <menuitem id="menu_library_loans" name="Loans"
               parent="menu_library_root"
               action="action_library_loan" sequence="20"/>
+
+    <menuitem id="menu_library_reports" name="Reports"
+              parent="menu_library_root" sequence="90"/>
+
+    <menuitem id="menu_library_report_overdue" name="Overdue Loans Report"
+              parent="menu_library_reports"
+              action="action_library_overdue_report_wizard" sequence="10"/>
 </odoo>

@@ -1,17 +1,22 @@
 {
     'name': 'Library Manager',
-    'version': '18.0.1.0.0',
-    'summary': 'Manage books and lending in a simple library',
+    'version': '18.0.1.2.0',
+    'summary': 'Manage books, lending, loan history and printable reports',
     'category': 'Services',
     'author': 'Douglas',
     'depends': ['base', 'mail'],
-        'data': [
+    'data': [
         'security/ir.model.access.csv',
+        'data/library_filters.xml',
+        'report/library_report_actions.xml',
+        'report/library_loan_receipt_templates.xml',
+        'report/library_overdue_report_templates.xml',
+        'report/library_member_card_templates.xml',
         'views/library_book_views.xml',
         'views/library_loan_views.xml',
+        'wizard/library_overdue_report_wizard_views.xml',
         'views/library_menus.xml',
     ],
-
     'installable': True,
     'application': True,
     'license': 'LGPL-3',

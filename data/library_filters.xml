@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="filter_library_overdue_loans" model="ir.filters">
+        <field name="name">Overdue Loans</field>
+        <field name="model_id">library.loan</field>
+        <field name="domain">[('is_overdue', '=', True)]</field>
+        <field name="context">{}</field>
+    </record>
+    <record id="filter_library_overdue_books" model="ir.filters">
+        <field name="name">Overdue Books</field>
+        <field name="model_id">library.book</field>
+        <field name="domain">[('is_overdue', '=', True)]</field>
+        <field name="context">{}</field>
+    </record>
+</odoo>

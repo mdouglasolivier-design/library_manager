@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="report_overdue_list">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+
+                    <h2>Overdue Loans</h2>
+                    <p>
+                        As of <span t-out="date_as_of" t-options='{"widget": "date"}'/>:
+                        <strong t-out="len(docs)"/> overdue loan(s) from
+                        <strong t-out="len(docs.mapped('borrower_id'))"/> borrower(s).
+                    </p>
+
+                    <t t-if="not docs">
+                        <p class="text-muted">No overdue loans. Everything is on time.</p>
+                    </t>
+
+                    <table t-if="docs" class="table table-sm mt-3">
+                        <thead>
+                            <tr>
+                                <th>Loan</th>
+                                <th>Borrower</th>
+                                <th>Phone</th>
+                                <th>Book</th>
+                                <th>Borrowed</th>
+                                <th>Due Date</th>
+                                <th class="text-end">Days Late</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="docs" t-as="loan">
+                                <tr>
+                                    <td><span t-out="'LN%05d' % loan.id"/></td>
+                                    <td><span t-field="loan.borrower_id.name"/></td>
+                                    <td><span t-out="loan.borrower_id.phone or ''"/></td>
+                                    <td><span t-field="loan.book_id.name"/></td>
+                                    <td><span t-field="loan.borrow_date"/></td>
+                                    <td><span t-field="loan.due_date"/></td>
+                                    <td class="text-end text-danger">
+                                        <strong t-out="days_late.get(loan.id, 0)"/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                </div>
+            </t>
+        </t>
+    </template>
+
+</odoo>

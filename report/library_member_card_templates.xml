@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="report_member_card">
+        <t t-call="web.basic_layout">
+            <div class="page">
+                <t t-foreach="docs" t-as="o">
+                    <t t-set="card_no" t-value="'LIB%06d' % o.id"/>
+
+                    <!-- One credit-card sized card: 85.6mm x 54mm -->
+                    <div style="width: 85.6mm; height: 54mm; border: 1px solid #154a8c; margin-bottom: 8mm; overflow: hidden; page-break-inside: avoid;">
+
+                        <div style="background-color: #009688; color: #ffffff; padding: 2mm 4mm; font-size: 11pt; font-weight: bold;">
+                            <span t-out="res_company.name"/> Library
+                        </div>
+
+                        <table style="width: 100%; margin-top: 2mm;">
+                            <tr>
+                                <td style="width: 22mm; padding-left: 4mm; vertical-align: top;">
+                                    <img t-if="o.image_128"
+                                         t-att-src="image_data_uri(o.image_128)"
+                                         style="width: 18mm; height: 18mm;" alt="Photo"/>
+                                </td>
+                                <td style="vertical-align: top; padding-right: 3mm; font-size: 9pt;">
+                                    <div style="font-size: 7pt; color: #666666;">MEMBER</div>
+                                    <div style="font-size: 11pt; font-weight: bold;">
+                                        <span t-out="o.name"/>
+                                    </div>
+                                    <div style="font-size: 7pt; color: #666666; margin-top: 1mm;">CARD NO.</div>
+                                    <div style="font-weight: bold;"><span t-out="card_no"/></div>
+                                    <div style="font-size: 7pt; color: #666666; margin-top: 1mm;">MEMBER SINCE</div>
+                                    <div>
+                                        <span t-field="o.create_date" t-options='{"widget": "date"}'/>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div style="text-align: center; margin-top: 1mm;">
+                            <img t-att-src="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', card_no, 600, 100)"
+                                 style="width: 62mm; height: 9mm;" alt="Barcode"/>
+                        </div>
+
+                    </div>
+                </t>
+            </div>
+        </t>
+    </template>
+
+</odoo>

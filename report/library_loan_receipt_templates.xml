@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- One receipt (one page) -->
+    <template id="report_loan_receipt_document">
+        <t t-call="web.external_layout">
+            <div class="page">
+
+                <table style="width: 100%;">
+                    <tr>
+                        <td style="vertical-align: top;">
+                            <h2>Loan Receipt</h2>
+                            <h4 t-out="'LN%05d' % o.id"/>
+                        </td>
+                        <td style="text-align: right; vertical-align: top;">
+                            <img t-att-src="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', 'LN%05d' % o.id, 400, 80)"
+                                 style="height: 14mm; max-width: 60mm;" alt="Barcode"/>
+                        </td>
+                    </tr>
+                </table>
+
+                <table class="table table-borderless mt-3" style="width: 100%;">
+                    <tr>
+                        <td style="width: 50%; vertical-align: top;">
+                            <strong>Borrower</strong><br/>
+                            <span t-field="o.borrower_id"
+                                  t-options='{"widget": "contact", "fields": ["name", "address", "phone", "email"], "no_marker": True}'/>
+                        </td>
+                        <td style="width: 50%; vertical-align: top;">
+                            <strong>Status:</strong> <span t-field="o.state"/><br/>
+                            <t t-if="o.is_overdue">
+                                <strong class="text-danger">
+                                    Overdue by <span t-out="o.days_late"/> day(s)
+                                </strong>
+                            </t>
+                        </td>
+                    </tr>
+                </table>
+
+                <table class="table table-sm mt-4">
+                    <thead>
+                        <tr>
+                            <th>Book</th>
+                            <th>Author</th>
+                            <th>ISBN</th>
+                            <th>Borrowed</th>
+                            <th>Due Date</th>
+                            <th>Returned</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span t-field="o.book_id.name"/></td>
+                            <td><span t-field="o.book_id.author"/></td>
+                            <td><span t-field="o.book_id.isbn"/></td>
+                            <td><span t-field="o.borrow_date"/></td>
+                            <td><strong><span t-field="o.due_date"/></strong></td>
+                            <td><span t-field="o.return_date"/></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p class="mt-4">
+                    Please return the book on or before the due date.
+                    Late returns and lost books may be charged according to the library rules.
+                </p>
+
+                <table style="width: 100%; margin-top: 60px;">
+                    <tr>
+                        <td style="width: 45%; border-top: 1px solid #000; text-align: center;">
+                            Borrower signature
+                        </td>
+                        <td style="width: 10%;"/>
+                        <td style="width: 45%; border-top: 1px solid #000; text-align: center;">
+                            Librarian signature
+                        </td>
+                    </tr>
+                </table>
+
+            </div>
+        </t>
+    </template>
+
+    <!-- Report entry point -->
+    <template id="report_loan_receipt">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="library_manager.report_loan_receipt_document"/>
+            </t>
+        </t>
+    </template>
+
+</odoo>
