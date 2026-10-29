@@ -1,0 +1,1 @@
+"""Loan issue test placeholder."""

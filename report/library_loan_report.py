@@ -1,0 +1,1 @@
+"""Library loan report placeholder."""

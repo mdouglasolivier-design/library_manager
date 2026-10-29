@@ -1,0 +1,1 @@
+"""Ebook access model placeholder."""

@@ -1,0 +1,1 @@
+/** Reader session asset placeholder. */

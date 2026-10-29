@@ -1,0 +1,1 @@
+"""Borrower model placeholder."""

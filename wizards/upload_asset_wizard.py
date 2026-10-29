@@ -1,0 +1,1 @@
+"""Asset upload wizard placeholder."""

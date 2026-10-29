@@ -1,0 +1,1 @@
+"""Ebook asset model placeholder."""

@@ -15,7 +15,7 @@
         'report/library_member_card_templates.xml',
         'views/library_book_views.xml',
         'views/library_loan_views.xml',
-        'wizard/library_overdue_report_wizard_views.xml',
+        'wizards/library_overdue_report_wizard_views.xml',
         'views/library_menus.xml',
     ],
     'installable': True,

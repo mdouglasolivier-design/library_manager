@@ -1,0 +1,1 @@
+"""Ebook loan model placeholder."""
