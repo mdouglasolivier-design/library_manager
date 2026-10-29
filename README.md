@@ -1,43 +1,82 @@
-# Library Manager (Odoo 18)
+# Library Manager
 
-A simple Odoo module to manage books and lending.
+![Odoo 18](https://img.shields.io/badge/Odoo-18.0-875A7B) ![License](https://img.shields.io/badge/license-LGPL--3-blue)
+
+A simple, clean Odoo app to manage books, lending, loan history and printable reports.
 
 ## Features
-- Add books (title, author, ISBN, category, pages)
-- Lend a book to a contact (14-day due date)
-- Return a book or mark it as lost
-- Overdue highlighting, filters, grouping
-- Chatter tracking on every book
 
-## Install
-1. Put the `library_manager` folder inside your custom addons folder.
+- **Book catalogue**: title, author, unique ISBN, category, pages, description
+- **Lending and returns**: lend a book to any contact, 14-day due date, return or mark as lost
+- **Loan history**: one record per borrow, with return date and days late
+- **Overdue tracking**: highlighted rows, filters, grouping
+- **PDF reports**: loan receipt (with barcode), overdue loans list, member card
+- **Saved filters and Excel export templates**
+- **Chatter tracking** on every book
+
+## Requirements
+
+- Odoo 18.0 (Community or Enterprise)
+- Odoo modules: `base`, `mail`
+
+## Installation
+
+1. Copy the `library_manager` folder into your custom addons folder.
 2. Add that folder to `addons_path` in `odoo.conf`.
-3. Run:
-   ```bash
-   ./odoo-bin -c odoo.conf -d librarydb -i library_manager --dev=all
-   ```
-4. Open http://localhost:8069 and click the **Library** app.
+3. Restart Odoo and enable developer mode.
+4. Go to **Apps**, click **Update Apps List**, search for **Library Manager** and click **Install**.
 
-## Update after changes
+Command-line install:
+
 ```bash
-./odoo-bin -c odoo.conf -d librarydb -u library_manager --dev=all
+python odoo-bin -c odoo.conf -d <database> -i library_manager
 ```
 
-## Run tests
+## Usage
+
+| Task | How |
+|---|---|
+| Add a book | Library, then Books, then New |
+| Lend a book | Open the book, choose **Borrowed By**, click **Lend Book** |
+| Return a book | Open the book, click **Return Book** |
+| Print a receipt | Library, then Loans, open a loan, then Print |
+| Overdue report | Library, then Reports, then Overdue Loans Report |
+| Member card | Contacts, open a contact, then Print |
+| Export to Excel | In a list, select rows, then Actions, then Export |
+
+## Upgrading
+
 ```bash
-./odoo-bin -c odoo.conf -d testdb -i library_manager --test-enable --stop-after-init
+python odoo-bin -c odoo.conf -d <database> -u library_manager
 ```
 
-## Git quick start
+## Running the tests
+
 ```bash
-git init
-git branch -M main
-git add .
-git commit -m "chore: initial library_manager module"
-git remote add origin https://github.com/<your-username>/library_manager.git
-git push -u origin main
+python odoo-bin -c odoo.conf -d <database> -u library_manager --test-enable --test-tags /library_manager --stop-after-init
 ```
 
-## Odoo version notes
-- Built for Odoo 18 (uses `<list>` views and `view_mode` `list,form`).
-- Odoo 17: rename `<list>` to `<tree>` and `view_mode` to `tree,form`, and set the version to `17.0.1.0.0`.
+## Project structure
+
+```
+library_manager/
+├── __manifest__.py
+├── data/          saved filters and export templates
+├── models/        library.book, library.loan
+├── report/        PDF reports and QWeb templates
+├── security/      access rights
+├── static/        icon and Apps page description
+├── tests/         automated tests
+├── views/         list, form, search views and menus
+└── wizard/        overdue report wizard
+```
+
+## Roadmap
+
+- Members, authors and publishers as separate models
+- Security groups (Reader, Librarian, Manager)
+- Settings page, overdue email reminders, kanban view with covers
+
+## License
+
+LGPL-3

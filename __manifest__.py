@@ -1,9 +1,10 @@
 {
     'name': 'Library Manager',
     'version': '18.0.1.2.0',
-    'summary': 'Manage books, lending, loan history and printable reports',
+    'summary': 'Books, lending, loan history and printable reports',
     'category': 'Services',
     'author': 'Douglas',
+    'website': 'https://github.com/mdouglasolivier-design/library_manager',
     'depends': ['base', 'mail'],
     'data': [
         'security/ir.model.access.csv',
