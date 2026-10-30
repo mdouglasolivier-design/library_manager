@@ -9,6 +9,9 @@ A simple, clean Odoo app to manage books, lending, loan history and printable re
 - **Book catalogue**: title, author, unique ISBN, category, pages, description
 - **Lending and returns**: lend a book to any contact, 14-day due date, return or mark as lost
 - **Loan history**: one record per borrow, with return date and days late
+- **Ebook catalog and loans**: librarians issue date-bounded ebook loans
+- **Ebook access eligibility**: only the signed-in member's active, in-date loan grants access
+- **Ebook reservations**: readers can request an ebook; librarians manage pending requests
 - **Overdue tracking**: highlighted rows, filters, grouping
 - **PDF reports**: loan receipt (with barcode), overdue loans list, member card
 - **Saved filters and Excel export templates**
@@ -39,10 +42,16 @@ python odoo-bin -c odoo.conf -d <database> -i library_manager
 | Add a book | Library, then Books, then New |
 | Lend a book | Open the book, choose **Borrowed By**, click **Lend Book** |
 | Return a book | Open the book, click **Return Book** |
+| Issue an ebook loan | As a librarian, open **Library → Ebook Loans** and create a loan |
+| Reserve an ebook | Open **Library → Ebook Reservations** and create a request |
+| Process a reservation | As a librarian, open a pending reservation and mark it fulfilled or cancel it |
 | Print a receipt | Library, then Loans, open a loan, then Print |
 | Overdue report | Library, then Reports, then Overdue Loans Report |
 | Member card | Contacts, open a contact, then Print |
 | Export to Excel | In a list, select rows, then Actions, then Export |
+
+Assign the **Library Librarian** group to trusted staff in **Settings → Users
+& Companies → Users** to let them issue and manage ebook loans.
 
 ## Upgrading
 
@@ -62,7 +71,7 @@ python odoo-bin -c odoo.conf -d <database> -u library_manager --test-enable --te
 library_manager/
 ├── __manifest__.py
 ├── data/          saved filters and export templates
-├── models/        library.book, library.loan
+├── models/        physical and ebook catalog, loan, and access models
 ├── report/        PDF reports and QWeb templates
 ├── security/      access rights
 ├── static/        icon and Apps page description
@@ -74,7 +83,7 @@ library_manager/
 ## Roadmap
 
 - Members, authors and publishers as separate models
-- Security groups (Reader, Librarian, Manager)
+- Ebook file delivery, asset management and DRM integrations
 - Settings page, overdue email reminders, kanban view with covers
 
 ## License

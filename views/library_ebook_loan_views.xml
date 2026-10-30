@@ -1,1 +1,93 @@
-<odoo/>
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_library_ebook_loan_list" model="ir.ui.view">
+        <field name="name">library.ebook.loan.list</field>
+        <field name="model">library.ebook.loan</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="is_overdue"
+                  decoration-muted="state == 'returned'">
+                <field name="ebook_id"/>
+                <field name="borrower_id"/>
+                <field name="borrow_date"/>
+                <field name="due_date"/>
+                <field name="return_date"/>
+                <field name="days_late"/>
+                <field name="is_overdue" column_invisible="1"/>
+                <field name="state" widget="badge"
+                       decoration-warning="state == 'active'"
+                       decoration-success="state == 'returned'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_library_ebook_loan_form" model="ir.ui.view">
+        <field name="name">library.ebook.loan.form</field>
+        <field name="model">library.ebook.loan</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_mark_returned" string="Return Ebook"
+                            type="object" class="btn-primary"
+                            invisible="state != 'active'"/>
+                    <field name="state" widget="statusbar" readonly="1"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="ebook_id"/>
+                            <field name="borrower_id"/>
+                        </group>
+                        <group>
+                            <field name="borrow_date"/>
+                            <field name="due_date"/>
+                            <field name="return_date" readonly="1"/>
+                            <field name="days_late"/>
+                            <field name="is_overdue" invisible="1"/>
+                        </group>
+                    </group>
+                    <group string="Access">
+                        <field name="access_ids" readonly="1">
+                            <list>
+                                <field name="valid_from"/>
+                                <field name="valid_until"/>
+                                <field name="is_active"/>
+                            </list>
+                        </field>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_library_ebook_loan_search" model="ir.ui.view">
+        <field name="name">library.ebook.loan.search</field>
+        <field name="model">library.ebook.loan</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="ebook_id"/>
+                <field name="borrower_id"/>
+                <filter name="active" string="Active"
+                        domain="[('state', '=', 'active')]"/>
+                <filter name="returned" string="Returned"
+                        domain="[('state', '=', 'returned')]"/>
+                <filter name="overdue" string="Overdue"
+                        domain="[('is_overdue', '=', True)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_ebook" string="Ebook"
+                            context="{'group_by': 'ebook_id'}"/>
+                    <filter name="group_borrower" string="Borrower"
+                            context="{'group_by': 'borrower_id'}"/>
+                    <filter name="group_state" string="Status"
+                            context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_library_ebook_loan" model="ir.actions.act_window">
+        <field name="name">Ebook Loans</field>
+        <field name="res_model">library.ebook.loan</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_active': 1}</field>
+    </record>
+</odoo>

@@ -12,6 +12,22 @@
               parent="menu_library_root"
               action="action_library_loan" sequence="20"/>
 
+    <menuitem id="menu_library_ebooks" name="Ebooks"
+              parent="menu_library_root"
+              action="action_library_ebook" sequence="30"/>
+
+    <menuitem id="menu_library_ebook_loans" name="Ebook Loans"
+              parent="menu_library_root"
+              action="action_library_ebook_loan" sequence="40"/>
+
+    <menuitem id="menu_library_ebook_access" name="Ebook Access"
+              parent="menu_library_root"
+              action="action_library_ebook_access" sequence="50"/>
+
+    <menuitem id="menu_library_ebook_reservations" name="Ebook Reservations"
+              parent="menu_library_root"
+              action="action_library_ebook_reservation" sequence="60"/>
+
     <menuitem id="menu_library_reports" name="Reports"
               parent="menu_library_root" sequence="90"/>
 
