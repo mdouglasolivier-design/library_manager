@@ -13,12 +13,78 @@
                 <field name="isbn"/>
                 <field name="borrower_id"/>
                 <field name="due_date"/>
-                <field name="is_overdue" column_invisible="1"/>
+                <field name="is_overdue" string="Overdue" widget="boolean"/>
                 <field name="state" widget="badge"
                        decoration-success="state == 'available'"
-                       decoration-warning="state == 'borrowed'"
+                       decoration-warning="state == 'borrowed' and not is_overdue"
                        decoration-danger="state == 'lost'"/>
             </list>
+        </field>
+    </record>
+
+    <!-- COVER KANBAN -->
+    <record id="view_library_book_kanban" model="ir.ui.view">
+        <field name="name">library.book.kanban</field>
+        <field name="model">library.book</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="author"/>
+                <field name="cover_image"/>
+                <field name="category"/>
+                <field name="isbn"/>
+                <field name="state"/>
+                <field name="borrower_id"/>
+                <field name="due_date"/>
+                <field name="is_overdue"/>
+                <templates>
+                    <t t-name="card">
+                        <article class="d-flex h-100 gap-3">
+                            <div class="flex-shrink-0" style="width: 96px;">
+                                <img t-if="record.cover_image.raw_value"
+                                     t-att-src="kanban_image('library.book', 'cover_image', record.id.raw_value)"
+                                     alt="Book cover"
+                                     class="img-fluid rounded"
+                                     style="width: 96px; height: 136px; object-fit: cover;"/>
+                                <div t-else="" class="d-flex align-items-center justify-content-center rounded bg-light text-muted"
+                                     style="width: 96px; height: 136px;">
+                                    <i class="fa fa-book fa-2x" aria-label="No cover"/>
+                                </div>
+                            </div>
+                            <div class="min-w-0 flex-grow-1">
+                                <strong class="d-block text-truncate">
+                                    <field name="name"/>
+                                </strong>
+                                <div class="text-muted text-truncate">
+                                    <field name="author"/>
+                                </div>
+                                <div class="small text-muted mt-1">
+                                    <field name="category"/>
+                                    <t t-if="record.isbn.raw_value">
+                                        <span> | </span><field name="isbn"/>
+                                    </t>
+                                </div>
+                                <div class="mt-2">
+                                    <span t-if="record.state.raw_value == 'available'"
+                                          class="badge text-bg-success">Available</span>
+                                    <span t-if="record.state.raw_value == 'borrowed' and not record.is_overdue.raw_value"
+                                          class="badge text-bg-warning">Borrowed</span>
+                                    <span t-if="record.state.raw_value == 'borrowed' and record.is_overdue.raw_value"
+                                          class="badge text-bg-danger">Overdue</span>
+                                    <span t-if="record.state.raw_value == 'lost'"
+                                          class="badge text-bg-secondary">Lost</span>
+                                </div>
+                                <div t-if="record.state.raw_value == 'borrowed'" class="small mt-1">
+                                    <field name="borrower_id"/>
+                                    <span t-if="record.due_date.raw_value" class="text-muted">
+                                        · Due <field name="due_date"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </article>
+                    </t>
+                </templates>
+            </kanban>
         </field>
     </record>
 
@@ -36,51 +102,58 @@
                     <button name="action_mark_lost" string="Mark as Lost" type="object"
                             invisible="state == 'lost'"/>
                     <field name="state" widget="statusbar"
-                           statusbar_visible="available,borrowed"/>
+                           statusbar_visible="available,borrowed,lost"/>
                 </header>
                 <sheet>
-                    <div class="oe_title">
-                        <label for="name"/>
-                        <h1><field name="name" placeholder="Book title"/></h1>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_loans" type="object"
+                                class="oe_stat_button" icon="fa-history">
+                            <field name="loan_count" widget="statinfo" string="Loans"/>
+                        </button>
+                    </div>
+                    <div class="d-flex flex-wrap gap-4">
+                        <field name="cover_image" widget="image"
+                               class="oe_avatar" options="{'size': [0, 300]}"/>
+                        <div class="oe_title flex-grow-1">
+                            <label for="name"/>
+                            <h1><field name="name" placeholder="Book title"/></h1>
+                            <h4 class="text-muted"><field name="author" placeholder="Author"/></h4>
+                        </div>
                     </div>
                     <group>
                         <group string="Book Details">
-                            <field name="author"/>
                             <field name="isbn"/>
                             <field name="category"/>
                             <field name="pages"/>
                             <field name="published_date"/>
                         </group>
-                        <group string="Lending">
+                        <group string="Availability">
                             <field name="borrower_id" readonly="state != 'available'"/>
                             <field name="borrow_date" readonly="1"/>
                             <field name="due_date" readonly="1"/>
                             <field name="is_overdue" invisible="1"/>
+                            <div class="alert alert-danger" role="alert" invisible="not is_overdue">
+                                This book is overdue.
+                            </div>
                         </group>
                     </group>
                     <notebook>
-                        <page string="Description">
-                            <field name="description"/>
+                        <page string="About this book">
+                            <field name="description" placeholder="Add a description or summary..."/>
                         </page>
                         <page string="Loan History">
-    <field name="loan_ids" readonly="1">
-        <list>
-            <field name="borrower_id"/>
-            <field name="borrow_date"/>
-            <field name="due_date"/>
-            <field name="return_date"/>
-            <field name="days_late"/>
-            <field name="state" widget="badge"/>
-        </list>
-    </field>
+                            <field name="loan_ids" readonly="1">
+                                <list>
+                                    <field name="borrower_id"/>
+                                    <field name="borrow_date"/>
+                                    <field name="due_date"/>
+                                    <field name="return_date"/>
+                                    <field name="days_late"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
 </page>
                     </notebook>
-                    <div class="oe_button_box" name="button_box">
-    <button name="action_view_loans" type="object"
-            class="oe_stat_button" icon="fa-history">
-        <field name="loan_count" widget="statinfo" string="Loans"/>
-    </button>
-</div>
                 </sheet>
                 <div class="oe_chatter">
                     <field name="message_follower_ids"/>
@@ -97,13 +170,15 @@
         <field name="model">library.book</field>
         <field name="arch" type="xml">
             <search>
-                <field name="name"/>
-                <field name="author"/>
-                <field name="isbn"/>
+                <field name="name" string="Search Books"
+                       filter_domain="['|', '|', '|', ('name', 'ilike', self), ('author', 'ilike', self), ('isbn', 'ilike', self), ('description', 'ilike', self)]"/>
+                <field name="author" filter_domain="[('author', 'ilike', self)]"/>
+                <field name="isbn" filter_domain="[('isbn', 'ilike', self)]"/>
                 <field name="borrower_id"/>
                 <filter name="available" string="Available" domain="[('state', '=', 'available')]"/>
                 <filter name="borrowed" string="Borrowed" domain="[('state', '=', 'borrowed')]"/>
                 <filter name="overdue" string="Overdue" domain="[('is_overdue', '=', True)]"/>
+                <filter name="lost" string="Lost" domain="[('state', '=', 'lost')]"/>
                 <separator/>
                 <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
                 <group expand="0" string="Group By">
@@ -111,6 +186,10 @@
                     <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
                     <filter name="group_author" string="Author" context="{'group_by': 'author'}"/>
                 </group>
+                <searchpanel>
+                    <field name="state" string="Availability" icon="fa-circle"/>
+                    <field name="category" icon="fa-book"/>
+                </searchpanel>
             </search>
         </field>
     </record>
@@ -119,9 +198,10 @@
     <record id="action_library_book" model="ir.actions.act_window">
         <field name="name">Books</field>
         <field name="res_model">library.book</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">kanban,list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">Add your first book</p>
+            <p>Add cover art to browse your catalog visually and quickly check availability.</p>
         </field>
     </record>
 

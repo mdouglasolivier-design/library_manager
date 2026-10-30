@@ -12,6 +12,7 @@ class LibraryBook(models.Model):
 
     name = fields.Char(string='Title', required=True, tracking=True)
     author = fields.Char(required=True, tracking=True)
+    cover_image = fields.Image(string='Cover', max_width=1024, max_height=1024)
     isbn = fields.Char(string='ISBN', copy=False)
     category = fields.Selection([
         ('fiction', 'Fiction'),

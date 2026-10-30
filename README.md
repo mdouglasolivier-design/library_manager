@@ -6,12 +6,13 @@ A simple, clean Odoo app to manage books, lending, loan history and printable re
 
 ## Features
 
-- **Book catalogue**: title, author, unique ISBN, category, pages, description
+- **Book catalogue**: cover-based Kanban, detailed book pages, title/author/ISBN/description search, category and availability filters
 - **Lending and returns**: lend a book to any contact, 14-day due date, return or mark as lost
 - **Loan history**: one record per borrow, with return date and days late
 - **Ebook catalog and loans**: librarians issue date-bounded ebook loans
 - **Ebook access eligibility**: only the signed-in member's active, in-date loan grants access
 - **Ebook reservations**: readers can request an ebook; librarians manage pending requests
+- **Availability at a glance**: clear available, borrowed, overdue, and lost indicators
 - **Overdue tracking**: highlighted rows, filters, grouping
 - **PDF reports**: loan receipt (with barcode), overdue loans list, member card
 - **Saved filters and Excel export templates**
@@ -39,7 +40,9 @@ python odoo-bin -c odoo.conf -d <database> -i library_manager
 
 | Task | How |
 |---|---|
-| Add a book | Library, then Books, then New |
+| Browse the catalogue | Library, then Books; switch between cover cards and the list |
+| Find a book | Search by title, author, ISBN, or description; narrow results by category and availability |
+| Add a book | Library, then Books, then New; add a cover image and book details |
 | Lend a book | Open the book, choose **Borrowed By**, click **Lend Book** |
 | Return a book | Open the book, click **Return Book** |
 | Issue an ebook loan | As a librarian, open **Library → Ebook Loans** and create a loan |
@@ -84,7 +87,7 @@ library_manager/
 
 - Members, authors and publishers as separate models
 - Ebook file delivery, asset management and DRM integrations
-- Settings page, overdue email reminders, kanban view with covers
+- Settings page, overdue email reminders
 
 ## License
 
