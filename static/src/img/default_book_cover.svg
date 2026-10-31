@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="900" viewBox="0 0 600 900" role="img" aria-labelledby="title description">
+  <title id="title">Book cover unavailable</title>
+  <desc id="description">Neutral placeholder cover for a digital library book.</desc>
+  <rect width="600" height="900" fill="#eef1f4"/>
+  <rect x="74" y="74" width="452" height="752" fill="none" stroke="#c7d0d9" stroke-width="4"/>
+  <path d="M248 380h104v142H248z" fill="#173b65"/>
+  <path d="M300 380v142" stroke="#fff" stroke-opacity=".45" stroke-width="4"/>
+  <path d="M272 420h26m28 0h26M272 446h26m28 0h26M272 472h26m28 0h26" stroke="#fff" stroke-width="4"/>
+  <text x="300" y="590" fill="#536273" font-family="Arial, sans-serif" font-size="26" text-anchor="middle">Cover unavailable</text>
+</svg>

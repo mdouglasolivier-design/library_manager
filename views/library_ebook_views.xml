@@ -7,10 +7,12 @@
             <list>
                 <field name="name"/>
                 <field name="author"/>
+                <field name="category_id"/>
                 <field name="isbn"/>
                 <field name="publication_date"/>
                 <field name="loan_count"/>
                 <field name="active" widget="boolean_toggle"/>
+                <field name="website_published"/>
             </list>
         </field>
     </record>
@@ -35,16 +37,43 @@
                     <group>
                         <group>
                             <field name="author"/>
+                            <field name="publisher"/>
                             <field name="isbn"/>
                             <field name="publication_date"/>
+                            <field name="category_id"/>
+                            <field name="language"/>
+                            <field name="file_format"/>
                         </group>
                         <group>
                             <field name="active"/>
+                            <field name="website_published"/>
                         </group>
                     </group>
+                    <field name="cover_image" widget="image"
+                           class="oe_avatar" options="{'size': [0, 360]}"/>
                     <notebook>
                         <page string="Description">
                             <field name="description"/>
+                        </page>
+                        <page string="Protected File">
+                            <field name="asset_ids">
+                                <list>
+                                    <field name="filename"/>
+                                    <field name="file_format"/>
+                                    <field name="file_size" readonly="1"/>
+                                </list>
+                                <form>
+                                    <sheet>
+                                        <group>
+                                            <field name="filename"/>
+                                            <field name="file_format"/>
+                                            <field name="file_data"
+                                                   filename="filename"/>
+                                            <field name="file_size" readonly="1"/>
+                                        </group>
+                                    </sheet>
+                                </form>
+                            </field>
                         </page>
                         <page string="Loan History">
                             <field name="loan_ids" readonly="1">
@@ -71,7 +100,10 @@
                 <field name="name"/>
                 <field name="author"/>
                 <field name="isbn"/>
+                <field name="category_id"/>
                 <filter name="active" string="Active" domain="[('active', '=', True)]"/>
+                <filter name="website_published" string="Published on Website"
+                        domain="[('website_published', '=', True)]"/>
                 <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
             </search>
         </field>

@@ -16,6 +16,16 @@
               parent="menu_library_root"
               action="action_library_ebook" sequence="30"/>
 
+    <menuitem id="menu_library_ebook_categories" name="eBook Categories"
+              parent="menu_library_root"
+              action="action_library_ebook_category" sequence="35"
+              groups="library_manager.group_library_librarian,base.group_system"/>
+
+    <menuitem id="menu_library_ebook_requests" name="eBook Requests"
+              parent="menu_library_root"
+              action="action_library_ebook_request" sequence="37"
+              groups="library_manager.group_library_librarian,base.group_system"/>
+
     <menuitem id="menu_library_ebook_loans" name="Ebook Loans"
               parent="menu_library_root"
               action="action_library_ebook_loan" sequence="40"/>

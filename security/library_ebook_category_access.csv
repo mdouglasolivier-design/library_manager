@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_library_ebook_category_user,library.ebook.category.user,model_library_ebook_category,base.group_user,1,0,0,0
+access_library_ebook_category_librarian,library.ebook.category.librarian,model_library_ebook_category,library_manager.group_library_librarian,1,1,1,0
+access_library_ebook_category_admin,library.ebook.category.admin,model_library_ebook_category,base.group_system,1,1,1,1
+access_library_ebook_category_portal,library.ebook.category.portal,model_library_ebook_category,base.group_portal,1,0,0,0

@@ -10,6 +10,8 @@ from . import library_lending_policy
 from . import library_borrower_category
 from . import library_borrower
 from . import library_ebook_loan
+from . import library_ebook_request
+from . import library_ebook_notification
 from . import library_ebook_access
 from . import library_ebook_reservation
 from . import library_ebook_audit

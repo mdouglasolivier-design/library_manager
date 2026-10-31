@@ -1,1 +1,33 @@
-<odoo/>
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_library" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.library</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app name="library_manager" string="Library"
+                     groups="base.group_system">
+                    <block title="Digital eBook lending">
+                        <setting string="Require librarian approval"
+                                 help="When enabled, a librarian must approve each borrowing request.">
+                            <field name="library_ebook_approval_required"/>
+                        </setting>
+                        <setting string="Loan duration"
+                                 help="The number of days in each new eBook loan.">
+                            <field name="library_ebook_loan_duration_days"/>
+                        </setting>
+                        <setting string="Maximum active loans per member"
+                                 help="Set to 0 for no limit.">
+                            <field name="library_ebook_max_active_loans"/>
+                        </setting>
+                        <setting string="Maximum concurrent loans per eBook"
+                                 help="Set to 0 for no limit. When the limit is reached, members can reserve the eBook.">
+                            <field name="library_ebook_max_concurrent_loans"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>

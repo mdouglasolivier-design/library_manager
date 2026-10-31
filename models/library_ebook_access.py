@@ -64,3 +64,10 @@ class LibraryEbookAccess(models.Model):
         if not grant:
             raise AccessError("You need an active ebook loan to access this ebook.")
         return True
+
+    @api.model
+    def get_readable_asset(self, ebook_id):
+        self.check_access(ebook_id)
+        return self.env['library.ebook.asset'].sudo().search([
+            ('ebook_id', '=', ebook_id),
+        ], limit=1)

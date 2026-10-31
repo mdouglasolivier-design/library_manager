@@ -1,1 +1,749 @@
-<odoo/>
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_library_header">
+        <header class="library-portal-header">
+            <div class="container library-portal-header__inner">
+                <a class="library-portal-brand" href="/library">
+                    <span class="library-portal-brand__mark" aria-hidden="true">L</span>
+                    <span>Digital Library</span>
+                </a>
+                <nav aria-label="Main navigation" class="library-portal-nav">
+                    <a href="/library">Home</a>
+                    <a href="/library/ebooks">Browse eBooks</a>
+                    <a href="/library#categories">Categories</a>
+                    <a t-if="not is_public" href="/my/library">My Library</a>
+                    <a t-if="not is_public" href="/my/library/reservations">Reservations</a>
+                    <a t-if="not is_public" href="/my/library/history">History</a>
+                </nav>
+                <div class="library-portal-header__actions">
+                    <a t-if="is_public" class="btn library-button library-button--outline"
+                       href="/web/login?redirect=/library">Sign in</a>
+                    <a t-if="is_public" class="library-text-link"
+                       href="/web/signup">Create account</a>
+                    <a t-else="" class="btn library-button library-button--outline"
+                       href="/my/library/account">My account</a>
+                </div>
+            </div>
+        </header>
+    </template>
+
+    <template id="portal_library_footer">
+        <footer class="library-portal-footer">
+            <div class="container library-portal-footer__inner">
+                <div>
+                    <strong>Digital Library</strong>
+                    <p>Discover knowledge. Explore the world of books.</p>
+                </div>
+                <nav aria-label="Footer navigation">
+                    <a href="/library">Home</a>
+                    <a href="/library/ebooks">Browse eBooks</a>
+                    <a href="/web/login?redirect=/library">Member sign in</a>
+                </nav>
+            </div>
+            <div class="container library-portal-footer__copyright">
+                <span>Library collection and availability are managed by the library team.</span>
+            </div>
+        </footer>
+    </template>
+
+    <template id="portal_library_book_card">
+        <article class="library-book-card">
+            <a class="library-book-card__cover" t-att-href="'/library/ebooks/%s' % ebook.id">
+                <img t-att-src="'/library/ebooks/%s/cover' % ebook.id"
+                     t-att-alt="'Cover of %s' % ebook.name"
+                     loading="lazy"/>
+            </a>
+            <div class="library-book-card__body">
+                <span t-if="ebook.category_id" class="library-book-card__category"
+                      t-esc="ebook.category_id.name"/>
+                <h3><a t-att-href="'/library/ebooks/%s' % ebook.id"
+                       t-esc="ebook.name"/></h3>
+                <p class="library-book-card__author" t-esc="ebook.author or 'Author not listed'"/>
+                <span t-if="ebook.availability_status == 'available'"
+                      class="library-status library-status--available">Available</span>
+                <span t-else="" class="library-status library-status--loaned">On loan</span>
+            </div>
+        </article>
+    </template>
+
+    <template id="portal_library_home" name="Digital Library">
+        <t t-call="website.layout">
+            <t t-set="title">Digital Library</t>
+            <div id="wrap" class="library-portal">
+                <t t-call="library_manager.portal_library_header"/>
+                <main>
+                    <section class="library-hero">
+                        <div class="container library-hero__inner">
+                            <div class="library-hero__content">
+                                <span class="library-eyebrow">A library without borders</span>
+                                <h1>Discover knowledge.<br/>Explore the world of books.</h1>
+                                <p>Access a world of knowledge through our digital collection. Discover eBooks from anywhere.</p>
+                                <form action="/library/ebooks" method="get" role="search"
+                                      class="library-search library-search--hero">
+                                    <label class="visually-hidden" for="library-home-query">Search by title, author, ISBN or publisher</label>
+                                    <input id="library-home-query" type="search" name="q"
+                                           placeholder="Search titles, authors, ISBNs..."/>
+                                    <button type="submit" class="library-button">Search collection</button>
+                                </form>
+                                <a class="library-text-link" href="/library/ebooks">Browse the collection</a>
+                            </div>
+                            <div class="library-hero__books" aria-label="Featured book covers">
+                                <a t-foreach="featured_ebooks[:3]" t-as="ebook"
+                                   t-att-href="'/library/ebooks/%s' % ebook.id"
+                                   class="library-hero__book">
+                                    <img t-att-src="'/library/ebooks/%s/cover' % ebook.id"
+                                         t-att-alt="'Cover of %s' % ebook.name"/>
+                                </a>
+                                <div t-if="not featured_ebooks" class="library-hero__empty">
+                                    <span>Explore our collection and discover your next book.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="container library-stats" aria-label="Collection statistics">
+                        <div><strong t-esc="ebook_count"/><span>eBooks in the collection</span></div>
+                        <div><strong t-esc="available_count"/><span>currently available</span></div>
+                        <div><strong t-esc="category_count"/><span>browseable categories</span></div>
+                    </section>
+
+                    <section id="categories" class="container library-section">
+                        <div class="library-section__heading">
+                            <div><span class="library-eyebrow">Find your subject</span><h2>Browse categories</h2></div>
+                            <a class="library-text-link" href="/library/ebooks">View all eBooks</a>
+                        </div>
+                        <div t-if="categories" class="library-category-list">
+                            <a t-foreach="categories" t-as="category"
+                               t-att-href="'/library/ebooks?category=%s' % category.id"
+                               class="library-category-link" t-esc="category.name"/>
+                        </div>
+                        <p t-else="" class="library-empty-note">Categories will appear here as the collection grows.</p>
+                    </section>
+
+                    <section t-if="featured_ebooks" class="library-section library-section--soft">
+                        <div class="container">
+                            <div class="library-section__heading">
+                                <div><span class="library-eyebrow">Reader favourites</span><h2>Popular eBooks</h2></div>
+                                <a class="library-text-link" href="/library/ebooks?sort=popular">Explore the collection</a>
+                            </div>
+                            <div class="library-book-grid">
+                                <t t-foreach="featured_ebooks" t-as="ebook">
+                                    <t t-call="library_manager.portal_library_book_card"/>
+                                </t>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section t-if="recent_ebooks" class="container library-section">
+                        <div class="library-section__heading">
+                            <div><span class="library-eyebrow">Fresh from the shelves</span><h2>Recently added</h2></div>
+                            <a class="library-text-link" href="/library/ebooks?sort=newest">Browse all eBooks</a>
+                        </div>
+                        <div class="library-book-grid">
+                            <t t-foreach="recent_ebooks" t-as="ebook">
+                                <t t-call="library_manager.portal_library_book_card"/>
+                            </t>
+                        </div>
+                    </section>
+                </main>
+                <t t-call="library_manager.portal_library_footer"/>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_library_catalog" name="Browse eBooks">
+        <t t-call="website.layout">
+            <t t-set="title">Browse eBooks</t>
+            <div id="wrap" class="library-portal">
+                <t t-call="library_manager.portal_library_header"/>
+                <main class="container library-page">
+                    <header class="library-page__heading">
+                        <span class="library-eyebrow">The collection</span>
+                        <h1>Browse eBooks</h1>
+                        <p>Search the collection by title, author, ISBN, or publisher.</p>
+                    </header>
+                    <form action="/library/ebooks" method="get" class="library-filter-form">
+                        <div class="library-filter-form__search">
+                            <label for="library-query">Search</label>
+                            <input id="library-query" type="search" name="q"
+                                   t-att-value="query"
+                                   placeholder="Title, author, ISBN or publisher"/>
+                        </div>
+                        <div>
+                            <label for="library-category">Category</label>
+                            <select id="library-category" name="category">
+                                <option value="">All categories</option>
+                                <option t-foreach="categories" t-as="category"
+                                        t-att-value="category.id"
+                                        t-att-selected="category.id == selected_category"
+                                        t-esc="category.name"/>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="library-availability">Availability</label>
+                            <select id="library-availability" name="availability">
+                                <option value="">All titles</option>
+                                <option value="available" t-att-selected="availability == 'available'">Available</option>
+                                <option value="on_loan" t-att-selected="availability == 'on_loan'">On loan</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="library-year">Publication year</label>
+                            <input id="library-year" type="number" name="year"
+                                   min="1000" max="9999" step="1"
+                                   t-att-value="year" placeholder="e.g. 2024"/>
+                        </div>
+                        <div>
+                            <label for="library-sort">Sort by</label>
+                            <select id="library-sort" name="sort">
+                                <option value="newest" t-att-selected="sort == 'newest'">Newest</option>
+                                <option value="title" t-att-selected="sort == 'title'">Title A–Z</option>
+                                <option value="popular" t-att-selected="sort == 'popular'">Most borrowed</option>
+                            </select>
+                        </div>
+                        <button class="library-button" type="submit">Apply filters</button>
+                    </form>
+                    <div class="library-results-summary">
+                        <p><strong t-esc="total"/> titles</p>
+                        <a t-if="query or selected_category or availability or year"
+                           href="/library/ebooks" class="library-text-link">Clear filters</a>
+                    </div>
+                    <div t-if="ebooks" class="library-book-grid">
+                        <t t-foreach="ebooks" t-as="ebook">
+                            <t t-call="library_manager.portal_library_book_card"/>
+                        </t>
+                    </div>
+                    <div t-else="" class="library-empty-state">
+                        <h2>No eBooks found</h2>
+                        <p>Try a different search term or clear one or more filters.</p>
+                        <a class="library-button" href="/library/ebooks">Browse all eBooks</a>
+                    </div>
+                    <nav t-if="page_count &gt; 1" class="library-pagination"
+                         aria-label="Catalog pages">
+                        <a t-if="previous_url" t-att-href="previous_url">Previous</a>
+                        <span>Page <t t-esc="page_number"/> of <t t-esc="page_count"/></span>
+                        <a t-if="next_url" t-att-href="next_url">Next</a>
+                    </nav>
+                </main>
+                <t t-call="library_manager.portal_library_footer"/>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_library_ebook_detail" name="eBook details">
+        <t t-call="website.layout">
+            <t t-set="title" t-value="ebook.name"/>
+            <div id="wrap" class="library-portal">
+                <t t-call="library_manager.portal_library_header"/>
+                <main class="container library-page">
+                    <nav aria-label="Breadcrumb" class="library-breadcrumb">
+                        <a href="/library">Home</a><span>/</span>
+                        <a href="/library/ebooks">Browse eBooks</a><span>/</span>
+                        <span t-esc="ebook.name"/>
+                    </nav>
+                    <article class="library-detail">
+                        <div class="library-detail__cover">
+                            <img t-att-src="'/library/ebooks/%s/cover' % ebook.id"
+                                 t-att-alt="'Cover of %s' % ebook.name"/>
+                        </div>
+                        <div class="library-detail__content">
+                            <span t-if="ebook.category_id" class="library-eyebrow"
+                                  t-esc="ebook.category_id.name"/>
+                            <h1 t-esc="ebook.name"/>
+                            <p class="library-detail__author">
+                                By <span t-esc="ebook.author or 'Author not listed'"/>
+                            </p>
+                            <span t-if="ebook.availability_status == 'available'"
+                                  class="library-status library-status--available">Available</span>
+                            <span t-else="" class="library-status library-status--loaned">On loan</span>
+                            <p t-if="ebook.description" class="library-detail__description"
+                               t-esc="ebook.description"/>
+                            <p t-else="" class="library-empty-note">A description has not been provided for this title.</p>
+                            <dl class="library-book-facts">
+                                <div t-if="ebook.publisher"><dt>Publisher</dt><dd t-esc="ebook.publisher"/></div>
+                                <div t-if="ebook.isbn"><dt>ISBN</dt><dd t-esc="ebook.isbn"/></div>
+                                <div t-if="ebook.publication_date"><dt>Publication date</dt><dd><span t-field="ebook.publication_date"/></dd></div>
+                                <div t-if="ebook.language"><dt>Language</dt><dd t-esc="ebook.language"/></div>
+                                <div t-if="ebook.file_format"><dt>Format</dt><dd class="text-uppercase" t-esc="ebook.file_format"/></div>
+                            </dl>
+                            <div t-if="notice" t-att-class="'alert alert-%s' % notice['level']"
+                                 role="status" t-esc="notice['message']"/>
+                            <form t-if="is_public" action="/web/login" method="get">
+                                <input type="hidden" name="redirect"
+                                       t-att-value="'/library/ebooks/%s' % ebook.id"/>
+                                <button class="library-button" type="submit">Sign in to request access</button>
+                            </form>
+                            <div t-elif="active_loan" class="library-detail__notice">
+                                <t t-if="reader_asset">
+                                    <a class="library-button"
+                                       t-att-href="'/my/library/ebooks/%s/read' % ebook.id">Read now</a>
+                                </t>
+                                <t t-else="">Reading requires an active, in-date loan and a supported digital file.</t>
+                                <a href="/my/library/loans">View My Library</a>
+                            </div>
+                            <div t-elif="pending_request" class="library-detail__notice">
+                                Your borrowing request is awaiting a librarian decision.
+                                <a href="/my/library/requests">View your requests</a>
+                            </div>
+                            <div t-elif="pending_reservation" class="library-detail__notice">
+                                Your reservation is pending.
+                                <a href="/my/library/reservations">View your reservations</a>
+                            </div>
+                            <form t-elif="at_capacity"
+                                  t-att-action="'/my/library/ebooks/%s/request' % ebook.id"
+                                  method="post">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <button class="library-button" type="submit">Reserve this eBook</button>
+                            </form>
+                            <form t-else=""
+                                  t-att-action="'/my/library/ebooks/%s/request' % ebook.id"
+                                  method="post">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <button class="library-button" type="submit">Request eBook access</button>
+                            </form>
+                            <aside class="library-detail__notice mt-3">
+                                Loan requests follow the library's borrowing policy. An active loan is required before reading.
+                            </aside>
+                        </div>
+                    </article>
+                    <section t-if="related_ebooks" class="library-section">
+                        <div class="library-section__heading"><div><span class="library-eyebrow">Continue exploring</span><h2>More in this collection</h2></div></div>
+                        <div class="library-book-grid">
+                            <t t-foreach="related_ebooks" t-as="ebook">
+                                <t t-call="library_manager.portal_library_book_card"/>
+                            </t>
+                        </div>
+                    </section>
+                </main>
+                <t t-call="library_manager.portal_library_footer"/>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_library_dashboard" name="My Library">
+        <t t-call="website.layout">
+            <t t-set="title">My Library</t>
+            <div id="wrap" class="library-portal">
+                <t t-call="library_manager.portal_library_header"/>
+                <main class="container library-page">
+                    <header class="library-page__heading">
+                        <span class="library-eyebrow">Member space</span>
+                        <h1>Welcome, <t t-esc="partner.name"/></h1>
+                        <p>Your loans, requests, reservations, and reading activity in one place.</p>
+                    </header>
+                    <div t-if="notice" t-att-class="'alert alert-%s' % notice['level']"
+                         role="status" t-esc="notice['message']"/>
+                    <div class="library-member-stats">
+                        <a href="/my/library/loans?status=active">
+                            <strong t-esc="active_count"/><span>Active eBooks</span>
+                        </a>
+                        <a href="/my/library/requests">
+                            <strong t-esc="pending_request_count"/><span>Pending requests</span>
+                        </a>
+                        <a href="/my/library/reservations">
+                            <strong t-esc="pending_reservation_count"/><span>Reservations</span>
+                        </a>
+                        <a href="/my/library/loans?status=overdue">
+                            <strong t-esc="overdue_count"/><span>Overdue eBooks</span>
+                        </a>
+                    </div>
+                    <section class="library-section">
+                        <div class="library-section__heading">
+                            <div><span class="library-eyebrow">Your shelf</span><h2>Due soon</h2></div>
+                            <a class="library-text-link" href="/my/library/loans?status=due_soon">View due soon</a>
+                        </div>
+                        <div t-if="due_soon_loans" class="library-member-book-list">
+                            <article t-foreach="due_soon_loans" t-as="loan"
+                                     class="library-member-book">
+                                <img t-att-src="'/my/library/ebooks/%s/cover' % loan.ebook_id.id"
+                                     t-att-alt="'Cover of %s' % loan.ebook_id.name"
+                                     loading="lazy"/>
+                                <div class="library-member-book__details">
+                                    <h3 t-esc="loan.ebook_id.name"/>
+                                    <p t-esc="loan.ebook_id.author or 'Author not listed'"/>
+                                    <span>Due <span t-field="loan.due_date"/></span>
+                                </div>
+                                <span class="library-status library-status--loaned">Due soon</span>
+                            </article>
+                        </div>
+                        <p t-else="" class="library-empty-note">No eBooks are due in the next three days.</p>
+                    </section>
+                    <section class="library-section">
+                        <div class="library-section__heading">
+                            <div><span class="library-eyebrow">Current activity</span><h2>Recent loans</h2></div>
+                            <a class="library-text-link" href="/my/library/loans">View My Library</a>
+                        </div>
+                        <div t-if="recent_loans" class="library-member-book-list">
+                            <article t-foreach="recent_loans" t-as="loan"
+                                     class="library-member-book">
+                                <img t-att-src="'/my/library/ebooks/%s/cover' % loan.ebook_id.id"
+                                     t-att-alt="'Cover of %s' % loan.ebook_id.name"
+                                     loading="lazy"/>
+                                <div class="library-member-book__details">
+                                    <h3 t-esc="loan.ebook_id.name"/>
+                                    <p t-esc="loan.ebook_id.author or 'Author not listed'"/>
+                                    <span>Due <span t-field="loan.due_date"/></span>
+                                </div>
+                                <span t-if="loan.is_overdue" class="library-status library-status--overdue">Overdue</span>
+                                <span t-else="" class="library-status library-status--available">Active</span>
+                            </article>
+                        </div>
+                        <div t-else="" class="library-empty-state">
+                            <h2>No eBooks borrowed yet</h2>
+                            <p>Browse the collection to discover your next read.</p>
+                            <a class="library-button" href="/library/ebooks">Browse eBooks</a>
+                        </div>
+                    </section>
+                    <section class="library-member-links">
+                        <a href="/my/library/requests">My borrowing requests</a>
+                        <a href="/my/library/reservations">My reservations</a>
+                        <a href="/my/library/history">Reading history</a>
+                        <a href="/my/library/notifications">Notifications <span t-if="unread_notification_count" t-esc="unread_notification_count"/></a>
+                        <a href="/my/library/account">My account</a>
+                    </section>
+                </main>
+                <t t-call="library_manager.portal_library_footer"/>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_library_loans" name="My eBook loans">
+        <t t-call="website.layout">
+            <t t-set="title">My eBook loans</t>
+            <div id="wrap" class="library-portal">
+                <t t-call="library_manager.portal_library_header"/>
+                <main class="container library-page">
+                    <header class="library-page__heading">
+                        <span class="library-eyebrow">Member space</span>
+                        <h1>My Library</h1>
+                        <p>Track current eBook loans and their due dates.</p>
+                    </header>
+                    <div t-if="notice" t-att-class="'alert alert-%s' % notice['level']"
+                         role="status" t-esc="notice['message']"/>
+                    <nav class="library-filter-links" aria-label="Filter eBook loans">
+                        <a t-att-class="'is-active' if status == 'active' else ''" href="/my/library/loans?status=active">Active</a>
+                        <a t-att-class="'is-active' if status == 'due_soon' else ''" href="/my/library/loans?status=due_soon">Due soon</a>
+                        <a t-att-class="'is-active' if status == 'overdue' else ''" href="/my/library/loans?status=overdue">Overdue</a>
+                        <a t-att-class="'is-active' if status == 'all' else ''" href="/my/library/loans?status=all">All loans</a>
+                        <a href="/my/library/history">Returned</a>
+                    </nav>
+                    <div t-if="loans" class="library-member-book-list">
+                        <article t-foreach="loans" t-as="loan" class="library-member-book">
+                            <img t-att-src="'/my/library/ebooks/%s/cover' % loan.ebook_id.id"
+                                 t-att-alt="'Cover of %s' % loan.ebook_id.name"
+                                 loading="lazy"/>
+                            <div class="library-member-book__details">
+                                <h2 t-esc="loan.ebook_id.name"/>
+                                <p t-esc="loan.ebook_id.author or 'Author not listed'"/>
+                                <span>Borrowed <span t-field="loan.borrow_date"/></span>
+                                <span>Due <span t-field="loan.due_date"/></span>
+                            </div>
+                            <span t-if="loan.is_overdue" class="library-status library-status--overdue">Overdue</span>
+                            <span t-else="" class="library-status library-status--available">Active</span>
+                            <t t-set="reader_asset" t-value="reader_assets.get(loan.id)"/>
+                            <a t-if="reader_asset"
+                               class="library-button library-button--outline"
+                               t-att-href="'/my/library/ebooks/%s/read' % loan.ebook_id.id">Read now</a>
+                            <span t-elif="loan.state == 'active'"
+                                  class="library-member-book__reader-note">Reading requires an in-date loan and an available digital file.</span>
+                        </article>
+                    </div>
+                    <div t-else="" class="library-empty-state">
+                        <h2>No loans in this view</h2>
+                        <p>Try another filter or browse the eBook collection.</p>
+                        <a class="library-button" href="/library/ebooks">Browse eBooks</a>
+                    </div>
+                </main>
+                <t t-call="library_manager.portal_library_footer"/>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_library_history" name="eBook borrowing history">
+        <t t-call="website.layout">
+            <t t-set="title">Reading history</t>
+            <div id="wrap" class="library-portal">
+                <t t-call="library_manager.portal_library_header"/>
+                <main class="container library-page">
+                    <header class="library-page__heading">
+                        <span class="library-eyebrow">Member space</span>
+                        <h1>Reading history</h1>
+                        <p>Your returned eBooks and completed loans.</p>
+                    </header>
+                    <div t-if="notice" t-att-class="'alert alert-%s' % notice['level']"
+                         role="status" t-esc="notice['message']"/>
+                    <form action="/my/library/history" method="get"
+                          class="library-history-search" role="search">
+                        <label for="library-history-query">Search history</label>
+                        <input id="library-history-query" type="search" name="q"
+                               t-att-value="query"
+                               placeholder="Search title, author or ISBN"/>
+                        <button class="library-button" type="submit">Search</button>
+                    </form>
+                    <div t-if="loans" class="library-member-book-list">
+                        <article t-foreach="loans" t-as="loan" class="library-member-book">
+                            <img t-att-src="'/my/library/ebooks/%s/cover' % loan.ebook_id.id"
+                                 t-att-alt="'Cover of %s' % loan.ebook_id.name"
+                                 loading="lazy"/>
+                            <div class="library-member-book__details">
+                                <h2 t-esc="loan.ebook_id.name"/>
+                                <p t-esc="loan.ebook_id.author or 'Author not listed'"/>
+                                <span>Borrowed <span t-field="loan.borrow_date"/></span>
+                                <span>Returned <span t-field="loan.return_date"/></span>
+                            </div>
+                            <span class="library-status library-status--available">Returned</span>
+                        </article>
+                    </div>
+                    <div t-else="" class="library-empty-state">
+                        <h2>No borrowing history yet</h2>
+                        <p>Returned eBooks will appear here.</p>
+                        <a class="library-button" href="/library/ebooks">Browse eBooks</a>
+                    </div>
+                </main>
+                <t t-call="library_manager.portal_library_footer"/>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_library_requests" name="My eBook requests">
+        <t t-call="website.layout">
+            <t t-set="title">My requests</t>
+            <div id="wrap" class="library-portal">
+                <t t-call="library_manager.portal_library_header"/>
+                <main class="container library-page">
+                    <header class="library-page__heading">
+                        <span class="library-eyebrow">Member space</span>
+                        <h1>My borrowing requests</h1>
+                        <p>Follow librarian decisions and manage pending requests.</p>
+                    </header>
+                    <div t-if="notice" t-att-class="'alert alert-%s' % notice['level']"
+                         role="status" t-esc="notice['message']"/>
+                    <div t-if="borrowing_requests" class="library-member-book-list">
+                        <article t-foreach="borrowing_requests" t-as="borrowing_request"
+                                 class="library-member-book">
+                            <img t-att-src="'/library/ebooks/%s/cover' % borrowing_request.ebook_id.id"
+                                 t-att-alt="'Cover of %s' % borrowing_request.ebook_id.name"
+                                 loading="lazy"/>
+                            <div class="library-member-book__details">
+                                <h2 t-esc="borrowing_request.ebook_id.name"/>
+                                <p>Requested <span t-field="borrowing_request.request_date"/></p>
+                                <span t-if="borrowing_request.loan_id">
+                                    Due <span t-field="borrowing_request.loan_id.due_date"/>
+                                </span>
+                            </div>
+                            <span t-if="borrowing_request.state == 'pending'"
+                                  class="library-status library-status--loaned">Pending</span>
+                            <span t-elif="borrowing_request.state == 'approved'"
+                                  class="library-status library-status--available">Approved</span>
+                            <span t-elif="borrowing_request.state == 'rejected'"
+                                  class="library-status library-status--overdue">Rejected</span>
+                            <span t-else="" class="library-status">Cancelled</span>
+                            <form t-if="borrowing_request.state == 'pending'"
+                                  t-att-action="'/my/library/requests/%s/cancel' % borrowing_request.id"
+                                  method="post">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <button class="library-button library-button--outline" type="submit">Cancel request</button>
+                            </form>
+                        </article>
+                    </div>
+                    <div t-else="" class="library-empty-state">
+                        <h2>No requests yet</h2>
+                        <p>Request eBook access from a title's details page.</p>
+                        <a class="library-button" href="/library/ebooks">Browse eBooks</a>
+                    </div>
+                </main>
+                <t t-call="library_manager.portal_library_footer"/>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_library_reservations" name="My eBook reservations">
+        <t t-call="website.layout">
+            <t t-set="title">My reservations</t>
+            <div id="wrap" class="library-portal">
+                <t t-call="library_manager.portal_library_header"/>
+                <main class="container library-page">
+                    <header class="library-page__heading">
+                        <span class="library-eyebrow">Member space</span>
+                        <h1>My reservations</h1>
+                        <p>Manage your reservation requests for eBooks at capacity.</p>
+                    </header>
+                    <div t-if="notice" t-att-class="'alert alert-%s' % notice['level']"
+                         role="status" t-esc="notice['message']"/>
+                    <div t-if="reservations" class="library-member-book-list">
+                        <article t-foreach="reservations" t-as="reservation"
+                                 class="library-member-book">
+                            <img t-att-src="'/library/ebooks/%s/cover' % reservation.ebook_id.id"
+                                 t-att-alt="'Cover of %s' % reservation.ebook_id.name"
+                                 loading="lazy"/>
+                            <div class="library-member-book__details">
+                                <h2 t-esc="reservation.ebook_id.name"/>
+                                <p>Requested <span t-field="reservation.reservation_date"/></p>
+                                <span t-if="reservation.loan_id">
+                                    Due <span t-field="reservation.loan_id.due_date"/>
+                                </span>
+                            </div>
+                            <span t-if="reservation.state == 'pending'"
+                                  class="library-status library-status--loaned">Pending</span>
+                            <span t-elif="reservation.state == 'fulfilled'"
+                                  class="library-status library-status--available">Fulfilled</span>
+                            <span t-else="" class="library-status">Cancelled</span>
+                            <form t-if="reservation.state == 'pending'"
+                                  t-att-action="'/my/library/reservations/%s/cancel' % reservation.id"
+                                  method="post">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <button class="library-button library-button--outline" type="submit">Cancel reservation</button>
+                            </form>
+                        </article>
+                    </div>
+                    <div t-else="" class="library-empty-state">
+                        <h2>No reservations yet</h2>
+                        <p>If an eBook reaches its borrowing capacity, you can reserve it from its details page.</p>
+                        <a class="library-button" href="/library/ebooks">Browse eBooks</a>
+                    </div>
+                </main>
+                <t t-call="library_manager.portal_library_footer"/>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_library_notifications" name="My notifications">
+        <t t-call="website.layout">
+            <t t-set="title">Notifications</t>
+            <div id="wrap" class="library-portal">
+                <t t-call="library_manager.portal_library_header"/>
+                <main class="container library-page">
+                    <header class="library-page__heading">
+                        <span class="library-eyebrow">Member space</span>
+                        <h1>Notifications</h1>
+                        <p>Updates about your eBook requests and reservations.</p>
+                    </header>
+                    <div t-if="notice" t-att-class="'alert alert-%s' % notice['level']"
+                         role="status" t-esc="notice['message']"/>
+                    <div t-if="notifications" class="library-notification-list">
+                        <article t-foreach="notifications" t-as="notification"
+                                 t-att-class="'library-notification %s' % ('is-unread' if not notification.is_read else '')">
+                            <div>
+                                <strong t-if="notification.notification_type == 'request_submitted'">Borrowing request submitted</strong>
+                                <strong t-elif="notification.notification_type == 'request_approved'">Borrowing request approved</strong>
+                                <strong t-elif="notification.notification_type == 'request_rejected'">Borrowing request declined</strong>
+                                <strong t-elif="notification.notification_type == 'reservation_submitted'">Reservation submitted</strong>
+                                <strong t-else="">Reservation updated</strong>
+                                <p t-if="notification.ebook_id">
+                                    <span t-esc="notification.ebook_id.name"/>
+                                    <span t-if="notification.ebook_id.website_published">
+                                        · <a t-att-href="'/library/ebooks/%s' % notification.ebook_id.id">View title</a>
+                                    </span>
+                                </p>
+                                <span class="text-muted" t-field="notification.create_date"/>
+                            </div>
+                            <form t-if="not notification.is_read"
+                                  t-att-action="'/my/library/notifications/%s/read' % notification.id"
+                                  method="post">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <button class="library-button library-button--outline" type="submit">Mark as read</button>
+                            </form>
+                        </article>
+                    </div>
+                    <div t-else="" class="library-empty-state">
+                        <h2>No notifications</h2>
+                        <p>Updates about your requests and reservations will appear here.</p>
+                    </div>
+                </main>
+                <t t-call="library_manager.portal_library_footer"/>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_library_account" name="My library account">
+        <t t-call="website.layout">
+            <t t-set="title">My account</t>
+            <div id="wrap" class="library-portal">
+                <t t-call="library_manager.portal_library_header"/>
+                <main class="container library-page">
+                    <header class="library-page__heading">
+                        <span class="library-eyebrow">Member space</span>
+                        <h1>My account</h1>
+                        <p>Review your library profile and contact details.</p>
+                    </header>
+                    <div t-if="notice" t-att-class="'alert alert-%s' % notice['level']"
+                         role="status" t-esc="notice['message']"/>
+                    <dl class="library-account-facts">
+                        <div><dt>Full name</dt><dd t-esc="partner.name"/></div>
+                        <div><dt>Email address</dt><dd t-esc="partner.email or 'Not provided'"/></div>
+                        <div><dt>Membership status</dt><dd t-esc="membership_status"/></div>
+                        <div t-if="partner.create_date"><dt>Registration date</dt><dd><span t-field="partner.create_date"/></dd></div>
+                    </dl>
+                    <form action="/my/library/account/update" method="post"
+                          class="library-account-form">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <label for="library-phone">Phone number</label>
+                        <input id="library-phone" type="tel" name="phone"
+                               autocomplete="tel" maxlength="32"
+                               t-att-value="partner.phone or ''"/>
+                        <button class="library-button" type="submit">Save contact details</button>
+                    </form>
+                    <p class="library-empty-note">Membership status and account permissions are managed by the library.</p>
+                </main>
+                <t t-call="library_manager.portal_library_footer"/>
+            </div>
+        </t>
+    </template>
+    <template id="portal_ebook_reader" name="Protected eBook reader">
+        <t t-call="website.layout">
+            <t t-set="title" t-value="'Read %s' % ebook.name"/>
+            <div id="wrap" class="library-portal">
+                <t t-call="library_manager.portal_library_header"/>
+                <main class="container library-page library-reader">
+                    <a class="library-text-link" href="/my/library/loans">Back to My Library</a>
+                    <header class="library-page__heading">
+                        <span class="library-eyebrow">Your loan</span>
+                        <h1 t-esc="ebook.name"/>
+                        <p t-esc="ebook.author or 'Author not listed'"/>
+                    </header>
+                    <div t-if="asset.file_format == 'pdf'" class="library-reader__pdf">
+                        <iframe t-att-src="file_url"
+                                t-att-title="'PDF reader for %s' % ebook.name"
+                                loading="eager"/>
+                    </div>
+                    <section t-else="" class="library-empty-state">
+                        <h2>Read this EPUB in your reading app</h2>
+                        <p>This browser reader supports PDF. Download the protected EPUB file and open it in your preferred eBook reader.</p>
+                        <a class="library-button" t-att-href="file_url">Download EPUB</a>
+                    </section>
+                </main>
+                <t t-call="library_manager.portal_library_footer"/>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_ebook_reader_denied" name="eBook reader access denied">
+        <t t-call="website.layout">
+            <t t-set="title">Reading access unavailable</t>
+            <div id="wrap" class="library-portal">
+                <main class="container library-page library-reader">
+                    <div class="library-empty-state" role="alert">
+                        <h1>Reading access unavailable</h1>
+                        <p>An active, in-date loan is required. If you believe this is an error, contact your library.</p>
+                        <a class="library-button" href="/my/library/loans">Back to My Library</a>
+                    </div>
+                </main>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_ebook_reader_missing" name="eBook file unavailable">
+        <t t-call="website.layout">
+            <t t-set="title">eBook file unavailable</t>
+            <div id="wrap" class="library-portal">
+                <main class="container library-page library-reader">
+                    <div class="library-empty-state" role="alert">
+                        <h1>eBook file unavailable</h1>
+                        <p>Your loan is active, but the library has not uploaded a digital file for this title.</p>
+                        <a class="library-button" href="/my/library/loans">Back to My Library</a>
+                    </div>
+                </main>
+            </div>
+        </t>
+    </template>
+</odoo>

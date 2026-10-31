@@ -1,7 +1,11 @@
+import logging
 from datetime import timedelta
 
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
+
+
+_logger = logging.getLogger(__name__)
 
 
 class LibraryEbookLoan(models.Model):
@@ -21,6 +25,8 @@ class LibraryEbookLoan(models.Model):
         default=lambda self: fields.Date.context_today(self) + timedelta(days=14),
         index=True)
     return_date = fields.Date()
+    last_overdue_reminder_date = fields.Date(
+        readonly=True, copy=False, index=True)
     state = fields.Selection(
         [('active', 'Active'), ('returned', 'Returned')],
         default='active', required=True, index=True)
@@ -30,8 +36,120 @@ class LibraryEbookLoan(models.Model):
     access_ids = fields.One2many(
         'library.ebook.access', 'loan_id', string='Access Grants', readonly=True)
 
+    @api.model
+    def _policy_integer(self, key, default):
+        value = self.env['ir.config_parameter'].sudo().get_param(
+            'library_manager.%s' % key, str(default))
+        try:
+            value = int(value)
+        except (TypeError, ValueError) as error:
+            raise ValidationError(
+                "The eBook lending policy setting %s must be an integer."
+                % key) from error
+        if value < 0:
+            raise ValidationError(
+                "The eBook lending policy setting %s cannot be negative."
+                % key)
+        return value
+
+    @api.model
+    def _member_at_loan_limit(self, partner):
+        limit = self._policy_integer('ebook_max_active_loans', 0)
+        if not limit:
+            return False
+        active_count = self.sudo().search_count([
+            ('borrower_id', '=', partner.id),
+            ('state', '=', 'active'),
+        ])
+        return active_count >= limit
+
+    @api.model
+    def _default_due_date(self):
+        days = self._policy_integer('ebook_loan_duration_days', 14)
+        if not days:
+            raise ValidationError(
+                "The eBook loan duration must be greater than zero.")
+        return fields.Date.context_today(self) + timedelta(days=days)
+
     @api.model_create_multi
     def create(self, vals_list):
+        ebook_ids = sorted({
+            values.get('ebook_id') for values in vals_list
+            if values.get('ebook_id')
+        })
+        if ebook_ids:
+            self.env.cr.execute(
+                "SELECT id FROM library_ebook "
+                "WHERE id = ANY(%s) ORDER BY id FOR UPDATE",
+                (ebook_ids,))
+        partner_ids = sorted({
+            values.get('borrower_id') for values in vals_list
+            if values.get('borrower_id')
+        })
+        if partner_ids:
+            self.env.cr.execute(
+                "SELECT id FROM res_partner "
+                "WHERE id = ANY(%s) ORDER BY id FOR UPDATE",
+                (partner_ids,))
+
+        planned_by_ebook = {}
+        planned_by_partner = {}
+        planned_pairs = set()
+        for values in vals_list:
+            if values.get('state') not in (False, None, 'active'):
+                continue
+            ebook_id = values.get('ebook_id')
+            partner_id = values.get('borrower_id')
+            if not ebook_id or not partner_id:
+                continue
+            pair = (ebook_id, partner_id)
+            if pair in planned_pairs or self.sudo().search_count([
+                    ('ebook_id', '=', ebook_id),
+                    ('borrower_id', '=', partner_id),
+                    ('state', '=', 'active'),
+            ]):
+                raise ValidationError(
+                    "This member already has an active loan for this eBook.")
+
+            ebook = self.env['library.ebook'].sudo().browse(ebook_id).exists()
+            if not ebook or not ebook.active:
+                raise ValidationError("An archived eBook cannot be loaned.")
+            if ebook._is_at_concurrent_capacity():
+                raise ValidationError(
+                    "The eBook has reached its concurrent loan limit.")
+            if self._member_at_loan_limit(
+                    self.env['res.partner'].browse(partner_id)):
+                raise ValidationError(
+                    "The member has reached the active eBook loan limit.")
+            planned_pairs.add(pair)
+            planned_by_ebook[ebook_id] = (
+                planned_by_ebook.get(ebook_id, 0) + 1)
+            planned_by_partner[partner_id] = (
+                planned_by_partner.get(partner_id, 0) + 1)
+
+        for ebook_id, planned_count in planned_by_ebook.items():
+            limit = self._policy_integer('ebook_max_concurrent_loans', 0)
+            if limit:
+                active_count = self.sudo().search_count([
+                    ('ebook_id', '=', ebook_id),
+                    ('state', '=', 'active'),
+                ])
+                if active_count + planned_count > limit:
+                    raise ValidationError(
+                        "The eBook has reached its concurrent loan limit.")
+        member_limit = self._policy_integer('ebook_max_active_loans', 0)
+        if member_limit:
+            for partner_id, planned_count in planned_by_partner.items():
+                active_count = self.sudo().search_count([
+                    ('borrower_id', '=', partner_id),
+                    ('state', '=', 'active'),
+                ])
+                if active_count + planned_count > member_limit:
+                    raise ValidationError(
+                        "The member has reached the active eBook loan limit.")
+
+        for values in vals_list:
+            values.setdefault('due_date', self._default_due_date())
         loans = super().create(vals_list)
         self.env['library.ebook.access'].sudo().create([
             {'loan_id': loan.id} for loan in loans
@@ -112,3 +230,37 @@ class LibraryEbookLoan(models.Model):
             'state': 'returned',
             'return_date': today,
         })
+
+    @api.model
+    def _cron_send_overdue_reminders(self):
+        today = fields.Date.today()
+        overdue_loans = self.sudo().search([
+            ('state', '=', 'active'),
+            ('due_date', '<', today),
+            '|',
+            ('last_overdue_reminder_date', '=', False),
+            ('last_overdue_reminder_date', '<', today),
+        ], order='id')
+        template = self.env.ref(
+            'library_manager.mail_template_library_ebook_overdue_reminder')
+        queued_count = 0
+        for loan in overdue_loans:
+            email = (loan.borrower_id.email or '').strip()
+            if not email:
+                _logger.warning(
+                    "Overdue reminder for eBook loan %s was skipped: "
+                    "the borrower has no email address.", loan.id)
+                continue
+            mail_id = template.sudo().send_mail(
+                loan.id,
+                force_send=False,
+                email_values={'email_to': email},
+            )
+            if not mail_id:
+                _logger.warning(
+                    "Overdue reminder email was not queued for eBook loan %s.",
+                    loan.id)
+                continue
+            loan.last_overdue_reminder_date = today
+            queued_count += 1
+        return queued_count

@@ -1,1 +1,33 @@
-<odoo/>
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_library_ebook_asset_list" model="ir.ui.view">
+        <field name="name">library.ebook.asset.list</field>
+        <field name="model">library.ebook.asset</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="ebook_id"/>
+                <field name="filename"/>
+                <field name="file_format"/>
+                <field name="file_size"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_library_ebook_asset_form" model="ir.ui.view">
+        <field name="name">library.ebook.asset.form</field>
+        <field name="model">library.ebook.asset</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="ebook_id"/>
+                        <field name="filename"/>
+                        <field name="file_format"/>
+                        <field name="file_data" filename="filename"/>
+                        <field name="file_size" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

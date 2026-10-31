@@ -41,6 +41,8 @@
                             <field name="borrow_date"/>
                             <field name="due_date"/>
                             <field name="return_date" readonly="1"/>
+                            <field name="last_overdue_reminder_date"
+                                   readonly="1"/>
                             <field name="days_late"/>
                             <field name="is_overdue" invisible="1"/>
                         </group>

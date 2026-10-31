@@ -18,6 +18,12 @@
         <field name="domain_force">[(1, '=', 1)]</field>
         <field name="groups" eval="[(4, ref('base.group_system'))]"/>
     </record>
+    <record id="rule_library_ebook_loan_portal" model="ir.rule">
+        <field name="name">Portal members see their own ebook loans</field>
+        <field name="model_id" ref="model_library_ebook_loan"/>
+        <field name="domain_force">[('borrower_id', '=', user.partner_id.id)]</field>
+        <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+    </record>
 
     <record id="rule_library_ebook_access_reader" model="ir.rule">
         <field name="name">Readers see their own ebook access</field>
@@ -37,6 +43,12 @@
         <field name="domain_force">[(1, '=', 1)]</field>
         <field name="groups" eval="[(4, ref('base.group_system'))]"/>
     </record>
+    <record id="rule_library_ebook_access_portal" model="ir.rule">
+        <field name="name">Portal members see their own ebook access</field>
+        <field name="model_id" ref="model_library_ebook_access"/>
+        <field name="domain_force">[('borrower_id', '=', user.partner_id.id)]</field>
+        <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+    </record>
 
     <record id="rule_library_ebook_reservation_reader" model="ir.rule">
         <field name="name">Readers see their own ebook reservations</field>
@@ -55,5 +67,74 @@
         <field name="model_id" ref="model_library_ebook_reservation"/>
         <field name="domain_force">[(1, '=', 1)]</field>
         <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+    </record>
+    <record id="rule_library_ebook_reservation_portal" model="ir.rule">
+        <field name="name">Portal members see their own ebook reservations</field>
+        <field name="model_id" ref="model_library_ebook_reservation"/>
+        <field name="domain_force">[('borrower_id', '=', user.partner_id.id)]</field>
+        <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+    </record>
+
+    <record id="rule_library_ebook_request_reader" model="ir.rule">
+        <field name="name">Readers see their own ebook requests</field>
+        <field name="model_id" ref="model_library_ebook_request"/>
+        <field name="domain_force">[('borrower_id', '=', user.partner_id.id)]</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+    <record id="rule_library_ebook_request_librarian" model="ir.rule">
+        <field name="name">Librarians see all ebook requests</field>
+        <field name="model_id" ref="model_library_ebook_request"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('library_manager.group_library_librarian'))]"/>
+    </record>
+    <record id="rule_library_ebook_request_admin" model="ir.rule">
+        <field name="name">System administrators see all ebook requests</field>
+        <field name="model_id" ref="model_library_ebook_request"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+    </record>
+    <record id="rule_library_ebook_request_portal" model="ir.rule">
+        <field name="name">Portal members see their own ebook requests</field>
+        <field name="model_id" ref="model_library_ebook_request"/>
+        <field name="domain_force">[('borrower_id', '=', user.partner_id.id)]</field>
+        <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+    </record>
+
+    <record id="rule_library_ebook_notification_reader" model="ir.rule">
+        <field name="name">Readers see their own ebook notifications</field>
+        <field name="model_id" ref="model_library_ebook_notification"/>
+        <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+    <record id="rule_library_ebook_notification_librarian" model="ir.rule">
+        <field name="name">Librarians see all ebook notifications</field>
+        <field name="model_id" ref="model_library_ebook_notification"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('library_manager.group_library_librarian'))]"/>
+    </record>
+    <record id="rule_library_ebook_notification_admin" model="ir.rule">
+        <field name="name">System administrators see all ebook notifications</field>
+        <field name="model_id" ref="model_library_ebook_notification"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+    </record>
+    <record id="rule_library_ebook_notification_portal" model="ir.rule">
+        <field name="name">Portal members see their own ebook notifications</field>
+        <field name="model_id" ref="model_library_ebook_notification"/>
+        <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+        <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+    </record>
+
+    <record id="rule_library_ebook_portal" model="ir.rule">
+        <field name="name">Portal members read public and personally borrowed eBooks</field>
+        <field name="model_id" ref="model_library_ebook"/>
+        <field name="domain_force">['|', '|', '|', '&amp;', ('active', '=', True), ('website_published', '=', True), ('loan_ids.borrower_id', '=', user.partner_id.id), ('reservation_ids.borrower_id', '=', user.partner_id.id), ('request_ids.borrower_id', '=', user.partner_id.id)]</field>
+        <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+    </record>
+    <record id="rule_library_ebook_category_portal" model="ir.rule">
+        <field name="name">Portal members read active eBook categories</field>
+        <field name="model_id" ref="model_library_ebook_category"/>
+        <field name="domain_force">[('active', '=', True)]</field>
+        <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
     </record>
 </odoo>

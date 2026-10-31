@@ -9,6 +9,7 @@ class TestEbookReservation(TransactionCase):
         super().setUp()
         self.ebook = self.env['library.ebook'].create({
             'name': 'Reservation Test Ebook',
+            'website_published': True,
         })
         self.reader = self._create_user(
             'ebook-reservation-reader',
@@ -16,6 +17,10 @@ class TestEbookReservation(TransactionCase):
         )
         self.other_reader = self._create_user(
             'ebook-reservation-other-reader',
+            [self.env.ref('base.group_user')],
+        )
+        self.occupant = self._create_user(
+            'ebook-reservation-occupant',
             [self.env.ref('base.group_user')],
         )
         self.librarian = self._create_user(
@@ -34,6 +39,18 @@ class TestEbookReservation(TransactionCase):
         })
 
     def _reserve(self, user, **values):
+        parameters = self.env['ir.config_parameter'].sudo()
+        parameters.set_param(
+            'library_manager.ebook_max_concurrent_loans', '1')
+        active_loans = self.env['library.ebook.loan'].sudo().search([
+            ('ebook_id', '=', self.ebook.id),
+            ('state', '=', 'active'),
+        ])
+        if not active_loans:
+            self.env['library.ebook.loan'].create({
+                'ebook_id': self.ebook.id,
+                'borrower_id': self.occupant.partner_id.id,
+            })
         return self.env['library.ebook.reservation'].with_user(user).create({
             'ebook_id': self.ebook.id,
             **values,
@@ -49,6 +66,11 @@ class TestEbookReservation(TransactionCase):
         self.assertEqual(reservation.borrower_id, self.reader.partner_id)
         self.assertEqual(reservation.state, 'pending')
         self.assertEqual(reservation.reservation_date, fields.Date.today())
+
+    def test_reader_cannot_reserve_an_available_ebook(self):
+        with self.assertRaises(ValidationError):
+            self.env['library.ebook.reservation'].with_user(
+                self.reader).create({'ebook_id': self.ebook.id})
 
     def test_reader_can_only_see_own_reservations(self):
         own_reservation = self._reserve(self.reader)
@@ -78,18 +100,34 @@ class TestEbookReservation(TransactionCase):
 
     def test_librarian_can_update_reservation_status(self):
         reservation = self._reserve(self.reader)
+        blocking_loan = self.env['library.ebook.loan'].sudo().search([
+            ('ebook_id', '=', self.ebook.id),
+            ('state', '=', 'active'),
+        ], limit=1)
+        blocking_loan.action_mark_returned()
 
         reservation.with_user(self.librarian).action_mark_fulfilled()
 
         self.assertEqual(reservation.state, 'fulfilled')
 
-    def test_reader_cannot_use_status_action(self):
+    def test_reader_can_cancel_own_pending_reservation(self):
+        reservation = self._reserve(self.reader)
+
+        reservation.with_user(self.reader).action_cancel()
+
+        self.assertEqual(reservation.state, 'cancelled')
+
+    def test_reader_cannot_cancel_another_members_reservation(self):
         reservation = self._reserve(self.reader)
 
         with self.assertRaises(AccessError):
-            reservation.with_user(self.reader).action_cancel()
+            reservation.with_user(self.other_reader).action_cancel()
 
     def test_archived_ebook_cannot_be_reserved(self):
+        self.env['library.ebook.loan'].create({
+            'ebook_id': self.ebook.id,
+            'borrower_id': self.occupant.partner_id.id,
+        })
         self.ebook.active = False
 
         with self.assertRaises(ValidationError):

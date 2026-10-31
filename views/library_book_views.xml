@@ -133,7 +133,7 @@
                             <field name="due_date" readonly="1"/>
                             <field name="is_overdue" invisible="1"/>
                             <div class="alert alert-danger" role="alert" invisible="not is_overdue">
-                                This book is overdue.
+                        This book is overdue.
                             </div>
                         </group>
                     </group>

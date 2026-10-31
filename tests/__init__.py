@@ -3,6 +3,8 @@ from . import test_library_report
 from . import common
 from . import test_catalog
 from . import test_asset_validation
+from . import test_reader_delivery
+from . import test_email_notifications
 from . import test_borrower
 from . import test_lending_policy
 from . import test_loan_issue

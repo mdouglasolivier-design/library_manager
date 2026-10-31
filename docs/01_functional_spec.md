@@ -11,11 +11,17 @@ to different borrowers concurrently.
 
 The access check is exposed as `library.ebook.access.check_access(ebook_id)`
 and is tied to the currently signed-in user's contact. It returns `True` when
-access is allowed and raises an access error otherwise. Ebook file storage,
-delivery, DRM, and detailed reader-session tracking are not implemented by
-this feature.
+access is allowed and raises an access error otherwise. Librarians can store
+one private PDF or EPUB file per title. The authenticated reader checks this
+entitlement on both the reader page and every file request. PDFs are embedded
+in the browser; EPUBs are available as protected downloads. DRM, watermarking,
+and detailed reader-session tracking are not implemented.
 
 Readers can create one pending reservation per ebook for their own account.
 They can see only their own reservation records and cannot alter reservation
 status. Librarians can review all requests and mark a pending reservation
 fulfilled or cancelled. A cancelled request can be submitted again.
+
+Request and reservation updates are also queued by email when the member has
+an email address. A daily scheduled job queues overdue eBook reminders once per
+day until the loan is returned. Outgoing mail requires an Odoo mail server.
