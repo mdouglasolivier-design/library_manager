@@ -90,8 +90,9 @@ class TestLibraryDashboardStatistics(TransactionCase):
             dashboard.pending_reservation_count, baseline['reservations'] + 1)
 
     def test_analytics_menu_action_opens_dashboard_form(self):
-        result = self.env['library.dashboard'].with_user(
-            self.librarian).action_open_dashboard()
+        result = self.env.ref(
+            'library_manager.action_library_dashboard'
+        ).with_user(self.librarian).run()
 
         self.assertEqual(result['res_model'], 'library.dashboard')
         self.assertEqual(result['view_mode'], 'form')
