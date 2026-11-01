@@ -1,1 +1,175 @@
-<templates/>
+<templates xml:space="preserve">
+    <t t-name="library_manager.LibraryDashboard" owl="1">
+        <div class="o_library_dashboard">
+            <aside class="o_library_dashboard_sidebar">
+                <div class="o_library_dashboard_brand">
+                    <i class="fa fa-book" aria-hidden="true"/>
+                    <span>Library</span>
+                </div>
+                <nav aria-label="Library navigation">
+                    <t t-foreach="state.navItems" t-as="item" t-key="item.label">
+                        <button
+                            type="button"
+                            t-att-class="'o_library_dashboard_nav_item ' + (item.action ? '' : 'active')"
+                            t-on-click="() => this.navigate(item)">
+                            <i t-att-class="'fa ' + item.icon" aria-hidden="true"/>
+                            <span t-esc="item.label"/>
+                        </button>
+                    </t>
+                </nav>
+                <div class="o_library_dashboard_sidebar_footer">
+                    Library Manager
+                </div>
+            </aside>
+
+            <main class="o_library_dashboard_main">
+                <t t-if="state.error">
+                    <div class="alert alert-danger" role="alert">
+                        <strong>Dashboard data could not be loaded.</strong>
+                        <span t-esc="state.error"/>
+                    </div>
+                </t>
+                <t t-if="state.listTitle">
+                    <div class="o_library_dashboard_page_header">
+                        <div>
+                            <button
+                                type="button"
+                                class="btn btn-link p-0 mb-2"
+                                t-on-click="() => this.state.listTitle = ''">
+                                <i class="fa fa-arrow-left me-1"/> Back to Dashboard
+                            </button>
+                            <h1 t-esc="state.listTitle"/>
+                            <p>Combined physical-book and eBook loan records</p>
+                        </div>
+                        <span class="o_library_dashboard_list_count">
+                            <t t-esc="state.loanRows.length"/> records
+                        </span>
+                    </div>
+                    <div t-if="state.loading" class="o_library_dashboard_loading">
+                        Loading loans...
+                    </div>
+                    <div t-else="" class="o_library_dashboard_panel o_library_dashboard_table_wrap">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Book</th>
+                                    <th>Borrower</th>
+                                    <th>Borrowed</th>
+                                    <th>Due</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="state.loanRows" t-as="row" t-key="row.model + '-' + row.id"
+                                    t-on-click="() => this.openLoan(row)">
+                                    <td><span t-esc="row.kind"/></td>
+                                    <td><a href="#" t-on-click.stop.prevent="() => this.openLoan(row)" t-esc="row.title"/></td>
+                                    <td t-esc="row.borrower"/>
+                                    <td t-esc="row.borrowDate"/>
+                                    <td t-esc="row.dueDate"/>
+                                </tr>
+                                <tr t-if="!state.loanRows.length">
+                                    <td colspan="5" class="text-center text-muted py-4">
+                                        No matching loans.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+                <t t-else="">
+                    <div class="o_library_dashboard_page_header">
+                        <div>
+                            <p class="o_library_dashboard_eyebrow">LIBRARY OVERVIEW</p>
+                            <h1>Dashboard</h1>
+                            <p>Live borrowing and eBook activity</p>
+                        </div>
+                        <button
+                            type="button"
+                            class="btn btn-outline-secondary"
+                            t-on-click="loadDashboard"
+                            t-att-disabled="state.loading">
+                            <i class="fa fa-refresh me-1"/> Refresh
+                        </button>
+                    </div>
+                    <div t-if="state.loading" class="o_library_dashboard_loading">
+                        Loading library statistics...
+                    </div>
+                    <t t-else="">
+                        <section class="o_library_dashboard_stats" aria-label="Library statistics">
+                            <button
+                                t-foreach="state.stats"
+                                t-as="stat"
+                                t-key="stat.kind"
+                                type="button"
+                                t-att-class="'o_library_dashboard_stat o_tone_' + stat.tone"
+                                t-on-click="() => this.openStat(stat)">
+                                <span class="o_library_dashboard_stat_icon">
+                                    <i t-att-class="'fa ' + stat.icon" aria-hidden="true"/>
+                                </span>
+                                <span class="o_library_dashboard_stat_copy">
+                                    <span class="o_library_dashboard_stat_label" t-esc="stat.label"/>
+                                    <strong t-esc="stat.value"/>
+                                </span>
+                                <i class="fa fa-external-link o_library_dashboard_stat_link"
+                                   aria-hidden="true"/>
+                            </button>
+                        </section>
+
+                        <section class="o_library_dashboard_charts">
+                            <div class="o_library_dashboard_panel">
+                                <div class="o_library_dashboard_panel_header">
+                                    <div>
+                                        <h2>Loans per Month</h2>
+                                        <p>Combined physical and eBook loans · last 6 months</p>
+                                    </div>
+                                    <i class="fa fa-bar-chart" aria-hidden="true"/>
+                                </div>
+                                <div class="o_library_dashboard_chart" role="img" aria-label="Loans per month">
+                                    <div t-foreach="state.months" t-as="month" t-key="month.key"
+                                         class="o_library_dashboard_bar_column">
+                                        <span class="o_library_dashboard_bar_value" t-esc="month.count"/>
+                                        <div class="o_library_dashboard_bar_track">
+                                            <div
+                                                class="o_library_dashboard_bar"
+                                                t-att-style="'height: ' + (month.count ? Math.max(8, month.count / this.chartMax * 100) : 0) + '%'"/>
+                                        </div>
+                                        <span class="o_library_dashboard_bar_label" t-esc="month.label"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="o_library_dashboard_panel">
+                                <div class="o_library_dashboard_panel_header">
+                                    <div>
+                                        <h2>Most Borrowed eBooks</h2>
+                                        <p>Top 5 by all-time loan count</p>
+                                    </div>
+                                    <i class="fa fa-trophy" aria-hidden="true"/>
+                                </div>
+                                <div t-if="state.topEbooks.length" class="o_library_dashboard_top_list">
+                                    <button
+                                        t-foreach="state.topEbooks"
+                                        t-as="ebook"
+                                        t-key="ebook.id"
+                                        type="button"
+                                        class="o_library_dashboard_top_item"
+                                        t-on-click="() => this.openEbookLoans(ebook.id)">
+                                        <span class="o_library_dashboard_rank" t-esc="ebook_index + 1"/>
+                                        <span class="o_library_dashboard_top_name" t-esc="ebook.name"/>
+                                        <strong>
+                                            <t t-esc="ebook.count"/>
+                                            <small> loans</small>
+                                        </strong>
+                                    </button>
+                                </div>
+                                <div t-else="" class="o_library_dashboard_empty">
+                                    No eBook loans recorded yet.
+                                </div>
+                            </div>
+                        </section>
+                    </t>
+                </t>
+            </main>
+        </div>
+    </t>
+</templates>

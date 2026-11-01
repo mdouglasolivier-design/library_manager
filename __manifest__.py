@@ -7,6 +7,11 @@
     'website': 'https://github.com/mdouglasolivier-design/library_manager',
     'depends': ['base', 'mail', 'website', 'portal', 'auth_signup'],
     'assets': {
+        'web.assets_backend': [
+            'library_manager/static/src/js/dashboard.js',
+            'library_manager/static/src/xml/dashboard.xml',
+            'library_manager/static/src/scss/library_dashboard.scss',
+        ],
         'web.assets_frontend': [
             'library_manager/static/src/scss/library_portal.scss',
         ],

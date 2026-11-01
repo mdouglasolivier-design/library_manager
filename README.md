@@ -18,6 +18,7 @@ A simple, clean Odoo app to manage books, lending, loan history and printable re
 - **Overdue reminders**: overdue eBook loans generate one queued reminder per day until returned
 - **Lending policy**: configure approval, loan duration, and optional per-member/title capacity limits
 - **Availability at a glance**: clear available, borrowed, overdue, and lost indicators
+- **Library Dashboard**: live eBook, borrower, combined loan, request, and reservation metrics with monthly activity and top-loan charts
 - **Overdue tracking**: highlighted rows, filters, grouping
 - **PDF reports**: loan receipt (with barcode), overdue loans list, member card
 - **Saved filters and Excel export templates**
@@ -47,6 +48,7 @@ python odoo-bin -c odoo.conf -d <database> -i library_manager
 
 | Task | How |
 |---|---|
+| View library activity | Open **Library → Dashboard**; loan counts combine physical-book and eBook loans |
 | Browse the catalogue | Library, then Books; switch between cover cards and the list |
 | Find a book | Search by title, author, ISBN, or description; narrow results by category and availability |
 | Add a book | Library, then Books, then New; add a cover image and book details |

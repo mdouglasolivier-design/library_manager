@@ -4,6 +4,11 @@
               web_icon="library_manager,static/description/icon.png"
               sequence="50"/>
 
+    <menuitem id="menu_library_dashboard_home" name="Dashboard"
+              parent="menu_library_root"
+              action="action_library_dashboard_client" sequence="1"
+              groups="library_manager.group_library_librarian,base.group_system"/>
+
     <menuitem id="menu_library_dashboard" name="Analytics"
               parent="menu_library_root"
               action="action_library_dashboard" sequence="5"

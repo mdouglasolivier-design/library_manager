@@ -34,4 +34,9 @@
         <field name="state">code</field>
         <field name="code">action = model.action_open_dashboard()</field>
     </record>
+
+    <record id="action_library_dashboard_client" model="ir.actions.client">
+        <field name="name">Library Dashboard</field>
+        <field name="tag">library_manager.library_dashboard</field>
+    </record>
 </odoo>
