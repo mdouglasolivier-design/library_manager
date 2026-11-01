@@ -14,8 +14,6 @@
     'data': [
         'security/library_security.xml',
         'security/ir.model.access.csv',
-        'security/library_ebook_category_access.csv',
-        'security/library_portal_access.csv',
         'security/library_record_rules.xml',
         'data/library_filters.xml',
         'data/library_ebook_mail_templates.xml',
@@ -33,6 +31,8 @@
         'views/library_ebook_access_views.xml',
         'views/library_ebook_reservation_views.xml',
         'views/library_ebook_request_views.xml',
+        'views/library_dashboard_views.xml',
+        'views/library_ebook_audit_views.xml',
         'views/portal_templates.xml',
         'views/res_config_settings_views.xml',
         'wizards/library_overdue_report_wizard_views.xml',

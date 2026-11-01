@@ -11,6 +11,7 @@
                 <field name="isbn"/>
                 <field name="publication_date"/>
                 <field name="loan_count"/>
+                <field name="file_available"/>
                 <field name="active" widget="boolean_toggle"/>
                 <field name="website_published"/>
             </list>
@@ -47,6 +48,7 @@
                         <group>
                             <field name="active"/>
                             <field name="website_published"/>
+                            <field name="file_available" readonly="1"/>
                         </group>
                     </group>
                     <field name="cover_image" widget="image"

@@ -10,6 +10,7 @@
                 <field name="borrower_id"/>
                 <field name="borrow_date"/>
                 <field name="due_date"/>
+                <field name="renewal_count" readonly="1"/>
                 <field name="return_date"/>
                 <field name="days_late"/>
                 <field name="is_overdue" column_invisible="1"/>

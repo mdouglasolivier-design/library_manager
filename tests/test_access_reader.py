@@ -1,8 +1,10 @@
 from datetime import timedelta
 
 from odoo import fields
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessError, ValidationError
 from odoo.tests.common import TransactionCase
+
+from .common import create_test_ebook_file
 
 
 class TestEbookReaderAccess(TransactionCase):
@@ -13,6 +15,7 @@ class TestEbookReaderAccess(TransactionCase):
             'name': 'Reader Access Test Ebook',
             'author': 'Test Author',
         })
+        create_test_ebook_file(self.env, self.ebook)
         today = fields.Date.today()
         self.loan = self.env['library.ebook.loan'].create({
             'ebook_id': self.ebook.id,
@@ -30,7 +33,7 @@ class TestEbookReaderAccess(TransactionCase):
         })
 
     def test_active_loan_grants_access_to_current_user(self):
-        self.assertTrue(self.access_model.check_access(self.ebook.id))
+        self.assertTrue(self.access_model.check_ebook_access(self.ebook.id))
         self.assertEqual(len(self.loan.access_ids), 1)
         self.assertTrue(self.loan.access_ids.is_active)
 
@@ -39,7 +42,7 @@ class TestEbookReaderAccess(TransactionCase):
 
         self.assertFalse(self.loan.access_ids.is_active)
         with self.assertRaises(AccessError):
-            self.access_model.check_access(self.ebook.id)
+            self.access_model.check_ebook_access(self.ebook.id)
 
     def test_loan_for_another_borrower_does_not_grant_access(self):
         self.loan.borrower_id = self.env['res.partner'].create({
@@ -47,13 +50,13 @@ class TestEbookReaderAccess(TransactionCase):
         })
 
         with self.assertRaises(AccessError):
-            self.access_model.check_access(self.ebook.id)
+            self.access_model.check_ebook_access(self.ebook.id)
 
     def test_archived_ebook_is_not_accessible(self):
         self.ebook.active = False
 
         with self.assertRaises(AccessError):
-            self.access_model.check_access(self.ebook.id)
+            self.access_model.check_ebook_access(self.ebook.id)
 
     def test_future_loan_does_not_grant_access(self):
         self.loan.write({
@@ -62,7 +65,7 @@ class TestEbookReaderAccess(TransactionCase):
         })
 
         with self.assertRaises(AccessError):
-            self.access_model.check_access(self.ebook.id)
+            self.access_model.check_ebook_access(self.ebook.id)
 
     def test_reader_cannot_create_a_loan(self):
         reader = self._create_user(
@@ -77,6 +80,16 @@ class TestEbookReaderAccess(TransactionCase):
                 'borrower_id': reader.partner_id.id,
                 'borrow_date': today,
                 'due_date': today + timedelta(days=14),
+            })
+
+    def test_ebook_without_protected_file_cannot_be_loaned(self):
+        ebook_without_file = self.env['library.ebook'].create({
+            'name': 'eBook Without Protected File',
+        })
+        with self.assertRaises(ValidationError):
+            self.env['library.ebook.loan'].create({
+                'ebook_id': ebook_without_file.id,
+                'borrower_id': self.env.user.partner_id.id,
             })
 
     def test_reader_cannot_see_another_members_loan(self):
@@ -111,4 +124,5 @@ class TestEbookReaderAccess(TransactionCase):
         })
 
         self.assertTrue(
-            self.access_model.with_user(reader).check_access(self.ebook.id))
+            self.access_model.with_user(
+                reader).check_ebook_access(self.ebook.id))

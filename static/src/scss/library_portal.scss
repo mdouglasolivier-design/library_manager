@@ -227,7 +227,7 @@
     display: block;
     width: 31%;
     max-width: 168px;
-    box-shadow: 0 8px 24px rgb(22 37 52 / 14%);
+    box-shadow: 0 8px 24px rgba(22, 37, 52, 0.14);
 
     &:first-child {
         transform: translateY(18px) rotate(-5deg);
@@ -798,6 +798,11 @@
     font-size: 12px;
 }
 
+.library-status--unavailable {
+    background: #f1f3f5;
+    color: #4b5563;
+}
+
 @media (max-width: 991.98px) {
     .library-book-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -941,18 +946,23 @@
 
 .library-reader__pdf {
     overflow: hidden;
-    min-height: min(78vh, 900px);
+    height: 78vh;
+    max-height: 900px;
     border: 1px solid var(--library-line);
     background: #e9edf2;
 
     iframe {
         display: block;
         width: 100%;
-        min-height: min(78vh, 900px);
+        height: 78vh;
+        max-height: 900px;
         border: 0;
         background: #fff;
     }
 
+}
+
+@media (max-width: 767.98px) {
     .library-portal-footer__inner {
         flex-direction: column;
     }

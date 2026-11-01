@@ -1,6 +1,6 @@
 # Security and DRM Limits
 
-`library.ebook.access.check_access(ebook_id)` checks the signed-in user's
+`library.ebook.access.check_ebook_access(ebook_id)` checks the signed-in user's
 contact against active ebook loans. A loan is eligible from its borrow date
 through its due date, inclusive. Returned loans, future or expired loans, and
 archived ebooks are denied. Librarians and system administrators can issue

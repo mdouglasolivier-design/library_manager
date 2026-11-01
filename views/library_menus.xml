@@ -4,6 +4,11 @@
               web_icon="library_manager,static/description/icon.png"
               sequence="50"/>
 
+    <menuitem id="menu_library_dashboard" name="Analytics"
+              parent="menu_library_root"
+              action="action_library_dashboard" sequence="5"
+              groups="library_manager.group_library_librarian,base.group_system"/>
+
     <menuitem id="menu_library_books" name="Books"
               parent="menu_library_root"
               action="action_library_book" sequence="10"/>
@@ -37,6 +42,11 @@
     <menuitem id="menu_library_ebook_reservations" name="Ebook Reservations"
               parent="menu_library_root"
               action="action_library_ebook_reservation" sequence="60"/>
+
+    <menuitem id="menu_library_ebook_audit" name="eBook Audit Trail"
+              parent="menu_library_root"
+              action="action_library_ebook_audit" sequence="70"
+              groups="library_manager.group_library_librarian,base.group_system"/>
 
     <menuitem id="menu_library_reports" name="Reports"
               parent="menu_library_root" sequence="90"/>

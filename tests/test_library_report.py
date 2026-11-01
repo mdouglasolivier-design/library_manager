@@ -18,7 +18,11 @@ class TestLibraryReport(TransactionCase):
         })
         cls.book.action_borrow()
         cls.loan = cls.book.loan_ids
-        cls.loan.due_date = fields.Date.today() - timedelta(days=3)
+        today = fields.Date.today()
+        cls.loan.write({
+            'borrow_date': today - timedelta(days=6),
+            'due_date': today - timedelta(days=3),
+        })
 
     def _render_html(self, report_name, ids, data=None):
         content, _kind = self.env['ir.actions.report']._render_qweb_html(
@@ -69,11 +73,14 @@ class TestLibraryReport(TransactionCase):
 
     def test_wizard_returns_report_action(self):
         wizard = self.env['library.overdue.report.wizard'].create({})
-        action = wizard.action_print()
+        action = wizard.with_context(discard_logo_check=True).action_print()
         self.assertEqual(action['type'], 'ir.actions.report')
         self.assertEqual(action['report_name'], 'library_manager.report_overdue_list')
 
     def test_saved_filters_are_loaded(self):
-        overdue = self.env.ref('library_manager.filter_loan_overdue')
-        self.assertEqual(overdue.model_id, 'library.loan')
-        self.assertTrue(self.env.ref('library_manager.export_loan_overview').export_fields)
+        overdue_loans = self.env.ref(
+            'library_manager.filter_library_overdue_loans')
+        overdue_books = self.env.ref(
+            'library_manager.filter_library_overdue_books')
+        self.assertEqual(overdue_loans.model_id, 'library.loan')
+        self.assertEqual(overdue_books.model_id, 'library.book')

@@ -9,7 +9,7 @@ Returning the loan or archiving the ebook revokes eligibility. A borrower may
 have only one active loan for a particular ebook; the same ebook may be loaned
 to different borrowers concurrently.
 
-The access check is exposed as `library.ebook.access.check_access(ebook_id)`
+The access check is exposed as `library.ebook.access.check_ebook_access(ebook_id)`
 and is tied to the currently signed-in user's contact. It returns `True` when
 access is allowed and raises an access error otherwise. Librarians can store
 one private PDF or EPUB file per title. The authenticated reader checks this

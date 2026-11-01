@@ -1,3 +1,5 @@
+import base64
+
 from odoo.tests import HttpCase, tagged
 
 
@@ -17,6 +19,13 @@ class TestLibraryCatalogWebsite(HttpCase):
             'publication_date': '2024-06-15',
             'category_id': cls.category.id,
             'website_published': True,
+        })
+        cls.env['library.ebook.asset'].create({
+            'ebook_id': cls.public_ebook.id,
+            'filename': 'catalog-test.pdf',
+            'file_format': 'pdf',
+            'file_data': base64.b64encode(
+                b'%PDF-1.7\nCatalog fixture').decode('ascii'),
         })
         cls.private_ebook = cls.env['library.ebook'].create({
             'name': 'Private Website Catalog Test eBook',
@@ -46,6 +55,8 @@ class TestLibraryCatalogWebsite(HttpCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.public_ebook.name, response.text)
         self.assertIn('eBooks in the collection', response.text)
+        self.assertNotIn('id="top"', response.text)
+        self.assertNotIn('id="bottom"', response.text)
 
     def test_unpublished_ebook_detail_is_not_public(self):
         response = self.url_open(
@@ -63,6 +74,17 @@ class TestLibraryCatalogWebsite(HttpCase):
         self.assertIn(self.public_ebook.name, response.text)
         self.assertEqual(cover_response.status_code, 200)
         self.assertIn(b'<svg', cover_response.content)
+        self.assertIn('>Available</span>', response.text)
+
+    def test_published_title_without_file_is_listed_but_not_borrowable(self):
+        ebook = self.env['library.ebook'].create({
+            'name': 'Published Without File',
+            'website_published': True,
+        })
+        response = self.url_open('/library/ebooks/%s' % ebook.id)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Reading file unavailable', response.text)
+        self.assertIn('Borrowing and reading are disabled', response.text)
 
     def test_member_portal_pages_render_after_login(self):
         self.authenticate(

@@ -37,6 +37,7 @@ class LibraryEbookRequest(models.Model):
         ], limit=1)
         if not ebook:
             raise UserError("This eBook is not available in the public catalog.")
+        ebook._check_file_available()
 
         self.env.cr.execute(
             "SELECT id FROM library_ebook WHERE id = %s FOR UPDATE",
@@ -74,6 +75,10 @@ class LibraryEbookRequest(models.Model):
             or self.env.user.has_group('library_manager.group_library_librarian')
             or self.env.user.has_group('base.group_system')
         )
+        for values in vals_list:
+            ebook = self.env['library.ebook'].sudo().browse(
+                values.get('ebook_id')).exists()
+            ebook._check_file_available()
         if not can_manage:
             partner_id = self.env.user.partner_id.id
             vals_list = [
@@ -104,6 +109,7 @@ class LibraryEbookRequest(models.Model):
                         or not ebook.website_published):
                     raise ValidationError(
                         "Only active eBooks published in the catalog can be requested.")
+                ebook._check_file_available()
                 if Loan.search_count([
                         ('ebook_id', '=', ebook.id),
                         ('borrower_id', '=', partner.id),
@@ -126,6 +132,11 @@ class LibraryEbookRequest(models.Model):
         for borrowing_request in requests:
             borrowing_request._notify(
                 'request_submitted', borrowing_request.borrower_id)
+            self.env['library.ebook.audit']._record_event(
+                'request_submitted',
+                ebook=borrowing_request.ebook_id,
+                partner=borrowing_request.borrower_id,
+                borrowing_request=borrowing_request)
         return requests
 
     def write(self, vals):
@@ -145,6 +156,14 @@ class LibraryEbookRequest(models.Model):
                     "Only your own pending requests can be cancelled.")
         previous_states = {item.id: item.state for item in self}
         result = super().write(vals)
+        if vals.get('state') == 'cancelled':
+            for borrowing_request in self:
+                if previous_states.get(borrowing_request.id) != 'cancelled':
+                    self.env['library.ebook.audit']._record_event(
+                        'request_cancelled',
+                        ebook=borrowing_request.ebook_id,
+                        partner=borrowing_request.borrower_id,
+                        borrowing_request=borrowing_request)
         if vals.get('state') in ('approved', 'rejected'):
             notification_type = (
                 'request_approved' if vals['state'] == 'approved'
@@ -153,6 +172,14 @@ class LibraryEbookRequest(models.Model):
                 if previous_states.get(borrowing_request.id) != vals['state']:
                     borrowing_request._notify(
                         notification_type, borrowing_request.borrower_id)
+                    self.env['library.ebook.audit']._record_event(
+                        'request_approved'
+                        if vals['state'] == 'approved'
+                        else 'request_rejected',
+                        ebook=borrowing_request.ebook_id,
+                        partner=borrowing_request.borrower_id,
+                        borrowing_request=borrowing_request,
+                        loan=borrowing_request.loan_id)
         return result
 
     @api.constrains('ebook_id', 'borrower_id', 'state')
@@ -206,6 +233,7 @@ class LibraryEbookRequest(models.Model):
             raise UserError("Only a pending request can be approved.")
 
         ebook = self.ebook_id
+        ebook._check_file_available()
         self.env.cr.execute(
             "SELECT id FROM library_ebook WHERE id = %s FOR UPDATE",
             (ebook.id,))

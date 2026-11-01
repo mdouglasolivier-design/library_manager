@@ -64,6 +64,7 @@ class LibraryEbookReservation(models.Model):
                         or not ebook.website_published):
                     raise ValidationError(
                         "Only active eBooks published in the catalog can be reserved.")
+                ebook._check_file_available()
                 if Loan.search_count([
                         ('ebook_id', '=', ebook.id),
                         ('borrower_id', '=', partner.id),
@@ -89,6 +90,11 @@ class LibraryEbookReservation(models.Model):
                 notification_type='reservation_submitted',
                 ebook=reservation.ebook_id,
                 reservation=reservation)
+            reservation.env['library.ebook.audit']._record_event(
+                'reservation_submitted',
+                ebook=reservation.ebook_id,
+                partner=reservation.borrower_id,
+                reservation=reservation)
         return reservations
 
     def write(self, vals):
@@ -108,6 +114,14 @@ class LibraryEbookReservation(models.Model):
                     "Only your own pending reservations can be cancelled.")
         previous_states = {item.id: item.state for item in self}
         result = super().write(vals)
+        if vals.get('state') == 'cancelled':
+            for reservation in self:
+                if previous_states.get(reservation.id) != 'cancelled':
+                    self.env['library.ebook.audit']._record_event(
+                        'reservation_cancelled',
+                        ebook=reservation.ebook_id,
+                        partner=reservation.borrower_id,
+                        reservation=reservation)
         if vals.get('state') == 'fulfilled':
             for reservation in self:
                 if previous_states.get(reservation.id) != 'fulfilled':
@@ -118,6 +132,12 @@ class LibraryEbookReservation(models.Model):
                         notification_type='reservation_fulfilled',
                         ebook=reservation.ebook_id,
                         reservation=reservation)
+                    self.env['library.ebook.audit']._record_event(
+                        'reservation_fulfilled',
+                        ebook=reservation.ebook_id,
+                        partner=reservation.borrower_id,
+                        reservation=reservation,
+                        loan=reservation.loan_id)
         return result
 
     @api.constrains('ebook_id', 'borrower_id', 'state')
@@ -193,6 +213,7 @@ class LibraryEbookReservation(models.Model):
                 self.borrower_id):
             raise UserError(
                 "The member has reached the active eBook loan limit.")
+        self.ebook_id._check_file_available()
         loan = self.env['library.ebook.loan'].create({
             'ebook_id': self.ebook_id.id,
             'borrower_id': self.borrower_id.id,

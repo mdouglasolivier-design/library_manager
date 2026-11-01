@@ -2,6 +2,8 @@ from odoo import fields
 from odoo.exceptions import AccessError, ValidationError
 from odoo.tests.common import TransactionCase
 
+from .common import create_test_ebook_file
+
 
 class TestEbookReservation(TransactionCase):
 
@@ -11,6 +13,7 @@ class TestEbookReservation(TransactionCase):
             'name': 'Reservation Test Ebook',
             'website_published': True,
         })
+        create_test_ebook_file(self.env, self.ebook)
         self.reader = self._create_user(
             'ebook-reservation-reader',
             [self.env.ref('base.group_user')],
@@ -71,6 +74,15 @@ class TestEbookReservation(TransactionCase):
         with self.assertRaises(ValidationError):
             self.env['library.ebook.reservation'].with_user(
                 self.reader).create({'ebook_id': self.ebook.id})
+
+    def test_member_cannot_reserve_ebook_without_protected_file(self):
+        ebook_without_file = self.env['library.ebook'].create({
+                'name': 'Reservation Without File',
+                'website_published': True,
+        })
+        with self.assertRaises(ValidationError):
+                self.env['library.ebook.reservation'].with_user(
+                    self.reader).create({'ebook_id': ebook_without_file.id})
 
     def test_reader_can_only_see_own_reservations(self):
         own_reservation = self._reserve(self.reader)

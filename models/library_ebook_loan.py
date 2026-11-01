@@ -2,7 +2,7 @@ import logging
 from datetime import timedelta
 
 from odoo import api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import AccessError, UserError, ValidationError
 
 
 _logger = logging.getLogger(__name__)
@@ -25,6 +25,7 @@ class LibraryEbookLoan(models.Model):
         default=lambda self: fields.Date.context_today(self) + timedelta(days=14),
         index=True)
     return_date = fields.Date()
+    renewal_count = fields.Integer(default=0, readonly=True, copy=False)
     last_overdue_reminder_date = fields.Date(
         readonly=True, copy=False, index=True)
     state = fields.Selection(
@@ -77,6 +78,8 @@ class LibraryEbookLoan(models.Model):
             values.get('ebook_id') for values in vals_list
             if values.get('ebook_id')
         })
+        ebooks = self.env['library.ebook'].sudo().browse(ebook_ids).exists()
+        ebooks._check_file_available()
         if ebook_ids:
             self.env.cr.execute(
                 "SELECT id FROM library_ebook "
@@ -154,7 +157,68 @@ class LibraryEbookLoan(models.Model):
         self.env['library.ebook.access'].sudo().create([
             {'loan_id': loan.id} for loan in loans
         ])
+        for loan in loans:
+            self.env['library.ebook.audit']._record_event(
+                'loan_issued',
+                ebook=loan.ebook_id,
+                partner=loan.borrower_id,
+                loan=loan)
         return loans
+
+    def write(self, vals):
+        previous = {
+            loan.id: (loan.state, loan.due_date)
+            for loan in self
+        }
+        result = super().write(vals)
+        for loan in self:
+            old_state, old_due_date = previous[loan.id]
+            if old_state != 'returned' and loan.state == 'returned':
+                self.env['library.ebook.audit']._record_event(
+                    'loan_returned',
+                    ebook=loan.ebook_id,
+                    partner=loan.borrower_id,
+                    loan=loan)
+            elif (old_due_date and loan.due_date
+                  and loan.due_date > old_due_date
+                  and loan.state == 'active'):
+                self.env['library.ebook.audit']._record_event(
+                    'loan_renewed',
+                    ebook=loan.ebook_id,
+                    partner=loan.borrower_id,
+                    loan=loan,
+                    detail='Due date extended to %s' % loan.due_date)
+        return result
+
+    def action_renew(self):
+        self.ensure_one()
+        is_librarian = (
+            self.env.su
+            or self.env.user.has_group('library_manager.group_library_librarian')
+            or self.env.user.has_group('base.group_system')
+        )
+        if not is_librarian and self.borrower_id != self.env.user.partner_id:
+            raise AccessError("You can only renew your own eBook loan.")
+        if self.state != 'active':
+            raise UserError("Only an active eBook loan can be renewed.")
+        if self.due_date < fields.Date.today():
+            raise UserError("An overdue eBook loan cannot be renewed.")
+        if self.renewal_count:
+            raise UserError("This eBook loan has already been renewed.")
+        if self.env['library.ebook.reservation'].sudo().search_count([
+                ('ebook_id', '=', self.ebook_id.id),
+                ('state', '=', 'pending')]):
+            raise UserError(
+                "This eBook has a waiting reservation and cannot be renewed.")
+        self.ebook_id._check_file_available()
+        duration = self._policy_integer('ebook_loan_duration_days', 14)
+        if not duration:
+            raise ValidationError(
+                "The eBook loan duration must be greater than zero.")
+        self.sudo().write({
+            'due_date': self.due_date + timedelta(days=duration),
+            'renewal_count': 1,
+        })
 
     @api.depends('ebook_id.name', 'borrower_id.name')
     def _compute_display_name(self):

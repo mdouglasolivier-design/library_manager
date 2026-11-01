@@ -4,6 +4,8 @@ from datetime import timedelta
 from odoo import fields
 from odoo.tests import HttpCase, tagged
 
+from .common import create_test_ebook_file
+
 
 @tagged('-at_install', 'post_install')
 class TestEbookReaderDelivery(HttpCase):
@@ -28,18 +30,18 @@ class TestEbookReaderDelivery(HttpCase):
             'password': 'library-test-password',
             'groups_id': [(6, 0, [cls.env.ref('base.group_portal').id])],
         })
-        cls.loan = cls.env['library.ebook.loan'].create({
-            'ebook_id': cls.ebook.id,
-            'borrower_id': cls.reader.partner_id.id,
-            'borrow_date': today,
-            'due_date': today + timedelta(days=14),
-        })
         cls.pdf_content = b'%PDF-1.7\nProtected fixture bytes'
         cls.asset = cls.env['library.ebook.asset'].create({
             'ebook_id': cls.ebook.id,
             'filename': 'protected-reader.pdf',
             'file_format': 'pdf',
             'file_data': base64.b64encode(cls.pdf_content).decode('ascii'),
+        })
+        cls.loan = cls.env['library.ebook.loan'].create({
+            'ebook_id': cls.ebook.id,
+            'borrower_id': cls.reader.partner_id.id,
+            'borrow_date': today,
+            'due_date': today + timedelta(days=14),
         })
 
     def test_member_with_active_loan_can_read_pdf(self):
@@ -125,6 +127,7 @@ class TestEbookReaderDelivery(HttpCase):
         ebook_without_asset = self.env['library.ebook'].create({
             'name': 'No Digital File eBook',
         })
+        asset = create_test_ebook_file(self.env, ebook_without_asset)
         today = fields.Date.today()
         self.env['library.ebook.loan'].create({
             'ebook_id': ebook_without_asset.id,
@@ -132,6 +135,7 @@ class TestEbookReaderDelivery(HttpCase):
             'borrow_date': today,
             'due_date': today + timedelta(days=7),
         })
+        asset.unlink()
         self.authenticate('protected-reader-member', 'library-test-password')
 
         response = self.url_open(

@@ -12,8 +12,10 @@
                     <a href="/library/ebooks">Browse eBooks</a>
                     <a href="/library#categories">Categories</a>
                     <a t-if="not is_public" href="/my/library">My Library</a>
+                    <a t-if="not is_public" href="/my/library/requests">Requests</a>
                     <a t-if="not is_public" href="/my/library/reservations">Reservations</a>
                     <a t-if="not is_public" href="/my/library/history">History</a>
+                    <a t-if="not is_public" href="/my/library/notifications">Notifications</a>
                 </nav>
                 <div class="library-portal-header__actions">
                     <a t-if="is_public" class="btn library-button library-button--outline"
@@ -46,6 +48,17 @@
         </footer>
     </template>
 
+    <template id="portal_library_portal_home" inherit_id="portal.portal_my_home">
+        <xpath expr="//div[@id='portal_common_category']" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Digital Library</t>
+                <t t-set="text">View your eBook loans, requests, reservations, and reading activity.</t>
+                <t t-set="url" t-value="'/my/library'"/>
+                <t t-set="config_card" t-value="True"/>
+            </t>
+        </xpath>
+    </template>
+
     <template id="portal_library_book_card">
         <article class="library-book-card">
             <a class="library-book-card__cover" t-att-href="'/library/ebooks/%s' % ebook.id">
@@ -59,7 +72,9 @@
                 <h3><a t-att-href="'/library/ebooks/%s' % ebook.id"
                        t-esc="ebook.name"/></h3>
                 <p class="library-book-card__author" t-esc="ebook.author or 'Author not listed'"/>
-                <span t-if="ebook.availability_status == 'available'"
+                <span t-if="not ebook.file_available"
+                      class="library-status library-status--unavailable">Reading file unavailable</span>
+                <span t-elif="ebook.availability_status == 'available'"
                       class="library-status library-status--available">Available</span>
                 <span t-else="" class="library-status library-status--loaned">On loan</span>
             </div>
@@ -67,6 +82,8 @@
     </template>
 
     <template id="portal_library_home" name="Digital Library">
+        <t t-set="no_header" t-value="True"/>
+        <t t-set="no_footer" t-value="True"/>
         <t t-call="website.layout">
             <t t-set="title">Digital Library</t>
             <div id="wrap" class="library-portal">
@@ -152,6 +169,8 @@
     </template>
 
     <template id="portal_library_catalog" name="Browse eBooks">
+        <t t-set="no_header" t-value="True"/>
+        <t t-set="no_footer" t-value="True"/>
         <t t-call="website.layout">
             <t t-set="title">Browse eBooks</t>
             <div id="wrap" class="library-portal">
@@ -185,6 +204,7 @@
                                 <option value="">All titles</option>
                                 <option value="available" t-att-selected="availability == 'available'">Available</option>
                                 <option value="on_loan" t-att-selected="availability == 'on_loan'">On loan</option>
+                                <option value="file_unavailable" t-att-selected="availability == 'file_unavailable'">Reading file unavailable</option>
                             </select>
                         </div>
                         <div>
@@ -231,6 +251,8 @@
     </template>
 
     <template id="portal_library_ebook_detail" name="eBook details">
+        <t t-set="no_header" t-value="True"/>
+        <t t-set="no_footer" t-value="True"/>
         <t t-call="website.layout">
             <t t-set="title" t-value="ebook.name"/>
             <div id="wrap" class="library-portal">
@@ -253,7 +275,9 @@
                             <p class="library-detail__author">
                                 By <span t-esc="ebook.author or 'Author not listed'"/>
                             </p>
-                            <span t-if="ebook.availability_status == 'available'"
+                            <span t-if="not ebook.file_available"
+                                  class="library-status library-status--unavailable">Reading file unavailable</span>
+                            <span t-elif="ebook.availability_status == 'available'"
                                   class="library-status library-status--available">Available</span>
                             <span t-else="" class="library-status library-status--loaned">On loan</span>
                             <p t-if="ebook.description" class="library-detail__description"
@@ -268,7 +292,11 @@
                             </dl>
                             <div t-if="notice" t-att-class="'alert alert-%s' % notice['level']"
                                  role="status" t-esc="notice['message']"/>
-                            <form t-if="is_public" action="/web/login" method="get">
+                            <div t-if="not ebook.file_available"
+                                 class="library-detail__notice" role="status">
+                                This eBook is listed in the catalog, but its protected reading file is not available yet. Borrowing and reading are disabled until the library uploads a valid PDF or EPUB.
+                            </div>
+                            <form t-elif="is_public" action="/web/login" method="get">
                                 <input type="hidden" name="redirect"
                                        t-att-value="'/library/ebooks/%s' % ebook.id"/>
                                 <button class="library-button" type="submit">Sign in to request access</button>
@@ -321,6 +349,8 @@
     </template>
 
     <template id="portal_library_dashboard" name="My Library">
+        <t t-set="no_header" t-value="True"/>
+        <t t-set="no_footer" t-value="True"/>
         <t t-call="website.layout">
             <t t-set="title">My Library</t>
             <div id="wrap" class="library-portal">
@@ -408,6 +438,8 @@
     </template>
 
     <template id="portal_library_loans" name="My eBook loans">
+        <t t-set="no_header" t-value="True"/>
+        <t t-set="no_footer" t-value="True"/>
         <t t-call="website.layout">
             <t t-set="title">My eBook loans</t>
             <div id="wrap" class="library-portal">
@@ -444,7 +476,13 @@
                             <a t-if="reader_asset"
                                class="library-button library-button--outline"
                                t-att-href="'/my/library/ebooks/%s/read' % loan.ebook_id.id">Read now</a>
-                            <span t-elif="loan.state == 'active'"
+                            <form t-if="loan.state == 'active' and not loan.is_overdue and not loan.renewal_count"
+                                  t-att-action="'/my/library/loans/%s/renew' % loan.id"
+                                  method="post">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <button class="library-button library-button--outline" type="submit">Renew once</button>
+                            </form>
+                            <span t-if="loan.state == 'active' and not reader_asset"
                                   class="library-member-book__reader-note">Reading requires an in-date loan and an available digital file.</span>
                         </article>
                     </div>
@@ -460,6 +498,8 @@
     </template>
 
     <template id="portal_library_history" name="eBook borrowing history">
+        <t t-set="no_header" t-value="True"/>
+        <t t-set="no_footer" t-value="True"/>
         <t t-call="website.layout">
             <t t-set="title">Reading history</t>
             <div id="wrap" class="library-portal">
@@ -506,6 +546,8 @@
     </template>
 
     <template id="portal_library_requests" name="My eBook requests">
+        <t t-set="no_header" t-value="True"/>
+        <t t-set="no_footer" t-value="True"/>
         <t t-call="website.layout">
             <t t-set="title">My requests</t>
             <div id="wrap" class="library-portal">
@@ -558,6 +600,8 @@
     </template>
 
     <template id="portal_library_reservations" name="My eBook reservations">
+        <t t-set="no_header" t-value="True"/>
+        <t t-set="no_footer" t-value="True"/>
         <t t-call="website.layout">
             <t t-set="title">My reservations</t>
             <div id="wrap" class="library-portal">
@@ -608,6 +652,8 @@
     </template>
 
     <template id="portal_library_notifications" name="My notifications">
+        <t t-set="no_header" t-value="True"/>
+        <t t-set="no_footer" t-value="True"/>
         <t t-call="website.layout">
             <t t-set="title">Notifications</t>
             <div id="wrap" class="library-portal">
@@ -656,6 +702,8 @@
     </template>
 
     <template id="portal_library_account" name="My library account">
+        <t t-set="no_header" t-value="True"/>
+        <t t-set="no_footer" t-value="True"/>
         <t t-call="website.layout">
             <t t-set="title">My account</t>
             <div id="wrap" class="library-portal">
@@ -690,6 +738,8 @@
         </t>
     </template>
     <template id="portal_ebook_reader" name="Protected eBook reader">
+        <t t-set="no_header" t-value="True"/>
+        <t t-set="no_footer" t-value="True"/>
         <t t-call="website.layout">
             <t t-set="title" t-value="'Read %s' % ebook.name"/>
             <div id="wrap" class="library-portal">
@@ -718,6 +768,8 @@
     </template>
 
     <template id="portal_ebook_reader_denied" name="eBook reader access denied">
+        <t t-set="no_header" t-value="True"/>
+        <t t-set="no_footer" t-value="True"/>
         <t t-call="website.layout">
             <t t-set="title">Reading access unavailable</t>
             <div id="wrap" class="library-portal">
@@ -733,6 +785,8 @@
     </template>
 
     <template id="portal_ebook_reader_missing" name="eBook file unavailable">
+        <t t-set="no_header" t-value="True"/>
+        <t t-set="no_footer" t-value="True"/>
         <t t-call="website.layout">
             <t t-set="title">eBook file unavailable</t>
             <div id="wrap" class="library-portal">

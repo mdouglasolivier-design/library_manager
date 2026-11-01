@@ -41,7 +41,7 @@ class LibraryEbookAccess(models.Model):
             )
 
     @api.model
-    def check_access(self, ebook_id):
+    def check_ebook_access(self, ebook_id):
         if type(ebook_id) is not int or ebook_id <= 0:
             raise ValidationError("A valid ebook ID is required.")
 
@@ -67,7 +67,7 @@ class LibraryEbookAccess(models.Model):
 
     @api.model
     def get_readable_asset(self, ebook_id):
-        self.check_access(ebook_id)
+        self.check_ebook_access(ebook_id)
         return self.env['library.ebook.asset'].sudo().search([
             ('ebook_id', '=', ebook_id),
         ], limit=1)

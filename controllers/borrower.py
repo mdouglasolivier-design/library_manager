@@ -136,6 +136,24 @@ class LibraryBorrowerController(http.Controller):
             'library_manager.portal_library_loans', context)
 
     @http.route(
+        '/my/library/loans/<int:loan_id>/renew', type='http',
+        auth='user', website=True, methods=['POST'], csrf=True)
+    def renew_ebook_loan(self, loan_id, **post):
+        loan = request.env['library.ebook.loan'].search([
+            ('id', '=', loan_id),
+            ('borrower_id', '=', self._member_partner().id),
+        ], limit=1)
+        if not loan:
+            return request.not_found()
+        try:
+            loan.action_renew()
+        except (AccessError, UserError) as error:
+            self._set_notice(str(error), 'warning')
+        else:
+            self._set_notice("Your eBook loan has been renewed.")
+        return request.redirect('/my/library/loans')
+
+    @http.route(
         '/my/library/history', type='http', auth='user',
         website=True, sitemap=False)
     def member_history(self, q=None, **params):

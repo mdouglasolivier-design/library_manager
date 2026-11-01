@@ -1,8 +1,10 @@
 from datetime import timedelta
 
 from odoo import fields
-from odoo.exceptions import AccessError, UserError
+from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tests.common import TransactionCase
+
+from .common import create_test_ebook_file
 
 
 class TestEbookBorrowingRequest(TransactionCase):
@@ -13,6 +15,7 @@ class TestEbookBorrowingRequest(TransactionCase):
             'name': 'Borrow Request Test eBook',
             'website_published': True,
         })
+        create_test_ebook_file(self.env, self.ebook)
         self.reader = self._create_user(
             'ebook-request-reader', [self.env.ref('base.group_portal')])
         self.other_reader = self._create_user(
@@ -46,6 +49,17 @@ class TestEbookBorrowingRequest(TransactionCase):
         self.assertEqual(borrowing_request.borrower_id, self.reader.partner_id)
         self.assertEqual(borrowing_request.state, 'pending')
         self.assertFalse(borrowing_request.loan_id)
+
+    def test_member_cannot_request_ebook_without_protected_file(self):
+        ebook_without_file = self.env['library.ebook'].create({
+            'name': 'Published eBook Without File',
+            'website_published': True,
+        })
+        with self.assertRaises(ValidationError):
+            self.env[
+                'library.ebook.request'
+            ].with_user(self.reader).submit_for_current_user(
+                ebook_without_file.id)
 
     def test_librarian_approval_creates_member_loan_and_access(self):
         borrowing_request = self.env[

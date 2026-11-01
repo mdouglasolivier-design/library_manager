@@ -44,6 +44,7 @@ class LibraryCatalogController(http.Controller):
             ].sudo().search_count(category_domain),
             'available_count': Ebook.search_count(domain + [
                 ('availability_status', '=', 'available'),
+                ('file_available', '=', True),
             ]),
             'ebook_count': Ebook.search_count(domain),
             'is_public': request.env.user._is_public(),
@@ -78,6 +79,9 @@ class LibraryCatalogController(http.Controller):
                 domain.append(('category_id', '=', category_id))
         if availability in ('available', 'on_loan'):
             domain.append(('availability_status', '=', availability))
+            domain.append(('file_available', '=', True))
+        elif availability == 'file_unavailable':
+            domain.append(('file_available', '=', False))
         publication_year = False
         if year:
             try:

@@ -15,5 +15,6 @@ from . import test_overdue_cron
 from . import test_reservation
 from . import test_license_expiry
 from . import test_security_rules
+from . import test_security_hardening
 from . import test_audit
 from . import test_reports_dashboard
