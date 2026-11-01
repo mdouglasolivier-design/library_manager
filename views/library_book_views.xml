@@ -67,7 +67,7 @@
                                 <div class="mt-2">
                                     <span t-if="record.state.raw_value == 'available'"
                                           class="badge text-bg-success">Available</span>
-                                    <span t-if="record.state.raw_value == 'borrowed' and not record.is_overdue.raw_value"
+                                    <span t-if="record.state.raw_value == 'borrowed' and !record.is_overdue.raw_value"
                                           class="badge text-bg-warning">Borrowed</span>
                                     <span t-if="record.state.raw_value == 'borrowed' and record.is_overdue.raw_value"
                                           class="badge text-bg-danger">Overdue</span>
