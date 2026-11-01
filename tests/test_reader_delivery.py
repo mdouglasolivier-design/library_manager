@@ -60,6 +60,50 @@ class TestEbookReaderDelivery(HttpCase):
         self.assertEqual(content.headers.get('Content-Disposition'),
                          'inline; filename="protected-reader.pdf"')
 
+    def test_approved_request_shows_read_link_and_grants_reader_access(self):
+        self.env['ir.config_parameter'].sudo().set_param(
+            'library_manager.ebook_approval_required', 'True')
+        approved_ebook = self.env['library.ebook'].create({
+            'name': 'Approved Request Reader eBook',
+            'website_published': True,
+        })
+        self.env['library.ebook.asset'].create({
+            'ebook_id': approved_ebook.id,
+            'filename': 'approved-request.pdf',
+            'file_format': 'pdf',
+            'file_data': base64.b64encode(self.pdf_content).decode('ascii'),
+        })
+        librarian = self.env['res.users'].create({
+            'name': 'Reader Approval Librarian',
+            'login': 'reader-approval-librarian',
+            'groups_id': [(6, 0, [
+                self.env.ref('base.group_user').id,
+                self.env.ref('library_manager.group_library_librarian').id,
+            ])],
+        })
+        borrowing_request = self.env[
+            'library.ebook.request'
+        ].with_user(self.reader).submit_for_current_user(approved_ebook.id)
+        borrowing_request.with_user(librarian).action_approve()
+
+        self.assertEqual(borrowing_request.state, 'approved')
+        self.assertTrue(borrowing_request.loan_id)
+        self.authenticate('protected-reader-member', 'library-test-password')
+
+        requests_page = self.url_open('/my/library/requests')
+        reader_page = self.url_open(
+            '/my/library/ebooks/%s/read' % approved_ebook.id)
+        file_response = self.url_open(
+            '/my/library/ebooks/%s/file' % approved_ebook.id)
+
+        self.assertEqual(requests_page.status_code, 200)
+        self.assertIn(
+            '/my/library/ebooks/%s/read' % approved_ebook.id,
+            requests_page.text)
+        self.assertEqual(reader_page.status_code, 200)
+        self.assertEqual(file_response.status_code, 200)
+        self.assertEqual(file_response.content, self.pdf_content)
+
     def test_pdf_reader_supports_single_byte_ranges(self):
         self.authenticate('protected-reader-member', 'library-test-password')
 

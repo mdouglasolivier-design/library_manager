@@ -164,17 +164,38 @@
 
 .library-hero {
     overflow: hidden;
-    background: #f7f8fa;
+    background: #f7f5f7;
 }
 
 .library-hero__inner {
     display: grid;
-    min-height: 450px;
-    grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+    min-height: 520px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: center;
-    gap: 60px;
-    padding-top: 64px;
-    padding-bottom: 64px;
+    gap: clamp(28px, 4vw, 64px);
+    padding-top: 48px;
+    padding-bottom: 48px;
+}
+
+#wrap .library-hero__inner::before,
+#wrap .library-hero__inner::after {
+    display: none;
+}
+
+.library-hero__artwork {
+    min-width: 0;
+    height: clamp(300px, 30vw, 460px);
+    overflow: hidden;
+    border-radius: 6px;
+    background: #f4eff3;
+
+    img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 68% center;
+    }
 }
 
 .library-eyebrow {
@@ -187,11 +208,16 @@
     text-transform: uppercase;
 }
 
-.library-hero h1 {
+.library-hero__headline {
     max-width: 650px;
     margin-bottom: 18px;
-    font-size: clamp(36px, 5vw, 56px);
-    line-height: 1.08;
+
+    img {
+        display: block;
+        width: 100%;
+        height: auto;
+        mix-blend-mode: multiply;
+    }
 }
 
 .library-hero__content > p {
@@ -223,46 +249,6 @@
     margin-top: 14px;
     font-size: 14px;
     font-weight: 600;
-}
-
-.library-hero__books {
-    display: flex;
-    min-height: 290px;
-    align-items: center;
-    justify-content: center;
-    gap: 14px;
-}
-
-.library-hero__book {
-    display: block;
-    width: 31%;
-    max-width: 168px;
-    box-shadow: 0 8px 24px rgba(22, 37, 52, 0.14);
-
-    &:first-child {
-        transform: translateY(18px) rotate(-5deg);
-    }
-
-    &:last-child {
-        transform: translateY(-18px) rotate(5deg);
-    }
-
-    img {
-        display: block;
-        width: 100%;
-        aspect-ratio: 2 / 3;
-        object-fit: contain;
-        background: #eef0f2;
-    }
-}
-
-.library-hero__empty {
-    max-width: 310px;
-    padding: 36px;
-    border-left: 3px solid var(--library-navy);
-    background: #fff;
-    color: var(--library-muted);
-    font: 20px/1.5 Georgia, serif;
 }
 
 .library-stats {
@@ -827,7 +813,12 @@
     }
 
     .library-hero__inner {
+        min-height: 460px;
         gap: 32px;
+    }
+
+    .library-hero__artwork {
+        height: 360px;
     }
 }
 
@@ -878,13 +869,9 @@
         padding-bottom: 38px;
     }
 
-    .library-hero__books {
-        min-height: 190px;
-    }
-
-    .library-hero__book {
-        width: 25%;
-        max-width: 120px;
+    .library-hero__artwork {
+        height: auto;
+        aspect-ratio: 1.55;
     }
 
     .library-search--hero {

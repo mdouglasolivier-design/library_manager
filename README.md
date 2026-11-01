@@ -11,7 +11,7 @@ A simple, clean Odoo app to manage books, lending, loan history and printable re
 - **Loan history**: one record per borrow, with return date and days late
 - **Ebook catalog and loans**: librarians issue date-bounded ebook loans
 - **Public eBook catalog**: cover-led discovery, metadata pages, search, filters, and responsive layouts
-- **Ebook access eligibility**: only the signed-in member's active, in-date loan grants access
+- **eBook reading access**: approval creates an active loan and a **Read now** link; only the signed-in member's active, in-date loan grants access
 - **Borrower portal**: members can submit borrowing requests, reserve titles at capacity, and manage loans, history, reservations, and notifications
 - **Protected eBook reader**: PDF browser reading and entitled EPUB downloads; librarian-uploaded files stay private and require an active loan on every request
 - **Email notifications**: request and reservation updates are queued for members with an email address

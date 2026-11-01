@@ -184,8 +184,21 @@ class LibraryBorrowerController(http.Controller):
         requests = request.env['library.ebook.request'].search(
             [('borrower_id', '=', self._member_partner().id)],
             order='request_date desc, id desc')
+        reader_assets = {}
+        for borrowing_request in requests.filtered(
+                lambda item: item.state == 'approved'
+                and item.loan_id.state == 'active'):
+            try:
+                asset = request.env[
+                    'library.ebook.access'
+                ].get_readable_asset(borrowing_request.ebook_id.id)
+            except AccessError:
+                continue
+            if asset:
+                reader_assets[borrowing_request.id] = asset
         context = self._member_context()
         context['borrowing_requests'] = requests
+        context['reader_assets'] = reader_assets
         return request.render(
             'library_manager.portal_library_requests', context)
 

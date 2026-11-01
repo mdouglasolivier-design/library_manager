@@ -91,9 +91,17 @@
                 <main>
                     <section class="library-hero">
                         <div class="container library-hero__inner">
+                            <div class="library-hero__artwork">
+                                <img src="/library_manager/static/src/img/library_hero.png"
+                                     alt="Illustration of bookshelves and a reading lamp"
+                                     fetchpriority="high" loading="eager"/>
+                            </div>
                             <div class="library-hero__content">
                                 <span class="library-eyebrow">A library without borders</span>
-                                <h1>Discover knowledge.<br/>Explore the world of books.</h1>
+                                <h1 class="library-hero__headline">
+                                    <img src="/library_manager/static/src/img/library_hero_slogan.png"
+                                         alt="You are not dreaming!" loading="eager"/>
+                                </h1>
                                 <p>Access a world of knowledge through our digital collection. Discover eBooks from anywhere.</p>
                                 <form action="/library/ebooks" method="get" role="search"
                                       class="library-search library-search--hero">
@@ -103,17 +111,6 @@
                                     <button type="submit" class="library-button">Search collection</button>
                                 </form>
                                 <a class="library-text-link" href="/library/ebooks">Browse the collection</a>
-                            </div>
-                            <div class="library-hero__books" aria-label="Featured book covers">
-                                <a t-foreach="featured_ebooks[:3]" t-as="ebook"
-                                   t-att-href="'/library/ebooks/%s' % ebook.id"
-                                   class="library-hero__book">
-                                    <img t-att-src="'/library/ebooks/%s/cover' % ebook.id"
-                                         t-att-alt="'Cover of %s' % ebook.name"/>
-                                </a>
-                                <div t-if="not featured_ebooks" class="library-hero__empty">
-                                    <span>Explore our collection and discover your next book.</span>
-                                </div>
                             </div>
                         </div>
                     </section>
@@ -580,6 +577,9 @@
                             <span t-elif="borrowing_request.state == 'rejected'"
                                   class="library-status library-status--overdue">Rejected</span>
                             <span t-else="" class="library-status">Cancelled</span>
+                            <a t-if="borrowing_request.state == 'approved' and reader_assets.get(borrowing_request.id)"
+                               class="library-button"
+                               t-att-href="'/my/library/ebooks/%s/read' % borrowing_request.ebook_id.id">Read now</a>
                             <form t-if="borrowing_request.state == 'pending'"
                                   t-att-action="'/my/library/requests/%s/cancel' % borrowing_request.id"
                                   method="post">

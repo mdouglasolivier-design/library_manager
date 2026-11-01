@@ -51,9 +51,27 @@ class TestLibraryCatalogWebsite(HttpCase):
 
     def test_public_home_displays_catalog_statistics(self):
         response = self.url_open('/library')
+        hero_image = self.url_open(
+            '/library_manager/static/src/img/library_hero.png')
+        slogan_image = self.url_open(
+            '/library_manager/static/src/img/library_hero_slogan.png')
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.public_ebook.name, response.text)
+        self.assertIn(
+            '/library_manager/static/src/img/library_hero.png',
+            response.text)
+        self.assertIn(
+            '/library_manager/static/src/img/library_hero_slogan.png',
+            response.text)
+        self.assertIn('You are not dreaming!', response.text)
+        self.assertEqual(response.text.count('loading="eager"'), 2)
+        self.assertEqual(hero_image.status_code, 200)
+        self.assertEqual(
+            hero_image.headers.get('Content-Type'), 'image/png')
+        self.assertEqual(slogan_image.status_code, 200)
+        self.assertEqual(
+            slogan_image.headers.get('Content-Type'), 'image/png')
         self.assertIn('eBooks in the collection', response.text)
         self.assertNotIn('id="top"', response.text)
         self.assertNotIn('id="bottom"', response.text)
