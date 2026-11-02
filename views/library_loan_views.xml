@@ -12,6 +12,9 @@
                 <field name="borrow_date"/>
                 <field name="due_date"/>
                 <field name="return_date"/>
+                <field name="payment_amount"/>
+                <field name="payment_method"/>
+                <field name="payment_status" widget="badge"/>
                 <field name="days_late"/>
                 <field name="is_overdue" column_invisible="1"/>
                 <field name="state" widget="badge"
@@ -28,6 +31,15 @@
         <field name="arch" type="xml">
             <form create="0">
                 <header>
+                    <button name="action_confirm_payment"
+                            string="Confirm Payment" type="object"
+                            class="btn-primary"
+                            groups="library_manager.group_library_librarian,base.group_system"
+                            invisible="state != 'borrowed' or payment_status != 'pending'"/>
+                    <button name="action_reject_payment"
+                            string="Reject Payment" type="object"
+                            groups="library_manager.group_library_librarian,base.group_system"
+                            invisible="state != 'borrowed' or payment_status != 'pending'"/>
                     <button name="action_mark_returned" string="Mark as Returned" type="object"
                             class="btn-primary" invisible="state != 'borrowed'"/>
                     <field name="state" widget="statusbar"/>
@@ -45,6 +57,14 @@
                             <field name="days_late"/>
                             <field name="is_overdue" invisible="1"/>
                         </group>
+                    </group>
+                    <group string="Payment">
+                        <field name="payment_amount" readonly="1"/>
+                        <field name="payment_method" readonly="1"/>
+                        <field name="payment_status" readonly="1"/>
+                        <field name="momo_phone" readonly="1"
+                               invisible="payment_method != 'momo'"/>
+                        <field name="payment_reference" readonly="1"/>
                     </group>
                 </sheet>
             </form>

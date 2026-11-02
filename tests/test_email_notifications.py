@@ -72,6 +72,7 @@ class TestEbookEmailNotifications(TransactionCase):
         today = fields.Date.today()
         loan = self.env['library.ebook.loan'].create({
             'ebook_id': self.ebook.id,
+            'payment_status': 'confirmed',
             'borrower_id': self.partner.id,
             'borrow_date': today - timedelta(days=14),
             'due_date': today - timedelta(days=1),
@@ -103,6 +104,7 @@ class TestEbookEmailNotifications(TransactionCase):
         })
         self.env['library.ebook.loan'].create({
             'ebook_id': self.ebook.id,
+            'payment_status': 'confirmed',
             'borrower_id': partner_without_email.id,
             'borrow_date': today - timedelta(days=14),
             'due_date': today - timedelta(days=1),

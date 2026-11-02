@@ -101,12 +101,14 @@ class TestLibrarySecurityOwnership(TransactionCase):
         Loan = self.env['library.ebook.loan']
         self.reader_loan = Loan.create({
             'ebook_id': self.reader_ebook.id,
+            'payment_status': 'confirmed',
             'borrower_id': self.reader.partner_id.id,
             'borrow_date': today,
             'due_date': today + timedelta(days=14),
         })
         Loan.create({
             'ebook_id': self.other_ebook.id,
+            'payment_status': 'confirmed',
             'borrower_id': self.other_reader.partner_id.id,
             'borrow_date': today,
             'due_date': today + timedelta(days=14),
@@ -157,6 +159,7 @@ class TestLibrarySecurityOwnership(TransactionCase):
             'library_manager.ebook_max_concurrent_loans', '1')
         self.env['library.ebook.loan'].create({
             'ebook_id': self.reservation_ebook.id,
+            'payment_status': 'confirmed',
             'borrower_id': self.occupant.partner_id.id,
         })
 
@@ -177,6 +180,7 @@ class TestLibrarySecurityOwnership(TransactionCase):
             'library_manager.ebook_max_concurrent_loans', '1')
         self.env['library.ebook.loan'].create({
             'ebook_id': self.reservation_ebook.id,
+            'payment_status': 'confirmed',
             'borrower_id': self.occupant.partner_id.id,
         })
         reservation_model = self.env['library.ebook.reservation']
@@ -197,6 +201,7 @@ class TestLibrarySecurityOwnership(TransactionCase):
             'library_manager.ebook_max_concurrent_loans', '1')
         self.env['library.ebook.loan'].create({
             'ebook_id': self.reservation_ebook.id,
+            'payment_status': 'confirmed',
             'borrower_id': self.occupant.partner_id.id,
         })
         reservation = self.env[
@@ -331,18 +336,21 @@ class TestLibrarySecurityRoutes(HttpCase):
         for ebook in (cls.pdf_ebook, cls.epub_ebook):
             cls.env['library.ebook.loan'].create({
                 'ebook_id': ebook.id,
+                'payment_status': 'confirmed',
                 'borrower_id': cls.reader.partner_id.id,
                 'borrow_date': today,
                 'due_date': today + timedelta(days=14),
             })
         cls.env['library.ebook.loan'].create({
             'ebook_id': cls.other_member_ebook.id,
+            'payment_status': 'confirmed',
             'borrower_id': cls.other_reader.partner_id.id,
             'borrow_date': today,
             'due_date': today + timedelta(days=14),
         })
         cls.env['library.ebook.loan'].create({
             'ebook_id': cls.internal_ebook.id,
+            'payment_status': 'confirmed',
             'borrower_id': cls.internal_user.partner_id.id,
             'borrow_date': today,
             'due_date': today + timedelta(days=14),
@@ -355,6 +363,7 @@ class TestLibrarySecurityRoutes(HttpCase):
         _create_asset(cls.env, cls.csrf_loan_ebook)
         cls.csrf_loan = cls.env['library.ebook.loan'].create({
             'ebook_id': cls.csrf_loan_ebook.id,
+            'payment_status': 'confirmed',
             'borrower_id': cls.reader.partner_id.id,
             'borrow_date': today,
             'due_date': today + timedelta(days=14),

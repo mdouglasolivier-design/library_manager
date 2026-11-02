@@ -23,6 +23,7 @@ class TestEbookReturnAndRenewal(TransactionCase):
         today = fields.Date.today()
         self.loan = self.env['library.ebook.loan'].create({
             'ebook_id': self.ebook.id,
+            'payment_status': 'confirmed',
             'borrower_id': self.reader.partner_id.id,
             'borrow_date': today,
             'due_date': today + timedelta(days=14),

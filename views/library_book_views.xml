@@ -11,6 +11,9 @@
                 <field name="author"/>
                 <field name="category"/>
                 <field name="isbn"/>
+                <field name="publisher"/>
+                <field name="total_copies"/>
+                <field name="available_copies"/>
                 <field name="borrower_id"/>
                 <field name="due_date"/>
                 <field name="is_overdue" string="Overdue" widget="boolean"/>
@@ -34,6 +37,8 @@
                 <field name="category"/>
                 <field name="isbn"/>
                 <field name="state"/>
+                <field name="total_copies"/>
+                <field name="available_copies"/>
                 <field name="borrower_id"/>
                 <field name="due_date"/>
                 <field name="is_overdue"/>
@@ -123,7 +128,14 @@
                     <group>
                         <group string="Book Details">
                             <field name="isbn"/>
+                            <field name="publisher"/>
                             <field name="category"/>
+                            <field name="price" readonly="1"/>
+                            <field name="total_copies"/>
+                            <field name="borrowed_copies" readonly="1"/>
+                            <field name="available_copies" readonly="1"/>
+                            <field name="lost_copies"/>
+                            <field name="website_published"/>
                             <field name="pages"/>
                             <field name="published_date"/>
                         </group>

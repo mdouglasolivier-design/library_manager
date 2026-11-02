@@ -5,6 +5,7 @@ from odoo.exceptions import AccessError, UserError, ValidationError
 class LibraryEbookReservation(models.Model):
     _name = 'library.ebook.reservation'
     _description = 'Ebook Reservation'
+    _inherit = ['library.payment.mixin']
     _order = 'reservation_date, id'
 
     ebook_id = fields.Many2one(
@@ -41,6 +42,12 @@ class LibraryEbookReservation(models.Model):
                     'ebook_id': values.get('ebook_id'),
                     'borrower_id': partner_id,
                     'state': 'pending',
+                    'payment_method': values.get(
+                        'payment_method', 'momo'),
+                    'payment_status': 'pending',
+                    'payment_amount': 5.0,
+                    'momo_phone': values.get('momo_phone'),
+                    'payment_reference': values.get('payment_reference'),
                 }
                 for values in vals_list
             ]
@@ -209,6 +216,9 @@ class LibraryEbookReservation(models.Model):
         if self.state != 'pending':
             raise UserError(
                 "Only a pending reservation can be marked as fulfilled.")
+        if self.payment_status != 'confirmed':
+            raise UserError(
+                "Confirm payment before fulfilling this reservation.")
         if self.env['library.ebook.loan']._member_at_loan_limit(
                 self.borrower_id):
             raise UserError(
@@ -217,6 +227,11 @@ class LibraryEbookReservation(models.Model):
         loan = self.env['library.ebook.loan'].create({
             'ebook_id': self.ebook_id.id,
             'borrower_id': self.borrower_id.id,
+            'payment_method': self.payment_method,
+            'payment_status': 'confirmed',
+            'payment_amount': 5.0,
+            'payment_reference': self.payment_reference,
+            'momo_phone': self.momo_phone,
         })
         self.write({'state': 'fulfilled', 'loan_id': loan.id})
 

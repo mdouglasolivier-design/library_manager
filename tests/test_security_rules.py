@@ -27,6 +27,7 @@ class TestLibrarySecurityRules(TransactionCase):
         })
         self.loan = self.env['library.ebook.loan'].create({
             'ebook_id': self.ebook.id,
+            'payment_status': 'confirmed',
             'borrower_id': self.reader.partner_id.id,
         })
         self.request = self.env[

@@ -19,6 +19,7 @@ class TestEbookReaderAccess(TransactionCase):
         today = fields.Date.today()
         self.loan = self.env['library.ebook.loan'].create({
             'ebook_id': self.ebook.id,
+            'payment_status': 'confirmed',
             'borrower_id': self.env.user.partner_id.id,
             'borrow_date': today,
             'due_date': today + timedelta(days=14),
@@ -77,6 +78,7 @@ class TestEbookReaderAccess(TransactionCase):
         with self.assertRaises(AccessError):
             self.env['library.ebook.loan'].with_user(reader).create({
                 'ebook_id': self.ebook.id,
+                'payment_status': 'confirmed',
                 'borrower_id': reader.partner_id.id,
                 'borrow_date': today,
                 'due_date': today + timedelta(days=14),
@@ -89,6 +91,7 @@ class TestEbookReaderAccess(TransactionCase):
         with self.assertRaises(ValidationError):
             self.env['library.ebook.loan'].create({
                 'ebook_id': ebook_without_file.id,
+                'payment_status': 'confirmed',
                 'borrower_id': self.env.user.partner_id.id,
             })
 
@@ -118,6 +121,7 @@ class TestEbookReaderAccess(TransactionCase):
         today = fields.Date.today()
         self.env['library.ebook.loan'].with_user(librarian).create({
             'ebook_id': self.ebook.id,
+            'payment_status': 'confirmed',
             'borrower_id': reader.partner_id.id,
             'borrow_date': today,
             'due_date': today + timedelta(days=14),

@@ -34,12 +34,14 @@ class TestEbookLoanLimitsAndCapacity(TransactionCase):
             'library_manager.ebook_max_concurrent_loans', '1')
         self.env['library.ebook.loan'].create({
             'ebook_id': self.ebook.id,
+            'payment_status': 'confirmed',
             'borrower_id': self.first_partner.id,
         })
 
         with self.assertRaises(ValidationError):
             self.env['library.ebook.loan'].create({
                 'ebook_id': self.ebook.id,
+                'payment_status': 'confirmed',
                 'borrower_id': self.second_partner.id,
             })
 
@@ -52,10 +54,12 @@ class TestEbookLoanLimitsAndCapacity(TransactionCase):
             self.env['library.ebook.loan'].create([
                 {
                     'ebook_id': self.ebook.id,
+                    'payment_status': 'confirmed',
                     'borrower_id': self.first_partner.id,
                 },
                 {
                     'ebook_id': self.ebook.id,
+                    'payment_status': 'confirmed',
                     'borrower_id': self.second_partner.id,
                 },
             ])
@@ -76,6 +80,7 @@ class TestEbookLoanLimitsAndCapacity(TransactionCase):
             'library_manager.ebook_max_active_loans', '1')
         self.env['library.ebook.loan'].create({
             'ebook_id': self.ebook.id,
+            'payment_status': 'confirmed',
             'borrower_id': self.first_partner.id,
         })
 
@@ -128,6 +133,7 @@ class TestEbookLoanLimitsAndCapacity(TransactionCase):
                     barrier.wait(timeout=15)
                     env['library.ebook.loan'].create({
                         'ebook_id': ebook_id,
+                        'payment_status': 'confirmed',
                         'borrower_id': partner_id,
                     })
                     cr.commit()

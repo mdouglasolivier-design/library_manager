@@ -55,10 +55,12 @@ class TestLibraryDashboardStatistics(TransactionCase):
         today = fields.Date.today()
         self.env['library.ebook.loan'].create({
             'ebook_id': ready_ebook.id,
+            'payment_status': 'confirmed',
             'borrower_id': member.id,
         })
         self.env['library.ebook.loan'].create({
             'ebook_id': overdue_ebook.id,
+            'payment_status': 'confirmed',
             'borrower_id': member.id,
             'borrow_date': today - timedelta(days=14),
             'due_date': today - timedelta(days=1),

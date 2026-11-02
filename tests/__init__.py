@@ -1,4 +1,5 @@
 from . import test_library_book
+from . import test_physical_library
 from . import test_library_report
 from . import common
 from . import test_catalog

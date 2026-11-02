@@ -12,6 +12,7 @@
                 <nav aria-label="Main navigation" class="library-portal-nav">
                     <a href="/library">Home</a>
                     <a href="/library/ebooks">Browse eBooks</a>
+                    <a href="/library/books">Physical Books</a>
                     <a href="/library#categories">Categories</a>
                     <a t-if="not is_public" href="/my/library">My Library</a>
                     <a t-if="not is_public" href="/my/library/requests">Requests</a>
@@ -21,13 +22,13 @@
                 </nav>
                 <div class="library-portal-header__actions">
                     <a t-if="is_public" class="btn library-button library-button--outline"
-                       href="/web/login?redirect=/library">Sign in</a>
+                       href="/web/login?redirect=/my/library">Login</a>
                     <a t-if="is_public" class="library-text-link"
-                       href="/web/signup?redirect=/library">Create account</a>
+                       href="/web/signup?redirect=/my/library">Create Account / Register</a>
                     <a t-else="" class="btn library-button library-button--outline"
                        href="/my/library/account">My account</a>
                     <a t-if="not is_public" class="library-text-link"
-                       href="/web/session/logout?redirect=/library">Sign out</a>
+                       href="/web/session/logout?redirect=/library">Log out</a>
                 </div>
             </div>
         </header>
@@ -43,8 +44,9 @@
                 <nav aria-label="Footer navigation">
                     <a href="/library">Home</a>
                     <a href="/library/ebooks">Browse eBooks</a>
-                    <a href="/web/login?redirect=/library">Member sign in</a>
-                    <a href="/web/signup?redirect=/library">Create account</a>
+                    <a href="/library/books">Physical Books</a>
+                    <a href="/web/login?redirect=/my/library">Login</a>
+                    <a href="/web/signup?redirect=/my/library">Create Account / Register</a>
                     <a class="btn library-button library-button--outline"
                        href="/library/staff">Staff Login</a>
                 </nav>
@@ -338,6 +340,16 @@
                                 <div t-if="ebook.language"><dt>Language</dt><dd t-esc="ebook.language"/></div>
                                 <div t-if="ebook.file_format"><dt>Format</dt><dd class="text-uppercase" t-esc="ebook.file_format"/></div>
                             </dl>
+                            <p class="library-price">
+                                Borrowing price: <strong>$5.00 USD</strong>
+                            </p>
+                            <div class="library-payment-instructions">
+                                <h2>Payment instructions</h2>
+                                <p>MTN MoMo: <t t-esc="momo_name"/> · <t t-esc="momo_phone"/>. Enter your own MoMo phone when requesting.</p>
+                                <p>Bank transfer: <t t-esc="bank_name or 'Bank name to be configured'"/> · Account <t t-esc="bank_account"/> · <t t-esc="bank_holder or 'Account holder to be configured'"/>.</p>
+                                <p>Card payment: <t t-esc="card_instructions"/> No card details are collected here.</p>
+                                <p>Payments are not processed automatically. A librarian must verify payment before approval or eBook access.</p>
+                            </div>
                             <div t-if="notice" t-att-class="'alert alert-%s' % notice['level']"
                                  role="status" t-esc="notice['message']"/>
                             <div t-if="not ebook.file_available"
@@ -346,7 +358,7 @@
                             </div>
                             <form t-elif="is_public" action="/web/login" method="get">
                                 <input type="hidden" name="redirect"
-                                       t-att-value="'/library/ebooks/%s' % ebook.id"/>
+                                       value="/my/library"/>
                                 <button class="library-button" type="submit">Sign in to request access</button>
                             </form>
                             <div t-elif="active_loan" class="library-detail__notice">
@@ -369,12 +381,32 @@
                                   t-att-action="'/my/library/ebooks/%s/request' % ebook.id"
                                   method="post">
                                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <label for="ebook-reserve-payment-method">Payment method</label>
+                                <select id="ebook-reserve-payment-method" name="payment_method" required="required">
+                                    <option value="momo">MTN Mobile Money</option>
+                                    <option value="bank">Bank transfer</option>
+                                    <option value="external_card">External card provider</option>
+                                </select>
+                                <label for="ebook-reserve-momo-phone">Your MTN MoMo phone (if selected)</label>
+                                <input id="ebook-reserve-momo-phone" name="momo_phone" type="tel"/>
+                                <label for="ebook-reserve-reference">Payment reference (optional)</label>
+                                <input id="ebook-reserve-reference" name="payment_reference" maxlength="128"/>
                                 <button class="library-button" type="submit">Reserve this eBook</button>
                             </form>
                             <form t-else=""
                                   t-att-action="'/my/library/ebooks/%s/request' % ebook.id"
                                   method="post">
                                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <label for="ebook-payment-method">Payment method</label>
+                                <select id="ebook-payment-method" name="payment_method" required="required">
+                                    <option value="momo">MTN Mobile Money</option>
+                                    <option value="bank">Bank transfer</option>
+                                    <option value="external_card">External card provider</option>
+                                </select>
+                                <label for="ebook-momo-phone">Your MTN MoMo phone (if selected)</label>
+                                <input id="ebook-momo-phone" name="momo_phone" type="tel"/>
+                                <label for="ebook-payment-reference">Payment reference (optional)</label>
+                                <input id="ebook-payment-reference" name="payment_reference" maxlength="128"/>
                                 <button class="library-button" type="submit">Request eBook access</button>
                             </form>
                             <aside class="library-detail__notice mt-3">
@@ -414,6 +446,10 @@
                     <div class="library-member-stats">
                         <a href="/my/library/loans?status=active">
                             <strong t-esc="active_count"/><span>Active eBooks</span>
+                        </a>
+                        <a href="/my/library/history">
+                            <strong t-esc="physical_active_count"/>
+                            <span>Physical books currently borrowed</span>
                         </a>
                         <a href="/my/library/requests">
                             <strong t-esc="pending_request_count"/><span>Pending requests</span>
@@ -470,6 +506,30 @@
                             <h2>No eBooks borrowed yet</h2>
                             <p>Browse the collection to discover your next read.</p>
                             <a class="library-button" href="/library/ebooks">Browse eBooks</a>
+                        </div>
+                    </section>
+                    <section t-if="physical_loans" class="library-section">
+                        <div class="library-section__heading">
+                            <div>
+                                <span class="library-eyebrow">Hard-copy loans</span>
+                                <h2>Physical books borrowed</h2>
+                            </div>
+                            <a class="library-text-link" href="/my/library/history">
+                                View borrowing history
+                            </a>
+                        </div>
+                        <div class="library-member-book-list">
+                            <article t-foreach="physical_loans"
+                                     t-as="physical_loan"
+                                     class="library-member-book">
+                                <div class="library-member-book__details">
+                                    <h3 t-esc="physical_loan.book_id.name"/>
+                                    <p t-esc="physical_loan.book_id.author"/>
+                                    <span>Borrowed <span t-field="physical_loan.borrow_date"/></span>
+                                    <span>Due <span t-field="physical_loan.due_date"/></span>
+                                </div>
+                                <span class="library-status library-status--loaned">Borrowed</span>
+                            </article>
                         </div>
                     </section>
                     <section class="library-member-links">
@@ -556,7 +616,7 @@
                     <header class="library-page__heading">
                         <span class="library-eyebrow">Member space</span>
                         <h1>Reading history</h1>
-                        <p>Your returned eBooks and completed loans.</p>
+                        <p>Your returned physical books and completed eBook loans.</p>
                     </header>
                     <div t-if="notice" t-att-class="'alert alert-%s' % notice['level']"
                          role="status" t-esc="notice['message']"/>
@@ -568,7 +628,7 @@
                                placeholder="Search title, author or ISBN"/>
                         <button class="library-button" type="submit">Search</button>
                     </form>
-                    <div t-if="loans" class="library-member-book-list">
+                    <div t-if="loans or physical_loans" class="library-member-book-list">
                         <article t-foreach="loans" t-as="loan" class="library-member-book">
                             <img t-att-src="'/my/library/ebooks/%s/cover' % loan.ebook_id.id"
                                  t-att-alt="'Cover of %s' % loan.ebook_id.name"
@@ -580,12 +640,29 @@
                                 <span>Returned <span t-field="loan.return_date"/></span>
                             </div>
                             <span class="library-status library-status--available">Returned</span>
+                            <span>Payment: <t t-esc="dict(loan._fields['payment_status'].selection).get(loan.payment_status)"/></span>
+                        </article>
+                        <article t-foreach="physical_loans"
+                                 t-as="physical_loan"
+                                 class="library-member-book">
+                            <img t-att-src="'/library/books/%s/cover' % physical_loan.book_id.id"
+                                 t-att-alt="'Cover of %s' % physical_loan.book_id.name"
+                                 loading="lazy"/>
+                            <div class="library-member-book__details">
+                                <h2 t-esc="physical_loan.book_id.name"/>
+                                <p t-esc="physical_loan.book_id.author"/>
+                                <span>Borrowed <span t-field="physical_loan.borrow_date"/></span>
+                                <span>Expected return <span t-field="physical_loan.due_date"/></span>
+                                <span>Returned <span t-field="physical_loan.return_date"/></span>
+                            </div>
+                            <span class="library-status library-status--available">Returned</span>
+                            <span>Payment: <t t-esc="dict(physical_loan._fields['payment_status'].selection).get(physical_loan.payment_status)"/></span>
                         </article>
                     </div>
                     <div t-else="" class="library-empty-state">
                         <h2>No borrowing history yet</h2>
-                        <p>Returned eBooks will appear here.</p>
-                        <a class="library-button" href="/library/ebooks">Browse eBooks</a>
+                        <p>Returned books and eBooks will appear here.</p>
+                        <a class="library-button" href="/library/books">Browse physical books</a>
                     </div>
                 </main>
                 <t t-call="library_manager.portal_library_footer"/>
@@ -608,7 +685,8 @@
                     </header>
                     <div t-if="notice" t-att-class="'alert alert-%s' % notice['level']"
                          role="status" t-esc="notice['message']"/>
-                    <div t-if="borrowing_requests" class="library-member-book-list">
+                    <div t-if="borrowing_requests or physical_requests"
+                         class="library-member-book-list">
                         <article t-foreach="borrowing_requests" t-as="borrowing_request"
                                  class="library-member-book">
                             <img t-att-src="'/library/ebooks/%s/cover' % borrowing_request.ebook_id.id"
@@ -628,6 +706,8 @@
                             <span t-elif="borrowing_request.state == 'rejected'"
                                   class="library-status library-status--overdue">Rejected</span>
                             <span t-else="" class="library-status">Cancelled</span>
+                            <span>Payment: <t t-esc="dict(borrowing_request._fields['payment_status'].selection).get(borrowing_request.payment_status)"/></span>
+                            <span>Price: $<t t-esc="'%.2f' % borrowing_request.payment_amount"/> USD</span>
                             <a t-if="borrowing_request.state == 'approved' and reader_assets.get(borrowing_request.id)"
                                class="library-button"
                                t-att-href="'/my/library/ebooks/%s/read' % borrowing_request.ebook_id.id">Read now</a>
@@ -638,11 +718,37 @@
                                 <button class="library-button library-button--outline" type="submit">Cancel request</button>
                             </form>
                         </article>
+                        <article t-foreach="physical_requests"
+                                 t-as="physical_request"
+                                 class="library-member-book">
+                            <img t-att-src="'/library/books/%s/cover' % physical_request.book_id.id"
+                                 t-att-alt="'Cover of %s' % physical_request.book_id.name"
+                                 loading="lazy"/>
+                            <div class="library-member-book__details">
+                                <h2 t-esc="physical_request.book_id.name"/>
+                                <p>Requested <span t-field="physical_request.request_date"/></p>
+                                <span>Borrowing date <span t-field="physical_request.borrow_date"/></span>
+                                <span>Expected return <span t-field="physical_request.due_date"/></span>
+                                <span>Payment: <t t-esc="dict(physical_request._fields['payment_status'].selection).get(physical_request.payment_status)"/></span>
+                                <span>Borrowing: <t t-esc="dict(physical_request._fields['state'].selection).get(physical_request.state)"/></span>
+                            </div>
+                            <span class="library-price">
+                                $<t t-esc="'%.2f' % physical_request.payment_amount"/> USD
+                            </span>
+                            <form t-if="physical_request.state == 'pending'"
+                                  t-att-action="'/my/library/book-requests/%s/cancel' % physical_request.id"
+                                  method="post">
+                                <input type="hidden" name="csrf_token"
+                                       t-att-value="request.csrf_token()"/>
+                                <button class="library-button library-button--outline"
+                                        type="submit">Cancel request</button>
+                            </form>
+                        </article>
                     </div>
                     <div t-else="" class="library-empty-state">
                         <h2>No requests yet</h2>
-                        <p>Request eBook access from a title's details page.</p>
-                        <a class="library-button" href="/library/ebooks">Browse eBooks</a>
+                        <p>Request a physical book or eBook from its details page.</p>
+                        <a class="library-button" href="/library/books">Browse physical books</a>
                     </div>
                 </main>
                 <t t-call="library_manager.portal_library_footer"/>

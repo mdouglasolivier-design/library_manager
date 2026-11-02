@@ -26,6 +26,23 @@
                             <field name="library_ebook_max_concurrent_loans"/>
                         </setting>
                     </block>
+                    <block title="Manual borrower payments">
+                        <setting string="MTN MoMo recipient">
+                            <field name="library_momo_recipient_name"/>
+                            <field name="library_momo_recipient_phone"/>
+                        </setting>
+                        <setting string="Bank transfer details">
+                            <field name="library_bank_name"/>
+                            <field name="library_bank_account_holder"/>
+                            <field name="library_bank_account_number"/>
+                        </setting>
+                        <setting string="External card provider">
+                            <field name="library_external_card_instructions"/>
+                        </setting>
+                        <p class="text-muted">
+                            Payments are not processed automatically. Verify receipt manually before confirming a request. Never collect card numbers, security codes, or MoMo PINs.
+                        </p>
+                    </block>
                 </app>
             </xpath>
         </field>

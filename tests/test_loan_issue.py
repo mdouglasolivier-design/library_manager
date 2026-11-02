@@ -44,7 +44,8 @@ class TestEbookBorrowingRequest(TransactionCase):
     def test_member_submits_own_pending_request(self):
         borrowing_request = self.env[
             'library.ebook.request'
-        ].with_user(self.reader).submit_for_current_user(self.ebook.id)
+        ].with_user(self.reader).submit_for_current_user(
+            self.ebook.id, momo_phone='+250788123456')
 
         self.assertEqual(borrowing_request.borrower_id, self.reader.partner_id)
         self.assertEqual(borrowing_request.state, 'pending')
@@ -64,8 +65,10 @@ class TestEbookBorrowingRequest(TransactionCase):
     def test_librarian_approval_creates_member_loan_and_access(self):
         borrowing_request = self.env[
             'library.ebook.request'
-        ].with_user(self.reader).submit_for_current_user(self.ebook.id)
+        ].with_user(self.reader).submit_for_current_user(
+            self.ebook.id, momo_phone='+250788123456')
 
+        borrowing_request.with_user(self.librarian).action_confirm_payment()
         borrowing_request.with_user(self.librarian).action_approve()
 
         self.assertEqual(borrowing_request.state, 'approved')
@@ -79,7 +82,8 @@ class TestEbookBorrowingRequest(TransactionCase):
     def test_member_cannot_approve_or_view_another_members_request(self):
         borrowing_request = self.env[
             'library.ebook.request'
-        ].with_user(self.reader).submit_for_current_user(self.ebook.id)
+        ].with_user(self.reader).submit_for_current_user(
+            self.ebook.id, momo_phone='+250788123456')
         other_requests = self.env[
             'library.ebook.request'
         ].with_user(self.other_reader).search([
@@ -95,12 +99,14 @@ class TestEbookBorrowingRequest(TransactionCase):
             'library_manager.ebook_max_concurrent_loans', '1')
         self.env['library.ebook.loan'].create({
             'ebook_id': self.ebook.id,
+            'payment_status': 'confirmed',
             'borrower_id': self.other_reader.partner_id.id,
         })
 
         reservation = self.env[
             'library.ebook.request'
-        ].with_user(self.reader).submit_for_current_user(self.ebook.id)
+        ].with_user(self.reader).submit_for_current_user(
+            self.ebook.id, momo_phone='+250788123456')
 
         self.assertEqual(reservation._name, 'library.ebook.reservation')
         self.assertEqual(reservation.borrower_id, self.reader.partner_id)
@@ -111,6 +117,7 @@ class TestEbookBorrowingRequest(TransactionCase):
             'library_manager.ebook_max_concurrent_loans', '1')
         self.env['library.ebook.loan'].create({
             'ebook_id': self.ebook.id,
+            'payment_status': 'confirmed',
             'borrower_id': self.other_reader.partner_id.id,
         })
 
@@ -124,21 +131,24 @@ class TestEbookBorrowingRequest(TransactionCase):
             'library_manager.ebook_max_active_loans', '1')
         self.env['library.ebook.loan'].create({
             'ebook_id': self.ebook.id,
+            'payment_status': 'confirmed',
             'borrower_id': self.reader.partner_id.id,
         })
 
         with self.assertRaises(UserError):
             self.env[
                 'library.ebook.request'
-            ].with_user(self.reader).submit_for_current_user(self.ebook.id)
+            ].with_user(self.reader).submit_for_current_user(
+                self.ebook.id, momo_phone='+250788123456')
 
-    def test_auto_approval_creates_loan(self):
+    def test_setting_cannot_bypass_manual_payment_confirmation(self):
         self.parameters.set_param(
             'library_manager.ebook_approval_required', 'False')
 
         borrowing_request = self.env[
             'library.ebook.request'
-        ].with_user(self.reader).submit_for_current_user(self.ebook.id)
+        ].with_user(self.reader).submit_for_current_user(
+            self.ebook.id, momo_phone='+250788123456')
 
-        self.assertEqual(borrowing_request.state, 'approved')
-        self.assertEqual(borrowing_request.loan_id.borrower_id, self.reader.partner_id)
+        self.assertEqual(borrowing_request.state, 'pending')
+        self.assertFalse(borrowing_request.loan_id)

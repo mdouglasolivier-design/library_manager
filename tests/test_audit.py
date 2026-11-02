@@ -29,7 +29,8 @@ class TestEbookAudit(TransactionCase):
     def test_request_issue_and_return_are_recorded_with_actor(self):
         borrowing_request = self.env[
             'library.ebook.request'
-        ].with_user(self.reader).submit_for_current_user(self.ebook.id)
+        ].with_user(self.reader).submit_for_current_user(
+            self.ebook.id, momo_phone='+250788123456')
         submitted_event = self.env['library.ebook.audit'].sudo().search([
             ('event_type', '=', 'request_submitted'),
             ('request_id', '=', borrowing_request.id),
@@ -38,6 +39,7 @@ class TestEbookAudit(TransactionCase):
         self.assertEqual(submitted_event.actor_id, self.reader)
         self.assertEqual(submitted_event.partner_id, self.reader.partner_id)
 
+        borrowing_request.with_user(self.librarian).action_confirm_payment()
         borrowing_request.with_user(self.librarian).action_approve()
         loan = borrowing_request.loan_id
         self.assertTrue(self.env['library.ebook.audit'].sudo().search([

@@ -85,9 +85,11 @@ class TestLibraryCatalogWebsite(HttpCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(
-            'href="/web/login?redirect=/library"', response.text)
+            'href="/web/login?redirect=/my/library"', response.text)
         self.assertIn(
-            'href="/web/signup?redirect=/library"', response.text)
+            'href="/web/signup?redirect=/my/library"', response.text)
+        self.assertIn(
+            'href="/web/signup?redirect=/my/library"', response.text)
         self.assertIn('href="/library/staff"', response.text)
 
     def test_removed_about_page_is_not_routable(self):

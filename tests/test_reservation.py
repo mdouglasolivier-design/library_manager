@@ -52,6 +52,7 @@ class TestEbookReservation(TransactionCase):
         if not active_loans:
             self.env['library.ebook.loan'].create({
                 'ebook_id': self.ebook.id,
+                'payment_status': 'confirmed',
                 'borrower_id': self.occupant.partner_id.id,
             })
         return self.env['library.ebook.reservation'].with_user(user).create({
@@ -118,6 +119,7 @@ class TestEbookReservation(TransactionCase):
         ], limit=1)
         blocking_loan.action_mark_returned()
 
+        reservation.with_user(self.librarian).action_confirm_payment()
         reservation.with_user(self.librarian).action_mark_fulfilled()
 
         self.assertEqual(reservation.state, 'fulfilled')
@@ -138,6 +140,7 @@ class TestEbookReservation(TransactionCase):
     def test_archived_ebook_cannot_be_reserved(self):
         self.env['library.ebook.loan'].create({
             'ebook_id': self.ebook.id,
+            'payment_status': 'confirmed',
             'borrower_id': self.occupant.partner_id.id,
         })
         self.ebook.active = False

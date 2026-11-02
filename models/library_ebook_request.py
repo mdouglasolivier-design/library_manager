@@ -1,3 +1,5 @@
+import re
+
 from odoo import api, fields, models
 from odoo.exceptions import AccessError, UserError, ValidationError
 
@@ -5,6 +7,7 @@ from odoo.exceptions import AccessError, UserError, ValidationError
 class LibraryEbookRequest(models.Model):
     _name = 'library.ebook.request'
     _description = 'eBook Borrowing Request'
+    _inherit = ['library.payment.mixin']
     _order = 'request_date desc, id desc'
 
     ebook_id = fields.Many2one(
@@ -25,7 +28,9 @@ class LibraryEbookRequest(models.Model):
     decision_date = fields.Datetime(readonly=True)
 
     @api.model
-    def submit_for_current_user(self, ebook_id):
+    def submit_for_current_user(
+            self, ebook_id, payment_method='momo', momo_phone=None,
+            payment_reference=None):
         user = self.env.user
         if user._is_public() or not user.partner_id:
             raise AccessError("Sign in with a library account to request an eBook.")
@@ -38,6 +43,13 @@ class LibraryEbookRequest(models.Model):
         if not ebook:
             raise UserError("This eBook is not available in the public catalog.")
         ebook._check_file_available()
+        if payment_method not in ('momo', 'bank', 'external_card'):
+            raise ValidationError("Select a supported payment method.")
+        phone = (momo_phone or '').strip()
+        if payment_method == 'momo' and not re.fullmatch(
+                r'[0-9+().\-\s]{7,32}', phone):
+            raise ValidationError(
+                "Enter the MTN MoMo phone number used for payment.")
 
         self.env.cr.execute(
             "SELECT id FROM library_ebook WHERE id = %s FOR UPDATE",
@@ -60,13 +72,19 @@ class LibraryEbookRequest(models.Model):
         if ebook._is_at_concurrent_capacity():
             reservation = self.env['library.ebook.reservation'].create({
                 'ebook_id': ebook.id,
+                'payment_method': payment_method,
+                'momo_phone': phone if payment_method == 'momo' else False,
+                'payment_reference': (payment_reference or '').strip()[:128],
             })
             return reservation
 
-        borrowing_request = self.create({'ebook_id': ebook.id})
-        if not self.env['res.config.settings']._library_approval_required():
-            borrowing_request._approve(auto_approval=True)
-        return borrowing_request
+        return self.create({
+            'ebook_id': ebook.id,
+            'payment_method': payment_method,
+            'momo_phone': phone if payment_method == 'momo' else False,
+            'payment_reference': (payment_reference or '').strip()[:128],
+            'payment_amount': 5.0,
+        })
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -86,6 +104,12 @@ class LibraryEbookRequest(models.Model):
                     'ebook_id': values.get('ebook_id'),
                     'borrower_id': partner_id,
                     'state': 'pending',
+                    'payment_status': 'pending',
+                    'payment_amount': 5.0,
+                    'payment_method': values.get(
+                        'payment_method', 'momo'),
+                    'momo_phone': values.get('momo_phone'),
+                    'payment_reference': values.get('payment_reference'),
                 }
                 for values in vals_list
             ]
@@ -218,19 +242,20 @@ class LibraryEbookRequest(models.Model):
             ebook=self.ebook_id,
             borrowing_request=self)
 
-    def _approve(self, auto_approval=False):
+    def _approve(self):
         self.ensure_one()
         is_librarian = (
             self.env.su
             or self.env.user.has_group('library_manager.group_library_librarian')
             or self.env.user.has_group('base.group_system')
         )
-        if not is_librarian and not (
-                auto_approval
-                and not self.env['res.config.settings']._library_approval_required()):
+        if not is_librarian:
             raise AccessError("Only a librarian can approve an eBook request.")
         if self.state != 'pending':
             raise UserError("Only a pending request can be approved.")
+        if self.payment_status != 'confirmed':
+            raise UserError(
+                "Confirm the payment before approving this eBook request.")
 
         ebook = self.ebook_id
         ebook._check_file_available()
@@ -248,6 +273,11 @@ class LibraryEbookRequest(models.Model):
         loan = self.env['library.ebook.loan'].sudo().create({
             'ebook_id': ebook.id,
             'borrower_id': self.borrower_id.id,
+            'payment_method': self.payment_method,
+            'payment_status': 'confirmed',
+            'payment_amount': 5.0,
+            'payment_reference': self.payment_reference,
+            'momo_phone': self.momo_phone,
         })
         self.sudo().write({
             'state': 'approved',

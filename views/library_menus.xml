@@ -22,6 +22,11 @@
               parent="menu_library_root"
               action="action_library_loan" sequence="20"/>
 
+    <menuitem id="menu_library_book_requests" name="Physical Book Requests"
+              parent="menu_library_root"
+              action="action_library_book_request" sequence="25"
+              groups="library_manager.group_library_librarian,base.group_system"/>
+
     <menuitem id="menu_library_ebooks" name="Ebooks"
               parent="menu_library_root"
               action="action_library_ebook" sequence="30"/>

@@ -39,6 +39,7 @@ class TestEbookReaderDelivery(HttpCase):
         })
         cls.loan = cls.env['library.ebook.loan'].create({
             'ebook_id': cls.ebook.id,
+            'payment_status': 'confirmed',
             'borrower_id': cls.reader.partner_id.id,
             'borrow_date': today,
             'due_date': today + timedelta(days=14),
@@ -83,7 +84,9 @@ class TestEbookReaderDelivery(HttpCase):
         })
         borrowing_request = self.env[
             'library.ebook.request'
-        ].with_user(self.reader).submit_for_current_user(approved_ebook.id)
+        ].with_user(self.reader).submit_for_current_user(
+            approved_ebook.id, momo_phone='+250788123456')
+        borrowing_request.with_user(librarian).action_confirm_payment()
         borrowing_request.with_user(librarian).action_approve()
 
         self.assertEqual(borrowing_request.state, 'approved')
@@ -175,6 +178,7 @@ class TestEbookReaderDelivery(HttpCase):
         today = fields.Date.today()
         self.env['library.ebook.loan'].create({
             'ebook_id': ebook_without_asset.id,
+            'payment_status': 'confirmed',
             'borrower_id': self.reader.partner_id.id,
             'borrow_date': today,
             'due_date': today + timedelta(days=7),

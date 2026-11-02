@@ -14,6 +14,12 @@
                        decoration-success="state == 'approved'"
                        decoration-danger="state == 'rejected'"
                        decoration-muted="state == 'cancelled'"/>
+                <field name="payment_amount"/>
+                <field name="payment_method"/>
+                <field name="payment_status" widget="badge"
+                       decoration-warning="payment_status == 'pending'"
+                       decoration-success="payment_status == 'confirmed'"
+                       decoration-danger="payment_status == 'rejected'"/>
                 <field name="loan_id"/>
                 <field name="decision_date"/>
             </list>
@@ -26,10 +32,19 @@
         <field name="arch" type="xml">
             <form>
                 <header>
+                    <button name="action_confirm_payment"
+                            string="Confirm Payment" type="object"
+                            class="btn-primary"
+                            groups="library_manager.group_library_librarian,base.group_system"
+                            invisible="state != 'pending' or payment_status != 'pending'"/>
+                    <button name="action_reject_payment"
+                            string="Reject Payment" type="object"
+                            groups="library_manager.group_library_librarian,base.group_system"
+                            invisible="state != 'pending' or payment_status != 'pending'"/>
                     <button name="action_approve" string="Approve"
                             type="object" class="btn-primary"
                             groups="library_manager.group_library_librarian,base.group_system"
-                            invisible="state != 'pending'"/>
+                            invisible="state != 'pending' or payment_status != 'confirmed'"/>
                     <button name="action_reject" string="Reject"
                             type="object"
                             groups="library_manager.group_library_librarian,base.group_system"
@@ -43,13 +58,19 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="ebook_id"/>
-                            <field name="borrower_id"/>
-                            <field name="loan_id"/>
+                            <field name="ebook_id" readonly="1"/>
+                            <field name="borrower_id" readonly="1"/>
+                            <field name="loan_id" readonly="1"/>
                         </group>
                         <group>
-                            <field name="request_date"/>
-                            <field name="decision_date"/>
+                            <field name="request_date" readonly="1"/>
+                            <field name="payment_amount" readonly="1"/>
+                            <field name="payment_method" readonly="1"/>
+                            <field name="payment_status" readonly="1"/>
+                            <field name="momo_phone" readonly="1"
+                                   invisible="payment_method != 'momo'"/>
+                            <field name="payment_reference" readonly="1"/>
+                            <field name="decision_date" readonly="1"/>
                         </group>
                     </group>
                 </sheet>

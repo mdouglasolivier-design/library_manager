@@ -36,6 +36,7 @@ class LibraryBorrowerController(http.Controller):
         Request = request.env['library.ebook.request']
         Reservation = request.env['library.ebook.reservation']
         Notification = request.env['library.ebook.notification']
+        PhysicalLoan = request.env['library.loan']
         today = fields.Date.today()
         active_domain = [
             ('borrower_id', '=', partner.id),
@@ -46,6 +47,14 @@ class LibraryBorrowerController(http.Controller):
         context = self._member_context()
         context.update({
             'active_count': Loan.search_count(active_domain),
+            'physical_active_count': PhysicalLoan.search_count([
+                ('borrower_id', '=', partner.id),
+                ('state', '=', 'borrowed'),
+            ]),
+            'physical_loans': PhysicalLoan.search([
+                ('borrower_id', '=', partner.id),
+                ('state', '=', 'borrowed'),
+            ], order='due_date, id', limit=5),
             'pending_request_count': Request.search_count([
                 ('borrower_id', '=', partner.id),
                 ('state', '=', 'pending'),
@@ -77,7 +86,11 @@ class LibraryBorrowerController(http.Controller):
         try:
             result = request.env[
                 'library.ebook.request'
-            ].submit_for_current_user(ebook_id)
+            ].submit_for_current_user(
+                ebook_id,
+                payment_method=post.get('payment_method', 'momo'),
+                momo_phone=post.get('momo_phone'),
+                payment_reference=post.get('payment_reference'))
         except (AccessError, UserError, ValidationError) as error:
             self._set_notice(str(error), 'warning')
             return request.redirect('/library/ebooks/%s' % ebook_id)
@@ -171,8 +184,22 @@ class LibraryBorrowerController(http.Controller):
             ]
         loans = request.env['library.ebook.loan'].search(
             domain, order='return_date desc, id desc')
+        physical_domain = [
+            ('borrower_id', '=', self._member_partner().id),
+            ('state', '=', 'returned'),
+        ]
+        if query:
+            physical_domain += [
+                '|', '|',
+                ('book_id.name', 'ilike', query),
+                ('book_id.author', 'ilike', query),
+                ('book_id.isbn', 'ilike', query),
+            ]
+        physical_loans = request.env['library.loan'].search(
+            physical_domain, order='return_date desc, id desc')
         context = self._member_context()
         context['loans'] = loans
+        context['physical_loans'] = physical_loans
         context['query'] = query
         return request.render(
             'library_manager.portal_library_history', context)
@@ -198,6 +225,11 @@ class LibraryBorrowerController(http.Controller):
                 reader_assets[borrowing_request.id] = asset
         context = self._member_context()
         context['borrowing_requests'] = requests
+        context['physical_requests'] = request.env[
+            'library.book.request'
+        ].search([
+            ('borrower_id', '=', self._member_partner().id),
+        ], order='request_date desc, id desc')
         context['reader_assets'] = reader_assets
         return request.render(
             'library_manager.portal_library_requests', context)

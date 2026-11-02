@@ -11,6 +11,7 @@ _logger = logging.getLogger(__name__)
 class LibraryEbookLoan(models.Model):
     _name = 'library.ebook.loan'
     _description = 'Ebook Loan'
+    _inherit = ['library.payment.mixin']
     _order = 'borrow_date desc, id desc'
 
     ebook_id = fields.Many2one(
@@ -74,6 +75,20 @@ class LibraryEbookLoan(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        manager = (
+            self.env.su
+            or self.env.user.has_group(
+                'library_manager.group_library_librarian')
+            or self.env.user.has_group('base.group_system')
+        )
+        if not manager:
+            raise AccessError(
+                "Only a librarian or administrator can issue eBook loans.")
+        for values in vals_list:
+            if values.get('payment_status') != 'confirmed':
+                raise ValidationError(
+                    "Confirm payment before granting eBook access.")
+            values.setdefault('payment_amount', 5.0)
         ebook_ids = sorted({
             values.get('ebook_id') for values in vals_list
             if values.get('ebook_id')

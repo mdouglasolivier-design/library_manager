@@ -10,6 +10,12 @@
                 <field name="reservation_date"/>
                 <field name="ebook_id"/>
                 <field name="borrower_id"/>
+                <field name="payment_amount"/>
+                <field name="payment_method"/>
+                <field name="payment_status" widget="badge"
+                       decoration-warning="payment_status == 'pending'"
+                       decoration-success="payment_status == 'confirmed'"
+                       decoration-danger="payment_status == 'rejected'"/>
                 <field name="state" widget="badge"
                        decoration-warning="state == 'pending'"
                        decoration-success="state == 'fulfilled'"
@@ -25,10 +31,19 @@
         <field name="arch" type="xml">
             <form create="1" delete="0">
                 <header>
+                    <button name="action_confirm_payment"
+                            string="Confirm Payment" type="object"
+                            class="btn-primary"
+                            groups="library_manager.group_library_librarian,base.group_system"
+                            invisible="state != 'pending' or payment_status != 'pending'"/>
+                    <button name="action_reject_payment"
+                            string="Reject Payment" type="object"
+                            groups="library_manager.group_library_librarian,base.group_system"
+                            invisible="state != 'pending' or payment_status != 'pending'"/>
                     <button name="action_mark_fulfilled" string="Mark Fulfilled"
                             type="object" class="btn-primary"
                             groups="library_manager.group_library_librarian,base.group_system"
-                            invisible="state != 'pending'"/>
+                            invisible="state != 'pending' or payment_status != 'confirmed'"/>
                     <button name="action_cancel" string="Cancel Reservation"
                             type="object"
                             groups="library_manager.group_library_librarian,base.group_system"
@@ -48,6 +63,12 @@
                         </group>
                         <group>
                             <field name="reservation_date"/>
+                            <field name="payment_amount" readonly="1"/>
+                            <field name="payment_method" readonly="1"/>
+                            <field name="payment_status" readonly="1"/>
+                            <field name="momo_phone" readonly="1"
+                                   invisible="payment_method != 'momo'"/>
+                            <field name="payment_reference" readonly="1"/>
                         </group>
                     </group>
                     <group>

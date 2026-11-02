@@ -3,6 +3,10 @@ access_library_book_user,library.book.user,model_library_book,base.group_user,1,
 access_library_book_admin,library.book.admin,model_library_book,base.group_system,1,1,1,1
 access_library_loan_user,library.loan.user,model_library_loan,base.group_user,1,1,1,0
 access_library_loan_admin,library.loan.admin,model_library_loan,base.group_system,1,1,1,1
+access_library_loan_portal,library.loan.portal,model_library_loan,base.group_portal,1,0,0,0
+access_library_book_request_portal,library.book.request.portal,model_library_book_request,base.group_portal,1,1,1,0
+access_library_book_request_librarian,library.book.request.librarian,model_library_book_request,library_manager.group_library_librarian,1,1,1,0
+access_library_book_request_admin,library.book.request.admin,model_library_book_request,base.group_system,1,1,1,1
 access_library_ebook_user,library.ebook.user,model_library_ebook,base.group_user,1,0,0,0
 access_library_ebook_librarian,library.ebook.librarian,model_library_ebook,library_manager.group_library_librarian,1,1,1,0
 access_library_ebook_admin,library.ebook.admin,model_library_ebook,base.group_system,1,1,1,1

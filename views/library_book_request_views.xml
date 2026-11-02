@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_library_book_request_list" model="ir.ui.view">
+        <field name="name">library.book.request.list</field>
+        <field name="model">library.book.request</field>
+        <field name="arch" type="xml">
+            <list decoration-success="state == 'approved'"
+                  decoration-danger="state == 'rejected'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="request_date"/>
+                <field name="book_id"/>
+                <field name="borrower_name"/>
+                <field name="borrower_phone"/>
+                <field name="borrow_date"/>
+                <field name="due_date"/>
+                <field name="payment_amount"/>
+                <field name="payment_method"/>
+                <field name="payment_status" widget="badge"
+                       decoration-warning="payment_status == 'pending'"
+                       decoration-success="payment_status == 'confirmed'"
+                       decoration-danger="payment_status == 'rejected'"/>
+                <field name="state" widget="badge"/>
+                <field name="loan_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_library_book_request_form" model="ir.ui.view">
+        <field name="name">library.book.request.form</field>
+        <field name="model">library.book.request</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <header>
+                    <button name="action_confirm_payment"
+                            string="Confirm Payment" type="object"
+                            class="btn-primary"
+                            groups="library_manager.group_library_librarian,base.group_system"
+                            invisible="payment_status != 'pending'"/>
+                    <button name="action_reject_payment"
+                            string="Reject Payment" type="object"
+                            groups="library_manager.group_library_librarian,base.group_system"
+                            invisible="payment_status != 'pending'"/>
+                    <button name="action_approve" string="Approve Request"
+                            type="object" class="btn-primary"
+                            groups="library_manager.group_library_librarian,base.group_system"
+                            invisible="state != 'pending' or payment_status != 'confirmed'"/>
+                    <button name="action_reject" string="Reject Request"
+                            type="object"
+                            groups="library_manager.group_library_librarian,base.group_system"
+                            invisible="state != 'pending'"/>
+                    <field name="state" widget="statusbar" readonly="1"
+                           statusbar_visible="pending,approved,rejected,cancelled"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Borrower and book">
+                            <field name="book_id" readonly="1"/>
+                            <field name="borrower_id" readonly="1"/>
+                            <field name="borrower_name" readonly="1"/>
+                            <field name="borrower_phone" readonly="1"/>
+                            <field name="loan_id" readonly="1"/>
+                        </group>
+                        <group string="Dates and payment">
+                            <field name="request_date" readonly="1"/>
+                            <field name="borrow_date" readonly="1"/>
+                            <field name="due_date" readonly="1"/>
+                            <field name="payment_amount" readonly="1"/>
+                            <field name="payment_method" readonly="1"/>
+                            <field name="payment_status" readonly="1"/>
+                            <field name="momo_phone" readonly="1"
+                                   invisible="payment_method != 'momo'"/>
+                            <field name="payment_reference" readonly="1"/>
+                            <field name="decision_date" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_library_book_request_search" model="ir.ui.view">
+        <field name="name">library.book.request.search</field>
+        <field name="model">library.book.request</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="book_id"/>
+                <field name="borrower_name"/>
+                <field name="borrower_phone"/>
+                <filter name="pending" string="Pending"
+                        domain="[('state', '=', 'pending')]"/>
+                <filter name="payment_pending" string="Payment Pending"
+                        domain="[('payment_status', '=', 'pending')]"/>
+                <filter name="approved" string="Approved"
+                        domain="[('state', '=', 'approved')]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_library_book_request" model="ir.actions.act_window">
+        <field name="name">Physical Book Requests</field>
+        <field name="res_model">library.book.request</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_pending': 1}</field>
+    </record>
+</odoo>

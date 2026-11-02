@@ -9,6 +9,24 @@ from odoo.http import request
 
 class LibraryCatalogController(http.Controller):
 
+    def _payment_instructions(self):
+        parameters = request.env['ir.config_parameter'].sudo()
+        return {
+            'momo_name': parameters.get_param(
+                'library_manager.momo_recipient_name', 'Odoo Library'),
+            'momo_phone': parameters.get_param(
+                'library_manager.momo_recipient_phone', '+250791393885'),
+            'bank_account': parameters.get_param(
+                'library_manager.bank_account_number', '100212701941'),
+            'bank_name': parameters.get_param(
+                'library_manager.bank_name', ''),
+            'bank_holder': parameters.get_param(
+                'library_manager.bank_account_holder', ''),
+            'card_instructions': parameters.get_param(
+                'library_manager.external_card_instructions',
+                'Configure a secure payment provider before enabling card payments.'),
+        }
+
     @http.route(
         '/library', type='http', auth='public', website=True, sitemap=True)
     def library_home(self, **params):
@@ -227,6 +245,7 @@ class LibraryCatalogController(http.Controller):
             'pending_request': pending_request,
             'pending_reservation': pending_reservation,
             'notice': request.session.pop('library_portal_notice', False),
+            **self._payment_instructions(),
         })
 
     @http.route(

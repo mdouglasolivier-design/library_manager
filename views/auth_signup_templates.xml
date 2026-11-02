@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="library_signup_phone_field"
+              inherit_id="auth_signup.fields"
+              name="Odoo Library registration phone">
+        <xpath expr="//div[hasclass('field-name')]" position="after">
+            <div class="mb-3 field-phone">
+                <label for="library_signup_phone">Phone number</label>
+                <input id="library_signup_phone" type="tel" name="phone"
+                       class="form-control form-control-sm"
+                       autocomplete="tel" required="required"
+                       t-att-value="phone"
+                       placeholder="+250..."/>
+            </div>
+        </xpath>
+    </template>
+</odoo>

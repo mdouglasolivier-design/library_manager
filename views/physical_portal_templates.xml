@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="physical_portal_navigation"
+              inherit_id="library_manager.portal_library_header"
+              name="Physical book and active portal navigation">
+        <xpath expr="//nav[hasclass('library-portal-nav')]/a[@href='/library/ebooks']"
+               position="attributes">
+            <attribute name="t-att-class">'is-active' if request.httprequest.path.startswith('/library/ebooks') else ''</attribute>
+        </xpath>
+        <xpath expr="//nav[hasclass('library-portal-nav')]/a[@href='/library']"
+               position="attributes">
+            <attribute name="t-att-class">'is-active' if request.httprequest.path == '/library' else ''</attribute>
+        </xpath>
+        <xpath expr="//nav[hasclass('library-portal-nav')]/a[@href='/library/books']"
+               position="attributes">
+            <attribute name="t-att-class">'is-active' if request.httprequest.path.startswith('/library/books') else ''</attribute>
+        </xpath>
+        <xpath expr="//nav[hasclass('library-portal-nav')]/a[@href='/my/library/history']"
+               position="attributes">
+            <attribute name="t-att-class">'is-active' if request.httprequest.path == '/my/library/history' else ''</attribute>
+        </xpath>
+        <xpath expr="//nav[hasclass('library-portal-nav')]/a[@href='/my/library']"
+               position="attributes">
+            <attribute name="t-att-class">'is-active' if request.httprequest.path == '/my/library' else ''</attribute>
+        </xpath>
+        <xpath expr="//nav[hasclass('library-portal-nav')]/a[@href='/my/library/requests']"
+               position="attributes">
+            <attribute name="t-att-class">'is-active' if request.httprequest.path == '/my/library/requests' else ''</attribute>
+        </xpath>
+        <xpath expr="//nav[hasclass('library-portal-nav')]/a[@href='/my/library/reservations']"
+               position="attributes">
+            <attribute name="t-att-class">'is-active' if request.httprequest.path == '/my/library/reservations' else ''</attribute>
+        </xpath>
+        <xpath expr="//nav[hasclass('library-portal-nav')]/a[@href='/my/library/notifications']"
+               position="attributes">
+            <attribute name="t-att-class">'is-active' if request.httprequest.path == '/my/library/notifications' else ''</attribute>
+        </xpath>
+    </template>
+
+    <template id="portal_physical_book_card">
+        <article class="library-book-card">
+            <a class="library-book-card__cover"
+               t-att-href="'/library/books/%s' % book.id">
+                <img t-att-src="'/library/books/%s/cover' % book.id"
+                     t-att-alt="'Cover of %s' % book.name" loading="lazy"/>
+            </a>
+            <div class="library-book-card__body">
+                <span class="library-book-card__category"
+                      t-field="book.category"/>
+                <h2><a t-att-href="'/library/books/%s' % book.id"
+                       t-esc="book.name"/></h2>
+                <p class="library-book-card__author" t-esc="book.author"/>
+                <p>Available copies: <strong t-esc="book.available_copies"/></p>
+                <p class="library-price">$6.00 USD</p>
+            </div>
+        </article>
+    </template>
+
+    <template id="portal_physical_catalog" name="Browse physical books">
+        <t t-set="no_header" t-value="True"/>
+        <t t-set="no_footer" t-value="True"/>
+        <t t-call="website.layout">
+            <t t-set="title">Physical Books</t>
+            <div id="wrap" class="library-portal">
+                <t t-call="library_manager.portal_library_header"/>
+                <main class="container library-page">
+                    <header class="library-page__heading">
+                        <span class="library-eyebrow">Physical collection</span>
+                        <h1>Browse Physical Books</h1>
+                        <p>Search hard-copy titles and check current copy availability.</p>
+                    </header>
+                    <form action="/library/books" method="get"
+                          class="library-filter-form">
+                        <label for="physical-book-query">Search title, author, ISBN, publisher</label>
+                        <input id="physical-book-query" type="search" name="q"
+                               t-att-value="query"
+                               placeholder="Search physical books"/>
+                        <button class="library-button" type="submit">Search</button>
+                    </form>
+                    <div t-if="books" class="library-book-grid">
+                        <t t-foreach="books" t-as="book">
+                            <t t-call="library_manager.portal_physical_book_card"/>
+                        </t>
+                    </div>
+                    <div t-else="" class="library-empty-state">
+                        <h2>No physical books found</h2>
+                        <p>Try another search or check back later.</p>
+                    </div>
+                </main>
+                <t t-call="library_manager.portal_library_footer"/>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_physical_book_detail" name="Physical book details">
+        <t t-set="no_header" t-value="True"/>
+        <t t-set="no_footer" t-value="True"/>
+        <t t-call="website.layout">
+            <t t-set="title" t-value="book.name"/>
+            <div id="wrap" class="library-portal">
+                <t t-call="library_manager.portal_library_header"/>
+                <main class="container library-page">
+                    <nav aria-label="Breadcrumb" class="library-breadcrumb">
+                        <a href="/library">Home</a><span>/</span>
+                        <a href="/library/books">Physical Books</a><span>/</span>
+                        <span t-esc="book.name"/>
+                    </nav>
+                    <article class="library-detail">
+                        <div class="library-detail__cover">
+                            <img t-att-src="'/library/books/%s/cover' % book.id"
+                                 t-att-alt="'Cover of %s' % book.name"/>
+                        </div>
+                        <div class="library-detail__content">
+                            <h1 t-esc="book.name"/>
+                            <p class="library-detail__author">
+                                By <span t-esc="book.author"/>
+                            </p>
+                            <p class="library-price">
+                                Borrowing price: <strong>$6.00 USD</strong>
+                            </p>
+                            <p t-if="book.description"
+                               class="library-detail__description"
+                               t-esc="book.description"/>
+                            <dl class="library-book-facts">
+                                <div t-if="book.isbn"><dt>ISBN</dt><dd t-esc="book.isbn"/></div>
+                                <div t-if="book.publisher"><dt>Publisher</dt><dd t-esc="book.publisher"/></div>
+                                <div><dt>Total copies</dt><dd t-esc="book.total_copies"/></div>
+                                <div><dt>Available copies</dt><dd t-esc="book.available_copies"/></div>
+                            </dl>
+                            <div class="library-payment-instructions">
+                                <h2>Payment instructions</h2>
+                                <p>MTN MoMo: <t t-esc="momo_name"/> · <t t-esc="momo_phone"/>.</p>
+                                <p>Bank transfer: <t t-esc="bank_name or 'Bank name to be configured'"/> · Account <t t-esc="bank_account"/> · <t t-esc="bank_holder or 'Account holder to be configured'"/>.</p>
+                                <p>External card: <t t-esc="card_instructions"/> No card details are collected here.</p>
+                                <p>Payment is not processed automatically. A librarian must verify payment before approving your request.</p>
+                            </div>
+                            <div t-if="notice"
+                                 t-att-class="'alert alert-%s' % notice['level']"
+                                 role="status" t-esc="notice['message']"/>
+                            <div t-if="not book.available_copies"
+                                 class="library-detail__notice">
+                                No copies are currently available to request.
+                            </div>
+                            <form t-elif="is_public" action="/web/login" method="get">
+                                <input type="hidden" name="redirect" value="/my/library"/>
+                                <button class="library-button" type="submit">Login to request this book</button>
+                                <a class="library-text-link"
+                                   href="/web/signup?redirect=/my/library">Create Account / Register</a>
+                            </form>
+                            <form t-else=""
+                                  t-att-action="'/my/library/books/%s/request' % book.id"
+                                  method="post" class="library-payment-form">
+                                <input type="hidden" name="csrf_token"
+                                       t-att-value="request.csrf_token()"/>
+                                <label for="physical-borrower-name">Full name</label>
+                                <input id="physical-borrower-name" type="text"
+                                       t-att-value="partner.name" readonly="readonly"/>
+                                <label for="physical-borrower-phone">Contact phone</label>
+                                <input id="physical-borrower-phone" name="borrower_phone"
+                                       type="tel" required="required"
+                                       t-att-value="partner.phone or ''"/>
+                                <label for="physical-borrow-date">Borrowing date</label>
+                                <input id="physical-borrow-date" name="borrow_date"
+                                       type="date" required="required"
+                                       t-att-value="today"/>
+                                <label for="physical-due-date">Expected return date</label>
+                                <input id="physical-due-date" name="due_date"
+                                       type="date" required="required"
+                                       t-att-value="expected_return"/>
+                                <label for="physical-payment-method">Payment method</label>
+                                <select id="physical-payment-method" name="payment_method"
+                                        required="required">
+                                    <option value="momo">MTN Mobile Money</option>
+                                    <option value="bank">Bank transfer</option>
+                                    <option value="external_card">External card provider</option>
+                                </select>
+                                <label for="physical-momo-phone">MTN MoMo payer phone (if selected)</label>
+                                <input id="physical-momo-phone" name="momo_phone"
+                                       type="tel"/>
+                                <label for="physical-payment-reference">Transfer/reference ID (optional)</label>
+                                <input id="physical-payment-reference"
+                                       name="payment_reference" maxlength="128"/>
+                                <button class="library-button" type="submit"
+                                        t-att-disabled="not book.available_copies">
+                                    Submit borrowing request
+                                </button>
+                            </form>
+                        </div>
+                    </article>
+                </main>
+                <t t-call="library_manager.portal_library_footer"/>
+            </div>
+        </t>
+    </template>
+</odoo>
