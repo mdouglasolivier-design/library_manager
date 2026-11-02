@@ -32,6 +32,8 @@ class LibraryBook(models.Model):
         compute='_compute_copy_counts', store=True)
     borrowed_copies = fields.Integer(
         compute='_compute_copy_counts', store=True)
+    returned_copies = fields.Integer(
+        compute='_compute_copy_counts', store=True)
     website_published = fields.Boolean(
         string='Published on Website', default=False, index=True)
     pages = fields.Integer()
@@ -101,6 +103,9 @@ class LibraryBook(models.Model):
                 - legacy_lost, 0)
             book.borrowed_copies = borrowed
             book.available_copies = available
+            book.returned_copies = len(
+                book.loan_ids.filtered(
+                    lambda loan: loan.state == 'returned'))
 
     @api.constrains('total_copies', 'lost_copies')
     def _check_copy_counts(self):

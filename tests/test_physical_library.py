@@ -60,6 +60,7 @@ class TestPhysicalLibrary(TransactionCase):
 
         self.assertEqual(first_loan.state, 'returned')
         self.assertEqual(second_loan.state, 'borrowed')
+        self.assertEqual(self.book.returned_copies, 1)
         self.assertEqual(self.book.borrowed_copies, 1)
         self.assertEqual(self.book.available_copies, 1)
 
