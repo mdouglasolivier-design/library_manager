@@ -3,8 +3,9 @@
         <div class="o_library_dashboard">
             <aside class="o_library_dashboard_sidebar">
                 <div class="o_library_dashboard_brand">
-                    <i class="fa fa-book" aria-hidden="true"/>
-                    <span>Library</span>
+                    <img src="/library_manager/static/description/icon.png"
+                         alt="" width="34" height="34"/>
+                    <span><span class="o_library_brand_odoo">Odoo</span> Library</span>
                 </div>
                 <nav aria-label="Library navigation">
                     <t t-foreach="state.navItems" t-as="item" t-key="item.label">
@@ -18,7 +19,7 @@
                     </t>
                 </nav>
                 <div class="o_library_dashboard_sidebar_footer">
-                    Library Manager
+                    Odoo Library
                 </div>
             </aside>
 

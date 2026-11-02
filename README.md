@@ -1,8 +1,8 @@
-# Library Manager
+# Odoo Library
 
 ![Odoo 18](https://img.shields.io/badge/Odoo-18.0-875A7B) ![License](https://img.shields.io/badge/license-LGPL--3-blue)
 
-A simple, clean Odoo app to manage books, lending, loan history and printable reports.
+Your Integrated Digital Library Management Platform.
 
 ## Features
 
@@ -13,6 +13,8 @@ A simple, clean Odoo app to manage books, lending, loan history and printable re
 - **Public eBook catalog**: cover-led discovery, metadata pages, search, filters, and responsive layouts
 - **eBook reading access**: approval creates an active loan and a **Read now** link; only the signed-in member's active, in-date loan grants access
 - **Borrower portal**: members can submit borrowing requests, reserve titles at capacity, and manage loans, history, reservations, and notifications
+- **Public registration and sign-in**: members use Odoo's standard email/password account flow and portal
+- **Google sign-in**: Odoo's OAuth flow is available when Google credentials are configured
 - **Protected eBook reader**: PDF browser reading and entitled EPUB downloads; librarian-uploaded files stay private and require an active loan on every request
 - **Email notifications**: request and reservation updates are queued for members with an email address
 - **Overdue reminders**: overdue eBook loans generate one queued reminder per day until returned
@@ -29,14 +31,14 @@ The website provides public eBook discovery, details, member requests, reservati
 ## Requirements
 
 - Odoo 18.0 (Community or Enterprise)
-- Odoo modules: `base`, `mail`, `website`, `portal`, `auth_signup`
+- Odoo modules: `base`, `mail`, `website`, `portal`, `auth_signup`, `auth_oauth`
 
 ## Installation
 
 1. Copy the `library_manager` folder into your custom addons folder.
 2. Add that folder to `addons_path` in `odoo.conf`.
 3. Restart Odoo and enable developer mode.
-4. Go to **Apps**, click **Update Apps List**, search for **Library Manager** and click **Install**.
+4. Go to **Apps**, click **Update Apps List**, search for **Odoo Library** and click **Install**.
 
 Command-line install:
 
@@ -74,16 +76,49 @@ python odoo-bin -c odoo.conf -d <database> -i library_manager
 Assign the **Library Librarian** group to trusted staff in **Settings → Users
 & Companies → Users** to let them issue and manage ebook loans.
 
+### Member accounts and Google sign-in
+
+Member registration, password login, and password recovery use Odoo's
+`auth_signup` pages. Public sign-up must be enabled in the Odoo database's
+authentication settings; this module does not change that setting or existing
+accounts. New sign-ups use Odoo's portal account flow and do not receive
+librarian or administrator access.
+
+Google sign-in is provided by Odoo's `auth_oauth` module and appears after a
+Google provider is configured and enabled. To configure it:
+
+1. Create or select a project in Google Cloud Console.
+2. Configure its OAuth consent screen.
+3. Create an OAuth 2.0 Client ID for a Web application.
+4. Add the exact redirect URI
+   `http://localhost:8069/auth_oauth/signin` for this local instance. For a
+   hosted installation, use `https://<your-odoo-domain>/auth_oauth/signin`
+   and ensure Odoo's base URL matches the public URL.
+5. In Odoo's **Settings → General Settings → Integrations → Google
+   Authentication** section, enter the Client ID and Client Secret and enable
+   Google authentication.
+
+Keep OAuth credentials in Odoo settings, never in source control. OAuth
+authentication has not been verified until configured credentials are tested.
+
 ## Upgrading
 
+Do not run an upgrade against a live database until its PostgreSQL backup and
+matching Odoo filestore backup have both been created and verified, the upgrade
+plan has been explained, and approval has been given. Never use the live
+`librarydb` for testing.
+
 ```bash
-python odoo-bin -c odoo.conf -d <database> -u library_manager
+python odoo-bin -c odoo.conf -d <approved_database> -u library_manager
 ```
 
 ## Running the tests
 
+Use a new, separate test database and a dedicated data directory (filestore).
+Do not substitute `librarydb` or reuse its filestore.
+
 ```bash
-python odoo-bin -c odoo.conf -d <database> -u library_manager --test-enable --test-tags /library_manager --stop-after-init
+python odoo-bin -c odoo.conf -d <test_database> --data-dir <test_data_directory> -i library_manager --test-enable --test-tags /library_manager --stop-after-init
 ```
 
 ## Project structure

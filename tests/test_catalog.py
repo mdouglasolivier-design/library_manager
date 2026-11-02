@@ -35,9 +35,11 @@ class TestLibraryCatalogWebsite(HttpCase):
         cls.portal_user = cls.env['res.users'].create({
             'name': 'Website Catalog Portal Member',
             'login': 'website-catalog-portal-member',
+            'email': 'catalog-member@example.test',
             'password': 'library-test-password',
             'groups_id': [(6, 0, [cls.env.ref('base.group_portal').id])],
         })
+        cls.portal_user.partner_id.phone = '+15550000000'
 
     def test_public_catalog_search_and_category_filter(self):
         response = self.url_open(
@@ -53,28 +55,72 @@ class TestLibraryCatalogWebsite(HttpCase):
         response = self.url_open('/library')
         hero_image = self.url_open(
             '/library_manager/static/src/img/library_hero.png')
-        slogan_image = self.url_open(
-            '/library_manager/static/src/img/library_hero_slogan.png')
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.public_ebook.name, response.text)
         self.assertIn(
             '/library_manager/static/src/img/library_hero.png',
             response.text)
+        self.assertIn('Odoo Library', response.text)
         self.assertIn(
-            '/library_manager/static/src/img/library_hero_slogan.png',
+            '/library_manager/static/description/icon.png', response.text)
+        self.assertIn(
+            'Your Integrated Digital Library Management Platform.',
             response.text)
-        self.assertIn('You are not dreaming!', response.text)
-        self.assertEqual(response.text.count('loading="eager"'), 2)
+        self.assertIn('douglasgroupltd@gmail.com', response.text)
+        self.assertIn('+250791393885', response.text)
+        self.assertIn('Rwanda, Kigali', response.text)
+        self.assertIn('Staff Login', response.text)
+        self.assertIn('How Odoo Library works', response.text)
+        self.assertEqual(response.text.count('loading="eager"'), 1)
         self.assertEqual(hero_image.status_code, 200)
         self.assertEqual(
             hero_image.headers.get('Content-Type'), 'image/png')
-        self.assertEqual(slogan_image.status_code, 200)
-        self.assertEqual(
-            slogan_image.headers.get('Content-Type'), 'image/png')
         self.assertIn('eBooks in the collection', response.text)
         self.assertNotIn('id="top"', response.text)
         self.assertNotIn('id="bottom"', response.text)
+
+    def test_public_home_links_to_member_authentication(self):
+        response = self.url_open('/library')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            'href="/web/login?redirect=/library"', response.text)
+        self.assertIn(
+            'href="/web/signup?redirect=/library"', response.text)
+        self.assertIn('href="/library/staff"', response.text)
+
+    def test_removed_about_page_is_not_routable(self):
+        response = self.url_open('/library/about')
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_login_hides_database_picker_and_signup_is_guided(self):
+        login = self.url_open('/web/login')
+        signup = self.url_open('/web/signup?token=invalid-test-token')
+
+        self.assertEqual(login.status_code, 200)
+        self.assertNotIn('>Database</label>', login.text)
+        self.assertNotIn('/web/database/selector', login.text)
+        self.assertIn(
+            '/library_manager/static/description/icon.png', login.text)
+        self.assertEqual(signup.status_code, 200)
+        self.assertIn('Library member account', signup.text)
+        self.assertIn('1. Your details', signup.text)
+        self.assertIn('2. Set a password', signup.text)
+        self.assertIn('3. Create account', signup.text)
+        self.assertIn('Create member account', signup.text)
+
+    def test_staff_login_redirects_portal_users_to_public_library(self):
+        self.authenticate(
+            'website-catalog-portal-member', 'library-test-password')
+
+        response = self.url_open('/library/staff')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            'Staff access is restricted to authorized librarians',
+            response.text)
 
     def test_unpublished_ebook_detail_is_not_public(self):
         response = self.url_open(
@@ -115,7 +161,17 @@ class TestLibraryCatalogWebsite(HttpCase):
                 '/my/library/requests',
                 '/my/library/reservations',
                 '/my/library/notifications',
-                '/my/library/account'):
+            '/my/library/account',
+            '/my/home'):
             with self.subTest(path=path):
                 response = self.url_open(path)
                 self.assertEqual(response.status_code, 200, path)
+                if path == '/my/library/account':
+                    self.assertIn(
+                        'catalog-member@example.test', response.text)
+                    self.assertIn('+15550000000', response.text)
+                if path == '/my/home':
+                    self.assertIn(
+                        'douglasgroupltd@gmail.com', response.text)
+                    self.assertIn('+250791393885', response.text)
+                    self.assertIn('Rwanda, Kigali', response.text)

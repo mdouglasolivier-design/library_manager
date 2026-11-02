@@ -4,8 +4,10 @@
         <header class="library-portal-header">
             <div class="container library-portal-header__inner">
                 <a class="library-portal-brand" href="/library">
-                    <span class="library-portal-brand__mark" aria-hidden="true">L</span>
-                    <span>Digital Library</span>
+                    <img class="library-portal-brand__logo"
+                         src="/library_manager/static/description/icon.png"
+                         alt="Odoo Library logo" width="40" height="40"/>
+                    <span><span class="library-brand__odoo">Odoo</span> Library</span>
                 </a>
                 <nav aria-label="Main navigation" class="library-portal-nav">
                     <a href="/library">Home</a>
@@ -21,9 +23,11 @@
                     <a t-if="is_public" class="btn library-button library-button--outline"
                        href="/web/login?redirect=/library">Sign in</a>
                     <a t-if="is_public" class="library-text-link"
-                       href="/web/signup">Create account</a>
+                       href="/web/signup?redirect=/library">Create account</a>
                     <a t-else="" class="btn library-button library-button--outline"
                        href="/my/library/account">My account</a>
+                    <a t-if="not is_public" class="library-text-link"
+                       href="/web/session/logout?redirect=/library">Sign out</a>
                 </div>
             </div>
         </header>
@@ -33,17 +37,25 @@
         <footer class="library-portal-footer">
             <div class="container library-portal-footer__inner">
                 <div>
-                    <strong>Digital Library</strong>
+                    <strong><span class="library-brand__odoo">Odoo</span> Library</strong>
                     <p>Discover knowledge. Explore the world of books.</p>
                 </div>
                 <nav aria-label="Footer navigation">
                     <a href="/library">Home</a>
                     <a href="/library/ebooks">Browse eBooks</a>
                     <a href="/web/login?redirect=/library">Member sign in</a>
+                    <a href="/web/signup?redirect=/library">Create account</a>
+                    <a class="btn library-button library-button--outline"
+                       href="/library/staff">Staff Login</a>
                 </nav>
             </div>
+            <div class="container library-portal-footer__contact">
+                <a href="mailto:douglasgroupltd@gmail.com">douglasgroupltd@gmail.com</a>
+                <a href="tel:+250791393885">+250791393885</a>
+                <span>Rwanda, Kigali</span>
+            </div>
             <div class="container library-portal-footer__copyright">
-                <span>Library collection and availability are managed by the library team.</span>
+                <span>Odoo Library. Collection and availability are managed by the library team.</span>
             </div>
         </footer>
     </template>
@@ -51,7 +63,7 @@
     <template id="portal_library_portal_home" inherit_id="portal.portal_my_home">
         <xpath expr="//div[@id='portal_common_category']" position="inside">
             <t t-call="portal.portal_docs_entry">
-                <t t-set="title">Digital Library</t>
+                <t t-set="title">Odoo Library</t>
                 <t t-set="text">View your eBook loans, requests, reservations, and reading activity.</t>
                 <t t-set="url" t-value="'/my/library'"/>
                 <t t-set="config_card" t-value="True"/>
@@ -72,6 +84,10 @@
                 <h3><a t-att-href="'/library/ebooks/%s' % ebook.id"
                        t-esc="ebook.name"/></h3>
                 <p class="library-book-card__author" t-esc="ebook.author or 'Author not listed'"/>
+                <p t-if="ebook.description" class="library-book-card__description">
+                    <t t-esc="ebook.description[:180]"/>
+                    <t t-if="len(ebook.description) &gt; 180">…</t>
+                </p>
                 <span t-if="not ebook.file_available"
                       class="library-status library-status--unavailable">Reading file unavailable</span>
                 <span t-elif="ebook.availability_status == 'available'"
@@ -81,14 +97,20 @@
         </article>
     </template>
 
-    <template id="portal_library_home" name="Digital Library">
+    <template id="portal_library_home" name="Odoo Library">
         <t t-set="no_header" t-value="True"/>
         <t t-set="no_footer" t-value="True"/>
         <t t-call="website.layout">
-            <t t-set="title">Digital Library</t>
+            <t t-set="title">Odoo Library</t>
             <div id="wrap" class="library-portal">
                 <t t-call="library_manager.portal_library_header"/>
                 <main>
+                    <div t-if="staff_access_denied"
+                         class="container mt-3" role="status">
+                        <div class="alert alert-warning mb-0">
+                            Staff access is restricted to authorized librarians and administrators.
+                        </div>
+                    </div>
                     <section class="library-hero">
                         <div class="container library-hero__inner">
                             <div class="library-hero__artwork">
@@ -99,10 +121,12 @@
                             <div class="library-hero__content">
                                 <span class="library-eyebrow">A library without borders</span>
                                 <h1 class="library-hero__headline">
-                                    <img src="/library_manager/static/src/img/library_hero_slogan.png"
-                                         alt="You are not dreaming!" loading="eager"/>
+                                    <span class="library-brand__odoo">Odoo</span> Library
                                 </h1>
-                                <p>Access a world of knowledge through our digital collection. Discover eBooks from anywhere.</p>
+                                <p class="lead">
+                                    Your Integrated Digital Library Management Platform.
+                                </p>
+                                <p>Explore published eBooks, discover new subjects, and manage your reading through your member account.</p>
                                 <form action="/library/ebooks" method="get" role="search"
                                       class="library-search library-search--hero">
                                     <label class="visually-hidden" for="library-home-query">Search by title, author, ISBN or publisher</label>
@@ -119,6 +143,33 @@
                         <div><strong t-esc="ebook_count"/><span>eBooks in the collection</span></div>
                         <div><strong t-esc="available_count"/><span>currently available</span></div>
                         <div><strong t-esc="category_count"/><span>browseable categories</span></div>
+                    </section>
+
+                    <section class="container library-section" id="how-it-works">
+                        <div class="library-section__heading">
+                            <div>
+                                <span class="library-eyebrow">Your member journey</span>
+                                <h2>How Odoo Library works</h2>
+                            </div>
+                        </div>
+                        <div class="row g-4">
+                            <div class="col-md-3">
+                                <h3 class="h5">Browse</h3>
+                                <p>Explore published eBooks and filter by title, author, category, or availability.</p>
+                            </div>
+                            <div class="col-md-3">
+                                <h3 class="h5">Join</h3>
+                                <p>Create a member account or sign in to manage your library activity.</p>
+                            </div>
+                            <div class="col-md-3">
+                                <h3 class="h5">Request</h3>
+                                <p>Submit a borrowing request or reservation where the title and lending policy allow it.</p>
+                            </div>
+                            <div class="col-md-3">
+                                <h3 class="h5">Read</h3>
+                                <p>Access protected reading materials when your account has an active, approved loan.</p>
+                            </div>
+                        </div>
                     </section>
 
                     <section id="categories" class="container library-section">

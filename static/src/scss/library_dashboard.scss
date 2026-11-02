@@ -35,9 +35,21 @@
         font-size: 19px;
         font-weight: 700;
 
+        img {
+            width: 34px;
+            height: 34px;
+            border-radius: 7px;
+            object-fit: contain;
+        }
+
         i {
             font-size: 22px;
         }
+    }
+
+    .o_library_brand_odoo {
+        color: #55c98a;
+        font-weight: 700;
     }
 
     .o_library_dashboard_nav_item {

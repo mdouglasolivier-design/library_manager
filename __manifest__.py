@@ -1,11 +1,13 @@
 {
-    'name': 'Library Manager',
-    'version': '18.0.1.3.0',
-    'summary': 'Books, lending, loan history and printable reports',
+    'name': 'Odoo Library',
+    'version': '18.0.1.4.0',
+    'summary': 'Your Integrated Digital Library Management Platform.',
     'category': 'Services',
     'author': 'Douglas',
     'website': 'https://github.com/mdouglasolivier-design/library_manager',
-    'depends': ['base', 'mail', 'website', 'portal', 'auth_signup'],
+    'depends': [
+        'base', 'mail', 'website', 'portal', 'auth_signup', 'auth_oauth',
+    ],
     'assets': {
         'web.assets_backend': [
             'library_manager/static/src/js/dashboard.js',
@@ -39,6 +41,8 @@
         'views/library_dashboard_views.xml',
         'views/library_ebook_audit_views.xml',
         'views/portal_templates.xml',
+        'views/branding_templates.xml',
+        'views/auth_oauth_templates.xml',
         'views/res_config_settings_views.xml',
         'wizards/library_overdue_report_wizard_views.xml',
         'views/library_menus.xml',

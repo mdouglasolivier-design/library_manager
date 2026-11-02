@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="library_website_header_brand"
+              inherit_id="website.option_header_brand_logo"
+              name="Odoo Library website logo" priority="99">
+        <xpath expr="//a[@data-name='Navbar Logo']" position="attributes">
+            <attribute name="href">/library</attribute>
+        </xpath>
+        <xpath expr="//span[@t-field='website.logo']" position="replace">
+            <img class="library-website-logo"
+                 src="/library_manager/static/description/icon.png"
+                 alt="Odoo Library logo" width="44" height="44"/>
+            <span class="library-website-brand">
+                <span class="library-brand__odoo">Odoo</span> Library
+            </span>
+        </xpath>
+    </template>
+
+    <template id="library_website_footer"
+              inherit_id="website.footer_custom"
+              name="Odoo Library website footer" priority="99">
+        <xpath expr="//div[@id='footer']" position="replace">
+            <div id="footer" class="oe_structure oe_structure_solo library-site-footer"
+                 t-ignore="true" t-if="not no_footer">
+                <section class="container">
+                    <a class="library-site-footer__brand" href="/library">
+                        <img src="/library_manager/static/description/icon.png"
+                             alt="Odoo Library logo" width="48" height="48"/>
+                        <span><span class="library-brand__odoo">Odoo</span> Library</span>
+                    </a>
+                    <h2 class="h5">Your Integrated Digital Library Management Platform.</h2>
+                    <ul class="library-site-footer__details">
+                        <li>
+                            <a href="mailto:douglasgroupltd@gmail.com">
+                                douglasgroupltd@gmail.com
+                            </a>
+                        </li>
+                        <li>
+                            <a href="tel:+250791393885">+250791393885</a>
+                        </li>
+                        <li>Rwanda, Kigali</li>
+                        <li><a href="/library">Library catalogue</a></li>
+                        <li><a href="/my/library">Member account</a></li>
+                    </ul>
+                    <div class="library-site-footer__copyright">
+                        Odoo Library. Collection and availability are managed by the library team.
+                    </div>
+                </section>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="library_login_without_database_picker"
+              inherit_id="web.login"
+              name="Hide database selector on login">
+        <xpath expr="//div[contains(@t-if, 'databases and len(databases)')]"
+               position="replace">
+            <input type="hidden" name="db" t-att-value="request.db"/>
+        </xpath>
+    </template>
+
+    <template id="library_signup_guidance"
+              inherit_id="auth_signup.signup"
+              name="Odoo Library member registration">
+        <xpath expr="//form[hasclass('oe_signup_form')]/input[@name='csrf_token']"
+               position="after">
+            <div class="library-signup-intro">
+                <h1><span class="library-brand__odoo">Odoo</span> Library member account</h1>
+                <p>Create your borrower account in a few simple steps.</p>
+                <ol class="library-signup-steps">
+                    <li>1. Your details</li>
+                    <li>2. Set a password</li>
+                    <li>3. Create account</li>
+                </ol>
+            </div>
+        </xpath>
+        <xpath expr="//form[hasclass('oe_signup_form')]//button[@type='submit']"
+               position="replace">
+            <button type="submit" class="btn btn-primary">
+                Create member account
+            </button>
+        </xpath>
+    </template>
+</odoo>

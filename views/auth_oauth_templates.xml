@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="google_oauth_button_label"
+              inherit_id="auth_oauth.providers"
+              name="Continue with Google button label">
+        <xpath expr="//t[@t-esc=&quot;p['body']&quot;]" position="replace">
+            <t t-if="p['body'] == 'Log in with Google'">
+                Continue with Google
+            </t>
+            <t t-else="" t-esc="p['body']"/>
+        </xpath>
+    </template>
+</odoo>

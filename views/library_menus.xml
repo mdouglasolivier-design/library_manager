@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <menuitem id="menu_library_root" name="Library"
+    <menuitem id="menu_library_root" name="Odoo Library"
               web_icon="library_manager,static/description/icon.png"
               sequence="50"/>
 

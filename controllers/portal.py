@@ -48,7 +48,20 @@ class LibraryCatalogController(http.Controller):
             ]),
             'ebook_count': Ebook.search_count(domain),
             'is_public': request.env.user._is_public(),
+            'staff_access_denied': (
+                params.get('staff_access') == 'denied'),
         })
+
+    @http.route(
+        '/library/staff', type='http', auth='user', website=True,
+        sitemap=False)
+    def library_staff_login(self, **params):
+        user = request.env.user
+        if not (
+                user.has_group('library_manager.group_library_librarian')
+                or user.has_group('base.group_system')):
+            return request.redirect('/library?staff_access=denied')
+        return request.redirect('/odoo')
 
     @http.route(
         '/library/ebooks', type='http', auth='public', website=True,

@@ -57,9 +57,38 @@
     h2,
     h3 {
         color: var(--library-ink);
-        font-weight: 650;
+        font-weight: 600;
         letter-spacing: -0.025em;
     }
+}
+
+#wrapwrap {
+    h1 {
+        font-size: clamp(1.7rem, 3vw, 2.35rem);
+        font-weight: 600;
+    }
+
+    h2 {
+        font-size: clamp(1.35rem, 2.2vw, 1.8rem);
+        font-weight: 600;
+    }
+
+    h3,
+    h4,
+    h5 {
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    strong,
+    b {
+        font-weight: 600;
+    }
+}
+
+.library-brand__odoo {
+    color: #178b59;
+    font-weight: 700;
 }
 
 .library-portal-header {
@@ -101,21 +130,31 @@
 .library-portal-brand {
     gap: 10px;
     color: var(--library-ink) !important;
-    font-size: 17px;
-    font-weight: 700;
+    font-size: 16px;
+    font-weight: 500;
     white-space: nowrap;
 }
 
-.library-portal-brand__mark {
-    display: inline-grid;
-    width: 34px;
-    height: 34px;
-    place-items: center;
-    border-radius: 4px;
-    background: var(--library-navy);
-    color: #fff;
-    font-family: Georgia, serif;
-    font-size: 21px;
+.library-portal-brand__logo {
+    flex: 0 0 40px;
+    border-radius: 8px;
+    object-fit: contain;
+}
+
+.library-website-logo {
+    width: 44px;
+    height: 44px;
+    margin-inline-end: 8px;
+    border-radius: 8px;
+    object-fit: contain;
+    vertical-align: middle;
+}
+
+.library-website-brand {
+    color: #202124;
+    font-size: 16px;
+    font-weight: 500;
+    vertical-align: middle;
 }
 
 .library-portal-nav {
@@ -799,9 +838,183 @@
     color: #4b5563;
 }
 
+.library-portal-footer__contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 24px;
+    padding-bottom: 14px;
+    color: var(--library-muted);
+    font-size: 13px;
+}
+
+.library-site-footer {
+    padding: 28px 0 18px;
+    background: #111827;
+    color: #f9fafb;
+
+    h2,
+    h3,
+    strong {
+        color: #fff;
+    }
+
+    a {
+        color: #e5e7eb;
+    }
+
+    .library-brand__odoo {
+        color: #55c98a;
+    }
+}
+
+.library-site-footer__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    font-size: 18px;
+    font-weight: 500;
+
+    img {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+    }
+}
+
+.library-site-footer__details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 14px;
+}
+
+.library-site-footer__copyright {
+    margin-top: 20px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    color: #d1d5db;
+    font-size: 12px;
+}
+
+.library-portal-footer__contact a,
+.library-portal-footer__contact span {
+    color: inherit;
+}
+
+.library-portal-footer__inner > div > strong {
+    font-weight: 500;
+}
+
+.oe_website_login_container {
+    .oe_login_form,
+    .oe_signup_form,
+    .oe_reset_password_form {
+        width: calc(100% - 32px);
+        max-width: 430px;
+        padding: 24px;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        background: #fff;
+        box-shadow: 0 12px 32px rgba(17, 24, 39, 0.08);
+        font-size: 14px;
+    }
+
+    h1,
+    h2,
+    h3 {
+        font-size: 1.35rem;
+        font-weight: 600;
+    }
+
+    label {
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .oe_login_buttons .btn,
+    .oe_signup_form .btn {
+        font-size: 14px;
+    }
+}
+
+.library-signup-intro {
+    margin-bottom: 20px;
+
+    h1 {
+        margin-bottom: 6px;
+        color: #1f2937;
+        font-size: 1.45rem;
+    }
+
+    p {
+        margin-bottom: 14px;
+        color: #6b7280;
+        font-size: 13px;
+    }
+}
+
+.library-signup-steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: #4b5563;
+    font-size: 11px;
+
+    li {
+        padding: 5px 8px;
+        border-radius: 999px;
+        background: #f3f4f6;
+    }
+}
+
+.oe_website_login_container form.oe_signup_form {
+    display: flex;
+    flex-direction: column;
+
+    .field-name {
+        order: 1;
+    }
+
+    .field-login {
+        order: 2;
+    }
+
+    .field-password {
+        order: 3;
+    }
+
+    .field-confirm_password {
+        order: 4;
+    }
+
+    .oe_login_buttons {
+        order: 5;
+    }
+
+    .library-signup-intro {
+        order: 0;
+    }
+}
+
 @media (max-width: 991.98px) {
     .library-book-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .library-portal-nav {
+        order: 3;
+        width: 100%;
+        flex: 0 0 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 8px 16px;
     }
 
     .library-filter-form {
@@ -829,12 +1042,6 @@
         padding-top: 10px;
         padding-bottom: 10px;
     }
-
-    .library-portal-nav {
-        order: 3;
-        width: 100%;
-        flex: 0 0 100%;
-    }
 }
 
 @media (max-width: 767.98px) {
@@ -847,18 +1054,14 @@
     }
 
     .library-portal-nav {
-        order: 3;
-        width: 100%;
-        justify-content: space-between;
-        flex-wrap: nowrap;
-        gap: 8px;
+        gap: 8px 14px;
 
         a {
             font-size: 12px;
         }
     }
 
-    .library-portal-header > .container > .library-button {
+    .library-portal-header__actions {
         margin-left: auto;
     }
 
@@ -946,13 +1149,34 @@
     }
 
     .library-member-book {
-        grid-template-columns: 62px minmax(0, 1fr);
+        grid-template-columns: 54px minmax(0, 1fr);
 
         > .library-status,
-        > form {
+        > form,
+        > .library-button {
             grid-column: 2;
             justify-self: start;
         }
+
+        > img {
+            width: 54px;
+            height: 78px;
+        }
+    }
+
+    .library-book-facts > div {
+        grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr);
+        gap: 12px;
+    }
+
+    .library-account-facts > div {
+        grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr);
+        gap: 12px;
+    }
+
+    .library-book-facts dd,
+    .library-account-facts dd {
+        overflow-wrap: anywhere;
     }
 }
 
