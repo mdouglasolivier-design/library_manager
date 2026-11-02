@@ -31,33 +31,8 @@
                                    string="Loans"/>
                         </button>
                     </div>
-                    <div class="oe_title">
-                        <label for="name"/>
-                        <h1><field name="name" placeholder="Ebook title"/></h1>
-                    </div>
-                    <group>
-                        <group>
-                            <field name="author"/>
-                            <field name="publisher"/>
-                            <field name="isbn"/>
-                            <field name="publication_date"/>
-                            <field name="category_id"/>
-                            <field name="language"/>
-                            <field name="file_format"/>
-                        </group>
-                        <group>
-                            <field name="active"/>
-                            <field name="website_published"/>
-                            <field name="file_available" readonly="1"/>
-                        </group>
-                    </group>
-                    <field name="cover_image" widget="image"
-                           class="oe_avatar" options="{'size': [0, 360]}"/>
                     <notebook>
-                        <page string="Description">
-                            <field name="description"/>
-                        </page>
-                        <page string="Protected File">
+                        <page string="Upload eBook and Preview Cover">
                             <field name="asset_ids">
                                 <list>
                                     <field name="filename"/>
@@ -71,11 +46,46 @@
                                             <field name="file_format"/>
                                             <field name="file_data"
                                                    filename="filename"/>
+                                            <field name="cover_preview"
+                                                   widget="image" readonly="1"
+                                                   options="{'size': [0, 240]}"/>
                                             <field name="file_size" readonly="1"/>
                                         </group>
                                     </sheet>
                                 </form>
                             </field>
+                            <div class="text-muted">
+                                Upload a valid PDF or EPUB to preview its
+                                extracted cover. You can replace the cover
+                                manually under Book Details.
+                            </div>
+                        </page>
+                        <page string="Book Details">
+                            <div class="oe_title">
+                                <label for="name"/>
+                                <h1><field name="name"
+                                           placeholder="eBook title"/></h1>
+                            </div>
+                            <group>
+                                <group>
+                                    <field name="author"/>
+                                    <field name="publisher"/>
+                                    <field name="isbn"/>
+                                    <field name="publication_date"/>
+                                    <field name="category_id"/>
+                                    <field name="language"/>
+                                    <field name="file_format"/>
+                                </group>
+                                <group>
+                                    <field name="active"/>
+                                    <field name="website_published"/>
+                                    <field name="file_available" readonly="1"/>
+                                </group>
+                            </group>
+                            <field name="cover_image" widget="image"
+                                   class="oe_avatar"
+                                   options="{'size': [0, 360]}"/>
+                            <field name="description"/>
                         </page>
                         <page string="Loan History">
                             <field name="loan_ids" readonly="1">

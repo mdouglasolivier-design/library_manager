@@ -5,6 +5,8 @@ from psycopg2 import IntegrityError
 
 from odoo import api, fields, models
 from odoo.exceptions import AccessError, ValidationError
+from .library_ebook_cover import (
+    extract_ebook_cover, log_cover_extraction_failure)
 from .library_file_validator import decode_ebook_file
 
 
@@ -23,6 +25,9 @@ class LibraryEbookAsset(models.Model):
     file_data = fields.Binary(
         string='File', required=True, attachment=False, copy=False)
     file_size = fields.Integer(compute='_compute_file_size', store=True)
+    cover_preview = fields.Image(
+        string='Extracted Cover Preview',
+        compute='_compute_cover_preview')
 
     _sql_constraints = [
         ('ebook_unique', 'unique(ebook_id)',
@@ -36,6 +41,36 @@ class LibraryEbookAsset(models.Model):
                 asset.file_size = len(base64.b64decode(asset.file_data or ''))
             except (binascii.Error, ValueError):
                 asset.file_size = 0
+
+    @api.depends('filename', 'file_format', 'file_data')
+    def _compute_cover_preview(self):
+        for asset in self:
+            asset.cover_preview = False
+            if not asset.file_data:
+                continue
+            try:
+                contents = decode_ebook_file(
+                    asset.filename, asset.file_format, asset.file_data)
+                cover = extract_ebook_cover(asset.file_format, contents)
+                asset.cover_preview = base64.b64encode(cover)
+            except ValidationError:
+                continue
+            except Exception as error:
+                log_cover_extraction_failure(asset.filename, error)
+
+    def _apply_extracted_cover(self):
+        for asset in self:
+            ebook = asset.ebook_id
+            if not ebook or ebook.cover_image:
+                continue
+            try:
+                contents = decode_ebook_file(
+                    asset.filename, asset.file_format, asset.file_data)
+                cover = extract_ebook_cover(asset.file_format, contents)
+            except Exception as error:
+                log_cover_extraction_failure(asset.filename, error)
+                continue
+            ebook.cover_image = base64.b64encode(cover)
 
     @api.constrains('filename', 'file_format', 'file_data')
     def _check_file(self):
@@ -84,6 +119,7 @@ class LibraryEbookAsset(models.Model):
                 ebook=asset.ebook_id,
                 asset=asset,
                 detail=asset.filename)
+        assets._apply_extracted_cover()
         return assets
 
     def write(self, vals):
@@ -95,6 +131,7 @@ class LibraryEbookAsset(models.Model):
                     ebook=asset.ebook_id,
                     asset=asset,
                     detail=asset.filename)
+            self._apply_extracted_cover()
         return result
 
     def unlink(self):

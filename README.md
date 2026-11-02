@@ -16,6 +16,7 @@ Your Integrated Digital Library Management Platform.
 - **Public registration and sign-in**: members use Odoo's standard email/password account flow and portal
 - **Google sign-in**: Odoo's OAuth flow is available when Google credentials are configured
 - **Protected eBook reader**: PDF browser reading and entitled EPUB downloads; librarian-uploaded files stay private and require an active loan on every request
+- **Automatic eBook cover previews**: extract EPUB designated covers and PDF first-page images (or render the first page); librarians can replace covers manually
 - **Email notifications**: request and reservation updates are queued for members with an email address
 - **Overdue reminders**: overdue eBook loans generate one queued reminder per day until returned
 - **Lending policy**: configure approval, loan duration, and optional per-member/title capacity limits
@@ -28,17 +29,25 @@ Your Integrated Digital Library Management Platform.
 
 The website provides public eBook discovery, details, member requests, reservations, loan history, notifications, account contact updates, and protected reading. The reader embeds PDFs; EPUB files are downloaded for reading in a compatible app.
 
+When adding an eBook, upload its protected PDF or EPUB in the first tab to
+preview the extracted cover, then enter the book details. The cover is saved
+with the eBook while the original protected file remains unchanged. A cover
+can also be uploaded manually in **Book Details**.
+
 ## Requirements
 
 - Odoo 18.0 (Community or Enterprise)
 - Odoo modules: `base`, `mail`, `website`, `portal`, `auth_signup`, `auth_oauth`
+- Python packages listed in `requirements.txt` (PyMuPDF and Pillow) for PDF/EPUB cover previews
 
 ## Installation
 
 1. Copy the `library_manager` folder into your custom addons folder.
 2. Add that folder to `addons_path` in `odoo.conf`.
-3. Restart Odoo and enable developer mode.
-4. Go to **Apps**, click **Update Apps List**, search for **Odoo Library** and click **Install**.
+3. Install the module's Python dependencies in the Odoo Python environment:
+   `python -m pip install -r requirements.txt`.
+4. Restart Odoo and enable developer mode.
+5. Go to **Apps**, click **Update Apps List**, search for **Odoo Library** and click **Install**.
 
 Command-line install:
 

@@ -24,6 +24,8 @@
                         <field name="filename"/>
                         <field name="file_format"/>
                         <field name="file_data" filename="filename"/>
+                        <field name="cover_preview" widget="image"
+                               readonly="1" options="{'size': [0, 240]}"/>
                         <field name="file_size" readonly="1"/>
                     </group>
                 </sheet>

@@ -1,6 +1,6 @@
 {
     'name': 'Odoo Library',
-    'version': '18.0.1.4.0',
+    'version': '18.0.1.5.0',
     'summary': 'Your Integrated Digital Library Management Platform.',
     'category': 'Services',
     'author': 'Douglas',
@@ -8,6 +8,9 @@
     'depends': [
         'base', 'mail', 'website', 'portal', 'auth_signup', 'auth_oauth',
     ],
+    'external_dependencies': {
+        'python': ['pymupdf', 'PIL'],
+    },
     'assets': {
         'web.assets_backend': [
             'library_manager/static/src/js/dashboard.js',

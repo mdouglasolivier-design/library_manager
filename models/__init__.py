@@ -5,6 +5,7 @@ from . import library_publisher
 from . import library_ebook_category
 from . import library_ebook
 from . import library_ebook_asset
+from . import library_ebook_cover
 from . import library_file_validator
 from . import library_lending_policy
 from . import library_borrower_category
