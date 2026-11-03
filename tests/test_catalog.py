@@ -106,6 +106,12 @@ class TestLibraryCatalogWebsite(HttpCase):
         self.assertNotIn('/web/database/selector', login.text)
         self.assertIn(
             '/library_manager/static/description/icon.png', login.text)
+        self.assertRegex(
+            login.text,
+            r'<a\b[^>]*href="/library"[^>]*>\s*Module Info\s*</a>')
+        self.assertIn(
+            'Explore the public Odoo Library website and catalogue.',
+            login.text)
         self.assertEqual(signup.status_code, 200)
         self.assertIn('Library member account', signup.text)
         self.assertIn('1. Your details', signup.text)

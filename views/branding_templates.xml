@@ -59,6 +59,22 @@
         </xpath>
     </template>
 
+    <template id="library_login_module_info"
+              inherit_id="website.login_layout"
+              name="Odoo Library public website link">
+        <xpath expr="//div[hasclass('oe_website_login_container')]"
+               position="after">
+            <div class="text-center mt-3">
+                <a class="btn btn-outline-primary w-100" href="/library">
+                    Module Info
+                </a>
+                <p class="small text-muted mt-2 mb-0">
+                    Explore the public Odoo Library website and catalogue.
+                </p>
+            </div>
+        </xpath>
+    </template>
+
     <template id="library_signup_guidance"
               inherit_id="auth_signup.signup"
               name="Odoo Library member registration">
