@@ -76,8 +76,11 @@ class LibraryCatalogController(http.Controller):
     def library_staff_login(self, **params):
         user = request.env.user
         if not (
-                user.has_group('library_manager.group_library_librarian')
-                or user.has_group('base.group_system')):
+                user._is_internal()
+                and (
+                    user.has_group(
+                        'library_manager.group_library_librarian')
+                    or user.has_group('base.group_system'))):
             return request.redirect('/library?staff_access=denied')
         return request.redirect('/odoo')
 

@@ -169,6 +169,18 @@
         font-size: 13px;
         white-space: nowrap;
     }
+
+    .library-portal-nav__register {
+        padding: 7px 10px;
+        border: 1px solid #178b59;
+        border-radius: 4px;
+        color: #14764d;
+        font-weight: 600;
+
+        &:hover {
+            background: #edf8f2;
+        }
+    }
 }
 
 .library-button {

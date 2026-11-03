@@ -14,6 +14,11 @@
                     <a href="/library/ebooks">Browse eBooks</a>
                     <a href="/library/books">Physical Books</a>
                     <a href="/library#categories">Categories</a>
+                    <a t-if="is_public"
+                       class="library-portal-nav__register"
+                       href="/web/signup?redirect=/my/library">
+                        Create Account / Register
+                    </a>
                     <a t-if="not is_public" href="/my/library">My Library</a>
                     <a t-if="not is_public" href="/my/library/requests">Requests</a>
                     <a t-if="not is_public" href="/my/library/reservations">Reservations</a>
@@ -23,8 +28,6 @@
                 <div class="library-portal-header__actions">
                     <a t-if="is_public" class="btn library-button library-button--outline"
                        href="/web/login?redirect=/my/library">Login</a>
-                    <a t-if="is_public" class="library-text-link"
-                       href="/web/signup?redirect=/my/library">Create Account / Register</a>
                     <a t-else="" class="btn library-button library-button--outline"
                        href="/my/library/account">My account</a>
                     <a t-if="not is_public" class="library-text-link"

@@ -40,6 +40,27 @@ class TestLibraryCatalogWebsite(HttpCase):
             'groups_id': [(6, 0, [cls.env.ref('base.group_portal').id])],
         })
         cls.portal_user.partner_id.phone = '+15550000000'
+        cls.internal_user = cls.env['res.users'].create({
+            'name': 'Website Catalog Internal User',
+            'login': 'website-catalog-internal',
+            'password': 'library-test-password',
+            'groups_id': [(6, 0, [cls.env.ref('base.group_user').id])],
+        })
+        cls.librarian = cls.env['res.users'].create({
+            'name': 'Website Catalog Librarian',
+            'login': 'website-catalog-librarian',
+            'password': 'library-test-password',
+            'groups_id': [(6, 0, [
+                cls.env.ref('base.group_user').id,
+                cls.env.ref('library_manager.group_library_librarian').id,
+            ])],
+        })
+        cls.administrator = cls.env['res.users'].create({
+            'name': 'Website Catalog Administrator',
+            'login': 'website-catalog-administrator',
+            'password': 'library-test-password',
+            'groups_id': [(6, 0, [cls.env.ref('base.group_system').id])],
+        })
 
     def test_public_catalog_search_and_category_filter(self):
         response = self.url_open(
@@ -86,10 +107,16 @@ class TestLibraryCatalogWebsite(HttpCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(
             'href="/web/login?redirect=/my/library"', response.text)
-        self.assertIn(
-            'href="/web/signup?redirect=/my/library"', response.text)
-        self.assertIn(
-            'href="/web/signup?redirect=/my/library"', response.text)
+        self.assertRegex(
+            response.text,
+            r'(?s)<nav aria-label="Main navigation" '
+            r'class="library-portal-nav">.*?'
+            r'<a class="library-portal-nav__register" '
+            r'href="/web/signup\?redirect=/my/library">'
+            r'\s*Create Account / Register\s*</a>.*?</nav>')
+        self.assertEqual(
+            response.text.count(
+                'href="/web/signup?redirect=/my/library"'), 2)
         self.assertIn('href="/library/staff"', response.text)
 
     def test_removed_about_page_is_not_routable(self):
@@ -146,6 +173,35 @@ class TestLibraryCatalogWebsite(HttpCase):
         self.assertIn(
             'Staff access is restricted to authorized librarians',
             response.text)
+
+    def test_staff_login_requires_authentication(self):
+        response = self.url_open(
+            '/library/staff', allow_redirects=False)
+
+        self.assertIn(response.status_code, (301, 302, 303))
+        self.assertIn('/web/login?redirect=', response.headers['Location'])
+
+    def test_staff_login_rejects_non_staff_internal_users(self):
+        self.authenticate(
+            'website-catalog-internal', 'library-test-password')
+
+        response = self.url_open('/library/staff')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            'Staff access is restricted to authorized librarians',
+            response.text)
+
+    def test_staff_login_allows_only_internal_librarians_and_administrators(self):
+        for user in (self.librarian, self.administrator):
+            with self.subTest(login=user.login):
+                self.authenticate(user.login, 'library-test-password')
+                response = self.url_open(
+                    '/library/staff', allow_redirects=False)
+
+                self.assertIn(response.status_code, (301, 302, 303))
+                self.assertTrue(
+                    response.headers['Location'].endswith('/odoo'))
 
     def test_unpublished_ebook_detail_is_not_public(self):
         response = self.url_open(

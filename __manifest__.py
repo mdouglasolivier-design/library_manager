@@ -1,6 +1,6 @@
 {
     'name': 'Odoo Library',
-    'version': '18.0.1.7.0',
+    'version': '18.0.1.8.0',
     'summary': 'Your Integrated Digital Library Management Platform.',
     'category': 'Services',
     'author': 'Douglas',
