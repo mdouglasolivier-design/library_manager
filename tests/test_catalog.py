@@ -119,6 +119,23 @@ class TestLibraryCatalogWebsite(HttpCase):
         self.assertIn('3. Create account', signup.text)
         self.assertIn('Create member account', signup.text)
 
+    def test_apps_module_info_links_to_library_only_for_this_module(self):
+        arch = self.env.ref(
+            'base.module_view_kanban'
+        )._get_combined_arch()
+        module_info_links = arch.xpath(
+            "//t[@t-name='menu']/a[normalize-space(.)='Module Info']")
+
+        self.assertEqual(len(module_info_links), 2)
+        library_link, default_link = module_info_links
+        self.assertEqual(
+            library_link.get('t-if'),
+            "record.name.raw_value == 'library_manager'")
+        self.assertEqual(library_link.get('href'), '/library')
+        self.assertEqual(default_link.get('t-else'), '')
+        self.assertEqual(default_link.get('type'), 'object')
+        self.assertEqual(default_link.get('name'), 'more_info')
+
     def test_staff_login_redirects_portal_users_to_public_library(self):
         self.authenticate(
             'website-catalog-portal-member', 'library-test-password')

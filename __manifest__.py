@@ -1,6 +1,6 @@
 {
     'name': 'Odoo Library',
-    'version': '18.0.1.6.0',
+    'version': '18.0.1.7.0',
     'summary': 'Your Integrated Digital Library Management Platform.',
     'category': 'Services',
     'author': 'Douglas',
@@ -50,6 +50,7 @@
         'views/physical_portal_templates.xml',
         'views/auth_signup_templates.xml',
         'views/branding_templates.xml',
+        'views/module_info_navigation.xml',
         'views/auth_oauth_templates.xml',
         'views/res_config_settings_views.xml',
         'wizards/library_overdue_report_wizard_views.xml',
