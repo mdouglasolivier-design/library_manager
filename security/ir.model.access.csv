@@ -44,3 +44,4 @@ access_library_ebook_audit_librarian,library.ebook.audit.librarian,model_library
 access_library_ebook_audit_admin,library.ebook.audit.admin,model_library_ebook_audit,base.group_system,1,0,0,0
 access_library_dashboard_librarian,library.dashboard.librarian,model_library_dashboard,library_manager.group_library_librarian,1,1,1,0
 access_library_dashboard_admin,library.dashboard.admin,model_library_dashboard,base.group_system,1,1,1,0
+access_payment_transaction_library_librarian,payment.transaction.library.librarian,payment.model_payment_transaction,library_manager.group_library_librarian,1,0,0,0

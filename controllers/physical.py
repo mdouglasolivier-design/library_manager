@@ -47,6 +47,9 @@ class PhysicalLibraryController(http.Controller):
                 'books': books,
                 'query': query,
                 'is_public': request.env.user._is_public(),
+                'physical_price': request.env[
+                    'library.payment.mixin'
+                ]._library_service_price('physical'),
             })
 
     @http.route(
@@ -67,6 +70,9 @@ class PhysicalLibraryController(http.Controller):
                 'partner': request.env.user.partner_id,
                 'today': fields.Date.today(),
                 'expected_return': fields.Date.today() + timedelta(days=14),
+                'physical_price': request.env[
+                    'library.payment.mixin'
+                ]._library_service_price('physical'),
                 'notice': request.session.pop(
                     'library_portal_notice', False),
                 **self._payment_instructions(),
@@ -111,8 +117,7 @@ class PhysicalLibraryController(http.Controller):
                 borrow_date=post.get('borrow_date'),
                 due_date=post.get('due_date'),
                 borrower_phone=post.get('borrower_phone'),
-                payment_method=post.get('payment_method', 'momo'),
-                momo_phone=post.get('momo_phone'),
+                payment_method='bank',
                 payment_reference=post.get('payment_reference'))
         except (AccessError, UserError, ValidationError, ValueError) as error:
             request.session['library_portal_notice'] = {
@@ -123,7 +128,8 @@ class PhysicalLibraryController(http.Controller):
                 'Your request was submitted. Payment must be verified by a librarian before approval.'),
             'level': 'info',
         }
-        return request.redirect('/my/library/requests')
+        return request.redirect(
+            '/my/library/payment/BREQ/%s' % result.id)
 
     @http.route(
         '/my/library/book-requests/<int:request_id>/cancel',

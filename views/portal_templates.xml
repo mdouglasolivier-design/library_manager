@@ -21,6 +21,7 @@
                     </a>
                     <a t-if="not is_public" href="/my/library">My Library</a>
                     <a t-if="not is_public" href="/my/library/requests">Requests</a>
+                    <a t-if="not is_public" href="/my/library/payments">Payments</a>
                     <a t-if="not is_public" href="/my/library/reservations">Reservations</a>
                     <a t-if="not is_public" href="/my/library/history">History</a>
                     <a t-if="not is_public" href="/my/library/notifications">Notifications</a>
@@ -344,14 +345,15 @@
                                 <div t-if="ebook.file_format"><dt>Format</dt><dd class="text-uppercase" t-esc="ebook.file_format"/></div>
                             </dl>
                             <p class="library-price">
-                                Borrowing price: <strong>$5.00 USD</strong>
+                                Borrowing price:
+                                <strong t-esc="'%s %s' % (ebook_price, request.env['ir.config_parameter'].sudo().get_param('library_manager.payment_currency', 'USD'))"/>
                             </p>
                             <div class="library-payment-instructions">
-                                <h2>Payment instructions</h2>
-                                <p>MTN MoMo: <t t-esc="momo_name"/> · <t t-esc="momo_phone"/>. Enter your own MoMo phone when requesting.</p>
+                                <h2>Secure checkout</h2>
+                                <p>Card and bank transfer options are shown only when an Odoo payment provider is configured.</p>
                                 <p>Bank transfer: <t t-esc="bank_name or 'Bank name to be configured'"/> · Account <t t-esc="bank_account"/> · <t t-esc="bank_holder or 'Account holder to be configured'"/>.</p>
-                                <p>Card payment: <t t-esc="card_instructions"/> No card details are collected here.</p>
-                                <p>Payments are not processed automatically. A librarian must verify payment before approval or eBook access.</p>
+                                <p>MTN MoMo is unavailable until an approved provider integration is configured. Bank transfers remain pending until library staff verify payment.</p>
+                                <p>Never enter card numbers, security codes, or MoMo PINs on this website.</p>
                             </div>
                             <div t-if="notice" t-att-class="'alert alert-%s' % notice['level']"
                                  role="status" t-esc="notice['message']"/>
@@ -384,33 +386,15 @@
                                   t-att-action="'/my/library/ebooks/%s/request' % ebook.id"
                                   method="post">
                                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                <label for="ebook-reserve-payment-method">Payment method</label>
-                                <select id="ebook-reserve-payment-method" name="payment_method" required="required">
-                                    <option value="momo">MTN Mobile Money</option>
-                                    <option value="bank">Bank transfer</option>
-                                    <option value="external_card">External card provider</option>
-                                </select>
-                                <label for="ebook-reserve-momo-phone">Your MTN MoMo phone (if selected)</label>
-                                <input id="ebook-reserve-momo-phone" name="momo_phone" type="tel"/>
-                                <label for="ebook-reserve-reference">Payment reference (optional)</label>
-                                <input id="ebook-reserve-reference" name="payment_reference" maxlength="128"/>
-                                <button class="library-button" type="submit">Reserve this eBook</button>
+                                <p>Choose an available payment provider at the next step. No payment is treated as successful until verified.</p>
+                                <button class="library-button" type="submit">Continue to secure checkout</button>
                             </form>
                             <form t-else=""
                                   t-att-action="'/my/library/ebooks/%s/request' % ebook.id"
                                   method="post">
                                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                <label for="ebook-payment-method">Payment method</label>
-                                <select id="ebook-payment-method" name="payment_method" required="required">
-                                    <option value="momo">MTN Mobile Money</option>
-                                    <option value="bank">Bank transfer</option>
-                                    <option value="external_card">External card provider</option>
-                                </select>
-                                <label for="ebook-momo-phone">Your MTN MoMo phone (if selected)</label>
-                                <input id="ebook-momo-phone" name="momo_phone" type="tel"/>
-                                <label for="ebook-payment-reference">Payment reference (optional)</label>
-                                <input id="ebook-payment-reference" name="payment_reference" maxlength="128"/>
-                                <button class="library-button" type="submit">Request eBook access</button>
+                                <p>Choose an available payment provider at the next step. Payment must be verified before an eBook loan is approved.</p>
+                                <button class="library-button" type="submit">Continue to secure checkout</button>
                             </form>
                             <aside class="library-detail__notice mt-3">
                                 Loan requests follow the library's borrowing policy. An active loan is required before reading.

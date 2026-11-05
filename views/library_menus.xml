@@ -53,6 +53,28 @@
               parent="menu_library_root"
               action="action_library_ebook_reservation" sequence="60"/>
 
+    <menuitem id="menu_library_payment_review" name="Payment Review"
+              parent="menu_library_root" sequence="65"
+              groups="library_manager.group_library_librarian,base.group_system"/>
+
+    <menuitem id="menu_library_payment_ebook_requests"
+              name="eBook Payment Requests"
+              parent="menu_library_payment_review"
+              action="action_library_payment_ebook_requests" sequence="10"
+              groups="library_manager.group_library_librarian,base.group_system"/>
+
+    <menuitem id="menu_library_payment_physical_requests"
+              name="Physical Book Payment Requests"
+              parent="menu_library_payment_review"
+              action="action_library_payment_physical_requests" sequence="20"
+              groups="library_manager.group_library_librarian,base.group_system"/>
+
+    <menuitem id="menu_library_payment_reservations"
+              name="eBook Reservation Payments"
+              parent="menu_library_payment_review"
+              action="action_library_payment_reservations" sequence="30"
+              groups="library_manager.group_library_librarian,base.group_system"/>
+
     <menuitem id="menu_library_ebook_audit" name="eBook Audit Trail"
               parent="menu_library_root"
               action="action_library_ebook_audit" sequence="70"

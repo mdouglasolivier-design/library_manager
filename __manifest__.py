@@ -1,13 +1,13 @@
 {
     'name': 'Odoo Library',
-    'version': '18.0.1.8.0',
+    'version': '18.0.1.9.0',
     'summary': 'Your Integrated Digital Library Management Platform.',
     'category': 'Services',
     'author': 'Douglas',
     'website': 'https://github.com/mdouglasolivier-design/library_manager',
     'depends': [
         'base', 'mail', 'website', 'portal', 'auth_signup', 'auth_oauth',
-        'contacts', 'stock',
+        'contacts', 'stock', 'payment', 'payment_custom', 'payment_stripe',
     ],
     'external_dependencies': {
         'python': ['pymupdf', 'PIL'],
@@ -31,6 +31,7 @@
         'data/library_ebook_mail_templates.xml',
         'data/library_ebook_overdue_cron.xml',
         'report/library_report_actions.xml',
+        'report/library_payment_receipt.xml',
         'report/library_loan_receipt_templates.xml',
         'report/library_overdue_report_templates.xml',
         'report/library_member_card_templates.xml',
@@ -53,6 +54,8 @@
         'views/module_info_navigation.xml',
         'views/auth_oauth_templates.xml',
         'views/res_config_settings_views.xml',
+        'views/library_payment_views.xml',
+        'views/library_payment_templates.xml',
         'wizards/library_overdue_report_wizard_views.xml',
         'views/library_menus.xml',
     ],

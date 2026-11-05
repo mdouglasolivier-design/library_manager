@@ -27,6 +27,10 @@
                position="attributes">
             <attribute name="t-att-class">'is-active' if request.httprequest.path == '/my/library/requests' else ''</attribute>
         </xpath>
+        <xpath expr="//nav[hasclass('library-portal-nav')]/a[@href='/my/library/payments']"
+               position="attributes">
+            <attribute name="t-att-class">'is-active' if request.httprequest.path.startswith('/my/library/payments') else ''</attribute>
+        </xpath>
         <xpath expr="//nav[hasclass('library-portal-nav')]/a[@href='/my/library/reservations']"
                position="attributes">
             <attribute name="t-att-class">'is-active' if request.httprequest.path == '/my/library/reservations' else ''</attribute>
@@ -51,7 +55,8 @@
                        t-esc="book.name"/></h2>
                 <p class="library-book-card__author" t-esc="book.author"/>
                 <p>Available copies: <strong t-esc="book.available_copies"/></p>
-                <p class="library-price">$6.00 USD</p>
+                <p class="library-price"
+                   t-esc="'%s %s' % (physical_price, request.env['ir.config_parameter'].sudo().get_param('library_manager.payment_currency', 'USD'))"/>
             </div>
         </article>
     </template>
@@ -116,7 +121,8 @@
                                 By <span t-esc="book.author"/>
                             </p>
                             <p class="library-price">
-                                Borrowing price: <strong>$6.00 USD</strong>
+                                Borrowing price:
+                                <strong t-esc="'%s %s' % (physical_price, request.env['ir.config_parameter'].sudo().get_param('library_manager.payment_currency', 'USD'))"/>
                             </p>
                             <p t-if="book.description"
                                class="library-detail__description"
@@ -128,11 +134,10 @@
                                 <div><dt>Available copies</dt><dd t-esc="book.available_copies"/></div>
                             </dl>
                             <div class="library-payment-instructions">
-                                <h2>Payment instructions</h2>
-                                <p>MTN MoMo: <t t-esc="momo_name"/> · <t t-esc="momo_phone"/>.</p>
+                                <h2>Secure checkout</h2>
                                 <p>Bank transfer: <t t-esc="bank_name or 'Bank name to be configured'"/> · Account <t t-esc="bank_account"/> · <t t-esc="bank_holder or 'Account holder to be configured'"/>.</p>
-                                <p>External card: <t t-esc="card_instructions"/> No card details are collected here.</p>
-                                <p>Payment is not processed automatically. A librarian must verify payment before approving your request.</p>
+                                <p>Card and bank transfer options are shown only when an Odoo payment provider is configured. MTN MoMo is unavailable until an approved provider integration is configured.</p>
+                                <p>Never enter card numbers, security codes, or MoMo PINs on this website.</p>
                             </div>
                             <div t-if="notice"
                                  t-att-class="'alert alert-%s' % notice['level']"
@@ -167,19 +172,7 @@
                                 <input id="physical-due-date" name="due_date"
                                        type="date" required="required"
                                        t-att-value="expected_return"/>
-                                <label for="physical-payment-method">Payment method</label>
-                                <select id="physical-payment-method" name="payment_method"
-                                        required="required">
-                                    <option value="momo">MTN Mobile Money</option>
-                                    <option value="bank">Bank transfer</option>
-                                    <option value="external_card">External card provider</option>
-                                </select>
-                                <label for="physical-momo-phone">MTN MoMo payer phone (if selected)</label>
-                                <input id="physical-momo-phone" name="momo_phone"
-                                       type="tel"/>
-                                <label for="physical-payment-reference">Transfer/reference ID (optional)</label>
-                                <input id="physical-payment-reference"
-                                       name="payment_reference" maxlength="128"/>
+                                <p>Choose an available payment provider at the next step. Payment must be verified before your request can be approved.</p>
                                 <button class="library-button" type="submit"
                                         t-att-disabled="not book.available_copies">
                                     Submit borrowing request

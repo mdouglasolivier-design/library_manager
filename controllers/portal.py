@@ -248,6 +248,8 @@ class LibraryCatalogController(http.Controller):
             'pending_request': pending_request,
             'pending_reservation': pending_reservation,
             'notice': request.session.pop('library_portal_notice', False),
+            'ebook_price': request.env['library.payment.mixin']._library_service_price(
+                'ebook'),
             **self._payment_instructions(),
         })
 

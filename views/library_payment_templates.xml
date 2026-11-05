@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="library_payment_checkout_summary" inherit_id="payment.pay">
+        <xpath expr="//div[hasclass('text-bg-light')]" position="before">
+            <section t-if="library_checkout_payment"
+                     class="border rounded p-3 mb-3">
+                <h2 class="h5">Order summary</h2>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Library item</dt>
+                    <dd class="col-sm-8"
+                        t-esc="library_checkout_payment['title']"/>
+                    <dt class="col-sm-4">Borrower</dt>
+                    <dd class="col-sm-8"
+                        t-esc="library_checkout_payment['borrower'].name"/>
+                    <dt class="col-sm-4">Total due</dt>
+                    <dd class="col-sm-8">
+                        <span t-out="library_checkout_payment['amount']"
+                              t-options="{'widget': 'monetary', 'display_currency': library_checkout_payment['currency']}"/>
+                    </dd>
+                </dl>
+            </section>
+            <div t-if="library_no_payment_providers"
+                 class="alert alert-warning">
+                No compatible online payment provider is currently configured. Contact the library team; no payment has been taken.
+            </div>
+        </xpath>
+    </template>
+
+    <template id="portal_library_payments" name="Library payment history">
+        <t t-set="no_header" t-value="True"/>
+        <t t-set="no_footer" t-value="True"/>
+        <t t-call="website.layout">
+            <t t-set="title">Payment history</t>
+            <div id="wrap" class="library-portal">
+                <t t-call="library_manager.portal_library_header"/>
+                <main class="container library-page">
+                    <header class="library-page__heading">
+                        <span class="library-eyebrow">Account</span>
+                        <h1>Payment history</h1>
+                        <p>Review your payment references, amounts, methods, and verification status.</p>
+                    </header>
+                    <div t-if="notice" t-att-class="'alert alert-%s' % notice['level']"
+                         role="status" t-esc="notice['message']"/>
+                    <div t-if="payments" class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Library item</th>
+                                    <th>Reference</th>
+                                    <th>Method</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="payments" t-as="payment">
+                                    <td>
+                                        <t t-if="payment._name == 'library.ebook.request'">
+                                            <t t-esc="payment.ebook_id.name"/>
+                                        </t>
+                                        <t t-elif="payment._name == 'library.book.request'">
+                                            <t t-esc="payment.book_id.name"/>
+                                        </t>
+                                        <t t-elif="payment._name == 'library.ebook.reservation'">
+                                            <t t-esc="payment.ebook_id.name"/>
+                                        </t>
+                                        <t t-else="">Library loan</t>
+                                    </td>
+                                    <td t-esc="payment.payment_transaction_id.reference or payment.payment_reference or '—'"/>
+                                    <td t-esc="payment.payment_method"/>
+                                    <td>
+                                        <span t-field="payment.payment_amount"
+                                              t-options="{'widget': 'monetary', 'display_currency': payment.payment_currency_id}"/>
+                                    </td>
+                                    <td>
+                                        <span class="badge text-bg-warning"
+                                              t-if="payment.payment_status == 'pending'">Pending</span>
+                                        <span class="badge text-bg-success"
+                                              t-elif="payment.payment_status == 'confirmed'">Successful</span>
+                                        <span class="badge text-bg-info"
+                                              t-elif="payment.payment_status == 'authorized'">Authorized</span>
+                                        <span class="badge text-bg-danger"
+                                              t-elif="payment.payment_status in ('failed', 'rejected')"
+                                              t-esc="payment.payment_status"/>
+                                        <span class="badge text-bg-secondary"
+                                              t-else="" t-esc="payment.payment_status"/>
+                                    </td>
+                                    <td>
+                                        <span t-if="payment.payment_transaction_id"
+                                              t-field="payment.payment_transaction_id.create_date"/>
+                                        <span t-else="" t-field="payment.create_date"/>
+                                    </td>
+                                    <td>
+                                        <a t-if="payment.payment_status == 'pending' and not payment.payment_transaction_id"
+                                           class="btn btn-sm btn-outline-primary"
+                                           t-att-href="'/my/library/payment/%s/%s' % ({'library.ebook.request': 'EREQ', 'library.book.request': 'BREQ', 'library.ebook.reservation': 'ERES'}.get(payment._name, ''), payment.id)">
+                                            Continue checkout
+                                        </a>
+                                        <form t-if="payment.payment_method == 'bank' and payment.payment_status == 'pending' and payment.payment_transaction_id and payment.payment_transaction_id.provider_code == 'custom'"
+                                              method="post" enctype="multipart/form-data"
+                                              t-att-action="'/my/library/payment/%s/%s/evidence' % (payment._name, payment.id)">
+                                            <input type="hidden" name="csrf_token"
+                                                   t-att-value="request.csrf_token()"/>
+                                            <input type="file" name="payment_evidence"
+                                                   accept=".pdf,.png,.jpg,.jpeg"
+                                                   required="required"/>
+                                            <button class="btn btn-sm btn-outline-primary"
+                                                    type="submit">Upload evidence</button>
+                                        </form>
+                                        <a t-if="payment.payment_status == 'confirmed' and payment.payment_transaction_id and payment.payment_transaction_id.state == 'done'"
+                                           class="btn btn-sm btn-outline-secondary"
+                                           t-att-href="'/my/library/payments/%s/receipt' % payment.payment_transaction_id.id">
+                                            Download receipt
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div t-else="" class="library-empty-state">
+                        <h2>No payments yet</h2>
+                        <p>Payment history will appear when you submit a borrowing request.</p>
+                        <a class="library-button" href="/library/ebooks">Browse eBooks</a>
+                    </div>
+                </main>
+                <t t-call="library_manager.portal_library_footer"/>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_library_payment_confirmation"
+              name="Library payment confirmation">
+        <t t-set="no_header" t-value="True"/>
+        <t t-set="no_footer" t-value="True"/>
+        <t t-call="website.layout">
+            <t t-set="title">Payment status</t>
+            <div id="wrap" class="library-portal">
+                <t t-call="library_manager.portal_library_header"/>
+                <main class="container library-page">
+                    <header class="library-page__heading">
+                        <span class="library-eyebrow">Payment</span>
+                        <h1>Payment status</h1>
+                    </header>
+                    <div t-if="tx.state == 'done'" class="alert alert-success">
+                        Payment received and verified. Your library request remains subject to any required librarian approval.
+                    </div>
+                    <div t-elif="tx.state in ('pending', 'authorized', 'draft')"
+                         class="alert alert-info">
+                        Your payment is pending verification. Do not submit another payment for this reference.
+                    </div>
+                    <div t-elif="tx.state == 'cancel'" class="alert alert-warning">
+                        This payment was cancelled.
+                    </div>
+                    <div t-else="" class="alert alert-danger">
+                        This payment was not completed. Contact the library team before trying again.
+                    </div>
+                    <dl class="row">
+                        <dt class="col-sm-3">Reference</dt>
+                        <dd class="col-sm-9" t-esc="tx.reference"/>
+                        <dt class="col-sm-3">Amount</dt>
+                        <dd class="col-sm-9">
+                            <span t-field="tx.amount"
+                                  t-options="{'widget': 'monetary', 'display_currency': tx.currency_id}"/>
+                        </dd>
+                        <dt class="col-sm-3">Provider</dt>
+                        <dd class="col-sm-9" t-esc="tx.provider_id.name"/>
+                    </dl>
+                    <a class="library-button" href="/my/library/payments">View payment history</a>
+                </main>
+                <t t-call="library_manager.portal_library_footer"/>
+            </div>
+        </t>
+    </template>
+</odoo>

@@ -26,7 +26,21 @@
                             <field name="library_ebook_max_concurrent_loans"/>
                         </setting>
                     </block>
-                    <block title="Manual borrower payments">
+                    <block title="Library payment checkout">
+                        <setting string="eBook borrowing price"
+                                 help="The configured price used for new eBook payment transactions.">
+                            <field name="library_ebook_borrowing_price"/>
+                        </setting>
+                        <setting string="Physical book borrowing price"
+                                 help="The configured price used for new physical book payment transactions.">
+                            <field name="library_physical_borrowing_price"/>
+                        </setting>
+                        <setting string="Payment currency"
+                                 help="Use an active ISO currency code supported by the configured provider.">
+                            <field name="library_payment_currency"/>
+                        </setting>
+                    </block>
+                    <block title="Manual bank-transfer details">
                         <setting string="MTN MoMo recipient">
                             <field name="library_momo_recipient_name"/>
                             <field name="library_momo_recipient_phone"/>
@@ -36,11 +50,8 @@
                             <field name="library_bank_account_holder"/>
                             <field name="library_bank_account_number"/>
                         </setting>
-                        <setting string="External card provider">
-                            <field name="library_external_card_instructions"/>
-                        </setting>
                         <p class="text-muted">
-                            Payments are not processed automatically. Verify receipt manually before confirming a request. Never collect card numbers, security codes, or MoMo PINs.
+                            MTN MoMo is unavailable until an approved provider integration is configured. Bank transfers remain pending until library staff verify the funds. Configure card processing in Odoo Payment Providers; never collect card numbers, security codes, or MoMo PINs.
                         </p>
                     </block>
                 </app>

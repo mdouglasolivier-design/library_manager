@@ -45,6 +45,20 @@ class ResConfigSettings(models.TransientModel):
         string='External card payment instructions',
         default='Configure a secure payment provider before enabling card payments.',
         config_parameter='library_manager.external_card_instructions')
+    library_ebook_borrowing_price = fields.Float(
+        string='eBook borrowing price',
+        default=5.0,
+        digits=(12, 2),
+        config_parameter='library_manager.ebook_borrowing_price')
+    library_physical_borrowing_price = fields.Float(
+        string='Physical book borrowing price',
+        default=6.0,
+        digits=(12, 2),
+        config_parameter='library_manager.physical_borrowing_price')
+    library_payment_currency = fields.Char(
+        string='Borrowing currency code',
+        default='USD',
+        config_parameter='library_manager.payment_currency')
 
     @api.model
     def _library_approval_required(self):
@@ -67,3 +81,26 @@ class ResConfigSettings(models.TransientModel):
             if settings.library_ebook_max_concurrent_loans < 0:
                 raise ValidationError(
                     "The concurrent eBook loan limit cannot be negative.")
+
+    @api.constrains(
+        'library_ebook_borrowing_price',
+        'library_physical_borrowing_price',
+        'library_payment_currency')
+    def _check_library_payment_settings(self):
+        for settings in self:
+            if (
+                    settings.library_ebook_borrowing_price <= 0
+                    or settings.library_physical_borrowing_price <= 0):
+                raise ValidationError(
+                    "Library borrowing prices must be greater than zero.")
+            currency_code = (settings.library_payment_currency or '').strip().upper()
+            if len(currency_code) != 3 or not currency_code.isalpha():
+                raise ValidationError(
+                    "Enter a valid three-letter currency code.")
+            currency = self.env['res.currency'].search([
+                ('name', '=', currency_code),
+                ('active', '=', True),
+            ], limit=1)
+            if not currency:
+                raise ValidationError(
+                    "The library payment currency must be an active Odoo currency.")

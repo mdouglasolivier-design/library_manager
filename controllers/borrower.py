@@ -88,20 +88,20 @@ class LibraryBorrowerController(http.Controller):
                 'library.ebook.request'
             ].submit_for_current_user(
                 ebook_id,
-                payment_method=post.get('payment_method', 'momo'),
-                momo_phone=post.get('momo_phone'),
+                payment_method='bank',
                 payment_reference=post.get('payment_reference'))
         except (AccessError, UserError, ValidationError) as error:
             self._set_notice(str(error), 'warning')
             return request.redirect('/library/ebooks/%s' % ebook_id)
         if result._name == 'library.ebook.reservation':
             self._set_notice("Your eBook reservation has been submitted.")
-            return request.redirect('/my/library/reservations')
+            return request.redirect(
+                '/my/library/payment/ERES/%s' % result.id)
         self._set_notice(
             "Your request was approved and the eBook is now in your library."
             if result.state == 'approved'
             else "Your borrowing request has been submitted.")
-        return request.redirect('/my/library/requests')
+        return request.redirect('/my/library/payment/EREQ/%s' % result.id)
 
     @http.route(
         '/my/library/loans', type='http', auth='user',
