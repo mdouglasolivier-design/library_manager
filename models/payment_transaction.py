@@ -1,5 +1,9 @@
+import logging
+
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
+
+_logger = logging.getLogger(__name__)
 
 
 _LIBRARY_PAYMENT_RECORD_MODELS = [
@@ -21,6 +25,30 @@ class PaymentTransaction(models.Model):
         index=True,
         readonly=True,
     )
+    library_receipt_sent = fields.Boolean(
+        string='Library Receipt Emailed',
+        copy=False,
+        readonly=True,
+        help='Set once the PDF receipt email has been queued, so duplicate '
+             'provider notifications never send a second receipt.',
+    )
+    library_receipt_item = fields.Char(
+        string='Library Item',
+        compute='_compute_library_receipt_item',
+    )
+
+    @api.depends('library_payment_record_ref')
+    def _compute_library_receipt_item(self):
+        for transaction in self:
+            record = transaction.library_payment_record_ref
+            item = False
+            if record:
+                record = record.sudo()
+                if 'ebook_id' in record._fields and record.ebook_id:
+                    item = record.ebook_id.name
+                elif 'book_id' in record._fields and record.book_id:
+                    item = record.book_id.name
+            transaction.library_receipt_item = item
 
     @api.constrains(
         'library_payment_record_ref', 'partner_id', 'amount', 'currency_id')
@@ -65,6 +93,41 @@ class PaymentTransaction(models.Model):
                     _library_payment_action=True).write({
                         'payment_status': status,
                     })
+            if status == 'confirmed':
+                transaction._library_send_receipt()
+
+    def _library_send_receipt(self):
+        """Queue the PDF receipt email once per verified library payment."""
+        template = self.env.ref(
+            'library_manager.mail_template_library_payment_receipt',
+            raise_if_not_found=False)
+        if not template:
+            return
+        for transaction in self:
+            if (
+                    transaction.library_receipt_sent
+                    or transaction.state != 'done'
+                    or transaction.operation == 'refund'
+                    or not transaction.library_payment_record_ref):
+                continue
+            email = (transaction.partner_id.email or '').strip()
+            if not email:
+                _logger.info(
+                    "Receipt for transaction %s was not emailed because "
+                    "partner %s has no email address.",
+                    transaction.reference, transaction.partner_id.id)
+                continue
+            mail_id = template.sudo().send_mail(
+                transaction.id,
+                force_send=False,
+                email_values={'email_to': email},
+            )
+            if mail_id:
+                transaction.sudo().write({'library_receipt_sent': True})
+            else:
+                _logger.warning(
+                    "Receipt email was not queued for transaction %s.",
+                    transaction.reference)
 
     def _library_link_payment_record(self, payment):
         self.ensure_one()

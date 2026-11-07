@@ -1,0 +1,44 @@
+// Compact type for the Library dashboard (backend).
+// Loaded after library_dashboard.scss; delete this file and its manifest line
+// to go back to the previous sizes.
+
+.o_library_dashboard {
+    .o_library_dashboard_brand {
+        font-size: 16px;
+        font-weight: 600;
+
+        i {
+            font-size: 18px;
+        }
+    }
+
+    .o_library_dashboard_page_header h1 {
+        font-size: clamp(19px, 1.8vw, 24px);
+        font-weight: 600;
+        letter-spacing: -0.02em;
+    }
+
+    .o_library_dashboard_stat_icon {
+        font-size: 17px;
+    }
+
+    .o_library_dashboard_stat_copy strong {
+        font-size: 21px;
+        font-weight: 600;
+    }
+
+    .o_library_dashboard_panel_header {
+        h2 {
+            font-size: 14.5px;
+            font-weight: 600;
+        }
+
+        > i {
+            font-size: 15px;
+        }
+    }
+}
+// Panel titles: regular weight.
+.o_library_dashboard .o_library_dashboard_panel_header h2 {
+    font-weight: 400;
+}

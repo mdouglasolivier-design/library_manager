@@ -1,0 +1,125 @@
+// Compact typography for the Odoo Library website.
+// Loaded after library_portal.scss. To go back to the previous look, delete
+// this file and its line in __manifest__.py.
+// Scale (desktop):  h1 22-28px  |  h2 17-20px  |  h3 14-15px  |  body 14px
+
+@font-face {
+    font-family: "LibraryInter";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("/library_manager/static/src/fonts/inter-latin-wght-normal.woff2") format("woff2");
+}
+
+$library-font: "LibraryInter", Inter, "Segoe UI Variable Text", "Segoe UI",
+    system-ui, -apple-system, sans-serif;
+
+#wrapwrap .library-portal {
+    font-family: $library-font;
+    font-size: 14px;
+    line-height: 1.6;
+    letter-spacing: -0.003em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+#wrapwrap {
+    h1 {
+        font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+        font-weight: 550;
+        letter-spacing: -0.022em;
+        line-height: 1.2;
+    }
+    h2 {
+        font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+        font-weight: 550;
+        letter-spacing: -0.018em;
+        line-height: 1.3;
+    }
+    h3,
+    h4,
+    h5 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+    }
+    strong,
+    b {
+        font-weight: 600;
+    }
+}
+
+#wrapwrap .library-page__heading h1,
+#wrapwrap .library-detail__content h1 {
+    font-size: clamp(22px, 3vw, 28px);
+}
+
+#wrapwrap .library-section__heading h2 {
+    font-size: clamp(18px, 2vw, 22px);
+}
+
+#wrapwrap .library-signup-intro h1 {
+    font-size: 1.2rem;
+}
+
+#wrapwrap .oe_website_login_container {
+    h1,
+    h2,
+    h3 {
+        font-size: 1.1rem;
+    }
+}
+
+#wrapwrap .library-hero__content > p,
+#wrapwrap .library-detail__author {
+    font-size: 14.5px;
+}
+
+#wrapwrap .library-book-card__body h3,
+#wrapwrap .library-member-book h2,
+#wrapwrap .library-member-book h3 {
+    font-size: 14px;
+}
+
+#wrapwrap .library-portal-brand,
+#wrapwrap .library-website-brand {
+    font-size: 14.5px;
+}
+
+#wrapwrap .library-site-footer__brand {
+    font-size: 15px;
+}
+
+.library-brand__odoo {
+    font-weight: 600;
+}
+
+#wrapwrap .library-stats strong {
+    font-size: 20px;
+    font-weight: 600;
+
+    @media (max-width: 767.98px) {
+        font-size: 16px;
+    }
+}
+
+#wrapwrap .library-member-stats strong {
+    font-size: 21px;
+    font-weight: 600;
+}
+// h2 and smaller: regular weight (h1 stays medium).
+#wrapwrap {
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-weight: 400;
+    }
+
+    .oe_website_login_container h2,
+    .oe_website_login_container h3 {
+        font-weight: 400;
+    }
+}

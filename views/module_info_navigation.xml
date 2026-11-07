@@ -5,18 +5,29 @@
         <field name="model">ir.module.module</field>
         <field name="inherit_id" ref="base.module_view_kanban"/>
         <field name="arch" type="xml">
-            <xpath expr="//t[@t-name='menu']/a[@name='more_info']"
-                   position="replace">
+
+            <!-- Three-dot menu: hide the default link for this module... -->
+            <xpath expr="//t[@t-name='menu']/a[normalize-space(.)='Module Info']"
+                   position="attributes">
+                <attribute name="t-if">record.name.raw_value != 'library_manager'</attribute>
+            </xpath>
+            <!-- ...and show a plain link to the public website instead. -->
+            <xpath expr="//t[@t-name='menu']/a[normalize-space(.)='Module Info']"
+                   position="before">
                 <a t-if="record.name.raw_value == 'library_manager'"
                    role="menuitem" class="dropdown-item" href="/library">
                     Module Info
                 </a>
-                <a t-else="" type="object" class="dropdown-item"
-                   context="{'module_type': module_type, 'module_name':name}"
-                   name="more_info">
-                    Module Info
-                </a>
             </xpath>
+
+            <!-- Card button: send this module to /library in the same tab. -->
+            <xpath expr="//t[@t-name='card']//footer/a[normalize-space(.)='Learn More']"
+                   position="attributes">
+                <attribute name="t-att-href">record.name.raw_value == 'library_manager' ? '/library' : record.website.raw_value</attribute>
+                <attribute name="target"/>
+                <attribute name="t-att-target">record.name.raw_value == 'library_manager' ? '_self' : '_blank'</attribute>
+            </xpath>
+
         </field>
     </record>
 </odoo>

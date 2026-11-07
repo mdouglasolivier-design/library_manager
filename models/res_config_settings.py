@@ -29,11 +29,9 @@ class ResConfigSettings(models.TransientModel):
         config_parameter='library_manager.momo_recipient_name')
     library_momo_recipient_phone = fields.Char(
         string='MTN MoMo merchant phone',
-        default='+250791393885',
         config_parameter='library_manager.momo_recipient_phone')
     library_bank_account_number = fields.Char(
         string='Bank account number',
-        default='100212701941',
         config_parameter='library_manager.bank_account_number')
     library_bank_name = fields.Char(
         string='Bank name',
