@@ -17,9 +17,11 @@
             'library_manager/static/src/js/dashboard.js',
             'library_manager/static/src/xml/dashboard.xml',
             'library_manager/static/src/scss/library_dashboard.scss',
+            'library_manager/static/src/scss/library_dashboard_typography.scss',
         ],
         'web.assets_frontend': [
             'library_manager/static/src/scss/library_portal.scss',
+            'library_manager/static/src/scss/library_typography.scss',
         ],
     },
     'data': [
@@ -32,6 +34,7 @@
         'data/library_ebook_overdue_cron.xml',
         'report/library_report_actions.xml',
         'report/library_payment_receipt.xml',
+        'data/library_payment_receipt_mail.xml',
         'report/library_loan_receipt_templates.xml',
         'report/library_overdue_report_templates.xml',
         'report/library_member_card_templates.xml',

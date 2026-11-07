@@ -15,9 +15,9 @@ class LibraryCatalogController(http.Controller):
             'momo_name': parameters.get_param(
                 'library_manager.momo_recipient_name', 'Odoo Library'),
             'momo_phone': parameters.get_param(
-                'library_manager.momo_recipient_phone', '+250791393885'),
+                'library_manager.momo_recipient_phone', ''),
             'bank_account': parameters.get_param(
-                'library_manager.bank_account_number', '100212701941'),
+                'library_manager.bank_account_number', ''),
             'bank_name': parameters.get_param(
                 'library_manager.bank_name', ''),
             'bank_holder': parameters.get_param(
