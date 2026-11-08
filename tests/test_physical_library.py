@@ -70,7 +70,7 @@ class TestPhysicalLibrary(TransactionCase):
         ].with_user(self.borrower).submit_for_current_user(
             self.book.id,
             borrower_phone='+250788123456',
-            payment_method='bank',
+            payment_method='flutterwave',
             payment_reference='BANK-REF-001')
 
         self.assertEqual(request_record.payment_status, 'pending')
@@ -95,7 +95,7 @@ class TestPhysicalLibrary(TransactionCase):
         ].with_user(self.borrower).submit_for_current_user(
             self.book.id,
             borrower_phone='+250788123456',
-            payment_method='bank')
+            payment_method='flutterwave')
         other_request = self.env[
             'library.book.request'
         ].with_user(self.other_borrower).search([

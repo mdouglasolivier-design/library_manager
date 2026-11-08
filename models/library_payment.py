@@ -19,11 +19,14 @@ class LibraryPaymentMixin(models.AbstractModel):
     _description = 'Library Payment'
 
     payment_method = fields.Selection([
-        ('momo', 'MTN Mobile Money'),
-        ('bank', 'Bank transfer'),
-        ('card', 'Bank card'),
-        ('external_card', 'External card provider'),
-    ], string='Payment Method', default='momo', required=True, index=True)
+        ('flutterwave', 'Flutterwave (card / mobile money)'),
+        # Kept so payments made before Flutterwave stay readable.
+        ('momo', 'MTN Mobile Money (legacy)'),
+        ('bank', 'Bank transfer (legacy)'),
+        ('card', 'Bank card (legacy)'),
+        ('external_card', 'External card provider (legacy)'),
+    ], string='Payment Method', default='flutterwave', required=True,
+        index=True)
     payment_status = fields.Selection([
         ('pending', 'Pending'),
         ('authorized', 'Authorized'),
@@ -45,6 +48,8 @@ class LibraryPaymentMixin(models.AbstractModel):
     payment_transaction_id = fields.Many2one(
         'payment.transaction', string='Online Transaction',
         readonly=True, copy=False, ondelete='set null', index=True)
+    # Legacy: proof uploads are no longer requested. The fields stay so old
+    # payments keep their attachments; nothing shows or fills them any more.
     payment_evidence = fields.Binary(
         string='Bank Transfer Evidence', attachment=True, copy=False,
         groups='library_manager.group_library_librarian,base.group_system')
@@ -144,25 +149,9 @@ class LibraryPaymentMixin(models.AbstractModel):
                 raise UserError("Only a pending payment can be confirmed.")
             transaction = record.payment_transaction_id
             if transaction:
-                if (
-                        record.payment_method != 'bank'
-                        or transaction.provider_code != 'custom'
-                        or transaction.state != 'pending'):
-                    raise UserError(
-                        "Online payment can only be confirmed by its verified provider.")
-                if not record.payment_evidence:
-                    raise UserError(
-                        "Attach bank-transfer evidence before reconciliation.")
-                if (
-                        transaction.partner_id != record.borrower_id
-                        or transaction.currency_id != record.payment_currency_id
-                        or transaction.currency_id.compare_amounts(
-                            transaction.amount, record.payment_amount) != 0):
-                    raise ValidationError(
-                        "The bank transaction does not match this library payment.")
-                transaction._set_done(
-                    state_message="Bank transfer verified by authorized library staff.")
-                return
+                raise UserError(
+                    "Online payments are confirmed automatically once "
+                    "Flutterwave reports them as successful.")
             record.with_context(_library_payment_action=True).write({
                 'payment_status': 'confirmed',
             })
@@ -177,37 +166,10 @@ class LibraryPaymentMixin(models.AbstractModel):
             transaction = record.payment_transaction_id
             if transaction and transaction.state in ('draft', 'pending', 'authorized'):
                 transaction._set_canceled(
-                    state_message="Library staff rejected the bank transfer.")
+                    state_message="Library staff rejected the payment.")
             record.with_context(_library_payment_action=True).write({
                 'payment_status': 'rejected',
             })
-
-    def _library_submit_bank_evidence(self, filename, content):
-        self.ensure_one()
-        if self.borrower_id != self.env.user.partner_id:
-            raise AccessError("You can only submit evidence for your own payment.")
-        if self.payment_method != 'bank':
-            raise UserError("Payment evidence is only accepted for bank transfers.")
-        if self.payment_status != 'pending':
-            raise UserError("Evidence can only be submitted for a pending payment.")
-        if not self.payment_transaction_id or (
-                self.payment_transaction_id.provider_code != 'custom'
-                or self.payment_transaction_id.state != 'pending'):
-            raise UserError(
-                "Start a bank-transfer checkout before uploading payment evidence.")
-        if not filename or len(filename) > 255:
-            raise ValidationError("Choose a valid evidence filename.")
-        extension = filename.rsplit('.', 1)[-1].lower() if '.' in filename else ''
-        if extension not in ('pdf', 'png', 'jpg', 'jpeg'):
-            raise ValidationError(
-                "Payment evidence must be a PDF, PNG, or JPEG file.")
-        if not content or len(content) > 5 * 1024 * 1024:
-            raise ValidationError(
-                "Payment evidence must be between 1 byte and 5 MB.")
-        self.sudo().write({
-            'payment_evidence': content,
-            'payment_evidence_filename': filename,
-        })
 
     def _library_checkout_reference(self):
         self.ensure_one()

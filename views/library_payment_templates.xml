@@ -21,7 +21,7 @@
             </section>
             <div t-if="library_no_payment_providers"
                  class="alert alert-warning">
-                No compatible online payment provider is currently configured. Contact the library team; no payment has been taken.
+                Online payment is not available yet because Flutterwave has not been switched on. Contact the library team; no payment has been taken.
             </div>
         </xpath>
     </template>
@@ -69,7 +69,7 @@
                                         <t t-else="">Library loan</t>
                                     </td>
                                     <td t-esc="payment.payment_transaction_id.reference or payment.payment_reference or '—'"/>
-                                    <td t-esc="payment.payment_method"/>
+                                    <td t-esc="dict(payment._fields['payment_method']._description_selection(payment.env)).get(payment.payment_method, payment.payment_method)"/>
                                     <td>
                                         <span t-field="payment.payment_amount"
                                               t-options="{'widget': 'monetary', 'display_currency': payment.payment_currency_id}"/>
@@ -98,21 +98,16 @@
                                            t-att-href="'/my/library/payment/%s/%s' % ({'library.ebook.request': 'EREQ', 'library.book.request': 'BREQ', 'library.ebook.reservation': 'ERES'}.get(payment._name, ''), payment.id)">
                                             Continue checkout
                                         </a>
-                                        <form t-if="payment.payment_method == 'bank' and payment.payment_status == 'pending' and payment.payment_transaction_id and payment.payment_transaction_id.provider_code == 'custom'"
-                                              method="post" enctype="multipart/form-data"
-                                              t-att-action="'/my/library/payment/%s/%s/evidence' % (payment._name, payment.id)">
-                                            <input type="hidden" name="csrf_token"
-                                                   t-att-value="request.csrf_token()"/>
-                                            <input type="file" name="payment_evidence"
-                                                   accept=".pdf,.png,.jpg,.jpeg"
-                                                   required="required"/>
-                                            <button class="btn btn-sm btn-outline-primary"
-                                                    type="submit">Upload evidence</button>
-                                        </form>
                                         <a t-if="payment.payment_status == 'confirmed' and payment.payment_transaction_id and payment.payment_transaction_id.state == 'done'"
                                            class="btn btn-sm btn-outline-secondary"
                                            t-att-href="'/my/library/payments/%s/receipt' % payment.payment_transaction_id.id">
-                                            Download receipt
+                                            Receipt (PDF)
+                                        </a>
+                                        <a t-if="payment.payment_status == 'confirmed' and payment.payment_transaction_id and payment.payment_transaction_id.state == 'done'"
+                                           class="btn btn-sm btn-outline-secondary"
+                                           t-att-href="'/my/library/payments/%s/receipt/view' % payment.payment_transaction_id.id"
+                                           target="_blank">
+                                            View
                                         </a>
                                     </td>
                                 </tr>
@@ -144,11 +139,12 @@
                         <h1>Payment status</h1>
                     </header>
                     <div t-if="tx.state == 'done'" class="alert alert-success">
-                        Payment received and verified. Your library request remains subject to any required librarian approval.
+                        Payment received and verified. Your receipt has been created.
+                        <a t-att-href="'/my/library/payments/%s/receipt' % tx.id">Download receipt (PDF)</a>
                     </div>
                     <div t-elif="tx.state in ('pending', 'authorized', 'draft')"
                          class="alert alert-info">
-                        Your payment is pending verification. Do not submit another payment for this reference.
+                        Your payment is being confirmed by Flutterwave. This page and your payment history update automatically; do not pay again for this reference.
                     </div>
                     <div t-elif="tx.state == 'cancel'" class="alert alert-warning">
                         This payment was cancelled.

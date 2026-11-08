@@ -1,0 +1,48 @@
+// Small "Pay" button next to the borrowing price on an eBook page.
+// To remove: delete this file and its line in __manifest__.py.
+#wrapwrap .library-price-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0 0 12px;
+
+    .library-price {
+        margin: 0;
+    }
+
+    form {
+        margin: 0;
+    }
+}
+
+#wrapwrap .library-pay-button {
+    display: inline-block;
+    padding: 5px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: #fff;
+    background: var(--library-navy);
+    border: 1px solid var(--library-navy);
+    border-radius: 6px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity 0.15s;
+
+    &:hover,
+    &:focus {
+        color: #fff;
+        opacity: 0.88;
+    }
+}
+
+#wrapwrap .library-pay-button--disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+
+    &:hover,
+    &:focus {
+        opacity: 0.4;
+    }
+}

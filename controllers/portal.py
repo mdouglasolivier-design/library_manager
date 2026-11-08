@@ -9,24 +9,6 @@ from odoo.http import request
 
 class LibraryCatalogController(http.Controller):
 
-    def _payment_instructions(self):
-        parameters = request.env['ir.config_parameter'].sudo()
-        return {
-            'momo_name': parameters.get_param(
-                'library_manager.momo_recipient_name', 'Odoo Library'),
-            'momo_phone': parameters.get_param(
-                'library_manager.momo_recipient_phone', ''),
-            'bank_account': parameters.get_param(
-                'library_manager.bank_account_number', ''),
-            'bank_name': parameters.get_param(
-                'library_manager.bank_name', ''),
-            'bank_holder': parameters.get_param(
-                'library_manager.bank_account_holder', ''),
-            'card_instructions': parameters.get_param(
-                'library_manager.external_card_instructions',
-                'Configure a secure payment provider before enabling card payments.'),
-        }
-
     @http.route(
         '/library', type='http', auth='public', website=True, sitemap=True)
     def library_home(self, **params):
@@ -238,7 +220,19 @@ class LibraryCatalogController(http.Controller):
                 ('borrower_id', '=', partner.id),
                 ('state', '=', 'pending'),
             ], limit=1)
+        pay_url = False
+        unpaid = pending_request or pending_reservation
+        if unpaid and unpaid.sudo().payment_status in (
+                'pending', 'failed', 'cancelled'):
+            unpaid = unpaid.sudo()
+            transaction = unpaid.payment_transaction_id
+            if not transaction or transaction.state in ('cancel', 'error'):
+                pay_url = '/my/library/payment/%s/%s' % (
+                    'EREQ' if pending_request else 'ERES', unpaid.id)
+            else:
+                pay_url = '/my/library/payments'
         return request.render('library_manager.portal_library_ebook_detail', {
+            'pay_url': pay_url,
             'ebook': ebook,
             'related_ebooks': related,
             'is_public': is_public,
@@ -250,7 +244,6 @@ class LibraryCatalogController(http.Controller):
             'notice': request.session.pop('library_portal_notice', False),
             'ebook_price': request.env['library.payment.mixin']._library_service_price(
                 'ebook'),
-            **self._payment_instructions(),
         })
 
     @http.route(

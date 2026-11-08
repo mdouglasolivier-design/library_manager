@@ -30,15 +30,11 @@
     .o_library_dashboard_panel_header {
         h2 {
             font-size: 14.5px;
-            font-weight: 600;
+            font-weight: 400;
         }
 
         > i {
             font-size: 15px;
         }
     }
-}
-// Panel titles: regular weight.
-.o_library_dashboard .o_library_dashboard_panel_header h2 {
-    font-weight: 400;
 }

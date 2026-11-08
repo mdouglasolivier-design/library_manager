@@ -27,9 +27,6 @@
             <xpath expr="//field[@name='payment_reference']" position="after">
                 <field name="payment_currency_id" readonly="1"/>
                 <field name="payment_transaction_id" readonly="1"/>
-                <field name="payment_evidence" filename="payment_evidence_filename"
-                       groups="library_manager.group_library_librarian,base.group_system"/>
-                <field name="payment_evidence_filename" invisible="1"/>
             </xpath>
         </field>
     </record>
@@ -42,9 +39,6 @@
             <xpath expr="//field[@name='payment_reference']" position="after">
                 <field name="payment_currency_id" readonly="1"/>
                 <field name="payment_transaction_id" readonly="1"/>
-                <field name="payment_evidence" filename="payment_evidence_filename"
-                       groups="library_manager.group_library_librarian,base.group_system"/>
-                <field name="payment_evidence_filename" invisible="1"/>
             </xpath>
         </field>
     </record>
@@ -57,9 +51,6 @@
             <xpath expr="//field[@name='payment_reference']" position="after">
                 <field name="payment_currency_id" readonly="1"/>
                 <field name="payment_transaction_id" readonly="1"/>
-                <field name="payment_evidence" filename="payment_evidence_filename"
-                       groups="library_manager.group_library_librarian,base.group_system"/>
-                <field name="payment_evidence_filename" invisible="1"/>
             </xpath>
         </field>
     </record>

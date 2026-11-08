@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <template id="portal_library_header">
-        <header class="library-portal-header">
+        <header t-attf-class="library-portal-header #{'library-portal-header--member' if not is_public else ''}">
             <div class="container library-portal-header__inner">
                 <a class="library-portal-brand" href="/library">
                     <img class="library-portal-brand__logo"
@@ -343,16 +343,32 @@
                                 <div t-if="ebook.language"><dt>Language</dt><dd t-esc="ebook.language"/></div>
                                 <div t-if="ebook.file_format"><dt>Format</dt><dd class="text-uppercase" t-esc="ebook.file_format"/></div>
                             </dl>
-                            <p class="library-price">
-                                Borrowing price:
-                                <strong t-esc="'%s %s' % (ebook_price, request.env['ir.config_parameter'].sudo().get_param('library_manager.payment_currency', 'USD'))"/>
-                            </p>
+                            <div class="library-price-row">
+                                <p class="library-price">
+                                    Borrowing price:
+                                    <strong t-esc="'%s %s' % (ebook_price, request.env['ir.config_parameter'].sudo().get_param('library_manager.payment_currency', 'USD'))"/>
+                                </p>
+                                <span t-if="not ebook.file_available and not active_loan"
+                                      class="library-pay-button library-pay-button--disabled"
+                                      title="The reading file has not been uploaded yet, so this eBook cannot be borrowed.">Pay</span>
+                                <t t-if="ebook.file_available and not active_loan">
+                                    <a t-if="is_public" class="library-pay-button"
+                                       t-att-href="'/web/login?redirect=/library/ebooks/%s' % ebook.id">Pay</a>
+                                    <t t-elif="pending_request or pending_reservation">
+                                        <a t-if="pay_url" class="library-pay-button"
+                                           t-att-href="pay_url">Pay</a>
+                                    </t>
+                                    <form t-else="" method="post"
+                                          t-att-action="'/my/library/ebooks/%s/request' % ebook.id">
+                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                        <button type="submit" class="library-pay-button">Pay</button>
+                                    </form>
+                                </t>
+                            </div>
                             <div class="library-payment-instructions">
                                 <h2>Secure checkout</h2>
-                                <p>Card and bank transfer options are shown only when an Odoo payment provider is configured.</p>
-                                <p>Bank transfer: <t t-esc="bank_name or 'Bank name to be configured'"/> · Account <t t-esc="bank_account or 'number to be configured'"/> · <t t-esc="bank_holder or 'Account holder to be configured'"/>.</p>
-                                <p>MTN MoMo is unavailable until an approved provider integration is configured. Bank transfers remain pending until library staff verify payment.</p>
-                                <p>Never enter card numbers, security codes, or MoMo PINs on this website.</p>
+                                <p>Pay with Flutterwave using a bank card or mobile money. Your receipt is created automatically as soon as the payment is confirmed.</p>
+                                <p>Never enter card numbers, security codes, or mobile money PINs anywhere except on the secure Flutterwave page.</p>
                             </div>
                             <div t-if="notice" t-att-class="'alert alert-%s' % notice['level']"
                                  role="status" t-esc="notice['message']"/>
@@ -374,7 +390,8 @@
                                 <a href="/my/library/loans">View My Library</a>
                             </div>
                             <div t-elif="pending_request" class="library-detail__notice">
-                                Your borrowing request is awaiting a librarian decision.
+                                <t t-if="pending_request.payment_status == 'pending'">Your request is saved. Press <strong>Pay</strong> next to the price to finish the payment.</t>
+                                <t t-else="">Your payment was received. Your borrowing request is awaiting a librarian decision.</t>
                                 <a href="/my/library/requests">View your requests</a>
                             </div>
                             <div t-elif="pending_reservation" class="library-detail__notice">
@@ -385,14 +402,14 @@
                                   t-att-action="'/my/library/ebooks/%s/request' % ebook.id"
                                   method="post">
                                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                <p>Choose an available payment provider at the next step. No payment is treated as successful until verified.</p>
+                                <p>You will pay securely on Flutterwave at the next step. No payment is treated as successful until Flutterwave confirms it.</p>
                                 <button class="library-button" type="submit">Continue to secure checkout</button>
                             </form>
                             <form t-else=""
                                   t-att-action="'/my/library/ebooks/%s/request' % ebook.id"
                                   method="post">
                                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                <p>Choose an available payment provider at the next step. Payment must be verified before an eBook loan is approved.</p>
+                                <p>You will pay securely on Flutterwave at the next step. Your receipt appears automatically once the payment is confirmed.</p>
                                 <button class="library-button" type="submit">Continue to secure checkout</button>
                             </form>
                             <aside class="library-detail__notice mt-3">

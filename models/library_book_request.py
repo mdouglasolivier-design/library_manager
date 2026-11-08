@@ -45,7 +45,7 @@ class LibraryBookRequest(models.Model):
     @api.model
     def submit_for_current_user(
             self, book_id, borrow_date=None, due_date=None,
-            borrower_phone=None, payment_method='momo', momo_phone=None,
+            borrower_phone=None, payment_method='flutterwave', momo_phone=None,
             payment_reference=None):
         user = self.env.user
         if user._is_public() or not user.partner_id:
@@ -58,13 +58,8 @@ class LibraryBookRequest(models.Model):
         ], limit=1)
         if not book:
             raise UserError("This book is not available in the public catalog.")
-        if payment_method not in ('momo', 'bank', 'external_card'):
+        if payment_method != 'flutterwave':
             raise ValidationError("Select a supported payment method.")
-        phone = (momo_phone or '').strip()
-        if payment_method == 'momo' and not re.fullmatch(
-                r'[0-9+().\-\s]{7,32}', phone):
-            raise ValidationError(
-                "Enter the MTN MoMo phone number used for payment.")
         contact_phone = (borrower_phone or '').strip()
         if not contact_phone:
             contact_phone = (user.partner_id.phone or '').strip()
@@ -84,7 +79,6 @@ class LibraryBookRequest(models.Model):
             'due_date': due_date,
             'payment_method': payment_method,
             'payment_reference': (payment_reference or '').strip()[:128],
-            'momo_phone': phone if payment_method == 'momo' else False,
             'borrower_phone': contact_phone,
         })
 

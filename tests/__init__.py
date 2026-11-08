@@ -19,3 +19,4 @@ from . import test_security_rules
 from . import test_security_hardening
 from . import test_audit
 from . import test_reports_dashboard
+from . import test_payment_lifecycle

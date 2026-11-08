@@ -8,24 +8,6 @@ from odoo.http import request
 
 class PhysicalLibraryController(http.Controller):
 
-    def _payment_instructions(self):
-        parameters = request.env['ir.config_parameter'].sudo()
-        return {
-            'momo_name': parameters.get_param(
-                'library_manager.momo_recipient_name', 'Odoo Library'),
-            'momo_phone': parameters.get_param(
-                'library_manager.momo_recipient_phone', ''),
-            'bank_account': parameters.get_param(
-                'library_manager.bank_account_number', ''),
-            'bank_name': parameters.get_param(
-                'library_manager.bank_name', ''),
-            'bank_holder': parameters.get_param(
-                'library_manager.bank_account_holder', ''),
-            'card_instructions': parameters.get_param(
-                'library_manager.external_card_instructions',
-                'Configure a secure payment provider before enabling card payments.'),
-        }
-
     @http.route(
         '/library/books', type='http', auth='public', website=True,
         sitemap=True)
@@ -75,7 +57,6 @@ class PhysicalLibraryController(http.Controller):
                 ]._library_service_price('physical'),
                 'notice': request.session.pop(
                     'library_portal_notice', False),
-                **self._payment_instructions(),
             })
 
     @http.route(
@@ -117,7 +98,7 @@ class PhysicalLibraryController(http.Controller):
                 borrow_date=post.get('borrow_date'),
                 due_date=post.get('due_date'),
                 borrower_phone=post.get('borrower_phone'),
-                payment_method='bank',
+                payment_method='flutterwave',
                 payment_reference=post.get('payment_reference'))
         except (AccessError, UserError, ValidationError, ValueError) as error:
             request.session['library_portal_notice'] = {

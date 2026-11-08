@@ -159,9 +159,18 @@ class TestLibraryCatalogWebsite(HttpCase):
             library_link.get('t-if'),
             "record.name.raw_value == 'library_manager'")
         self.assertEqual(library_link.get('href'), '/library')
-        self.assertEqual(default_link.get('t-else'), '')
-        self.assertEqual(default_link.get('type'), 'object')
-        self.assertEqual(default_link.get('name'), 'more_info')
+        # Every other module keeps Odoo's own Module Info link.
+        self.assertEqual(
+            default_link.get('t-if'),
+            "record.name.raw_value != 'library_manager'")
+        self.assertIsNone(default_link.get('href'))
+
+        learn_more = arch.xpath(
+            "//t[@t-name='card']//footer/a[normalize-space(.)='Learn More']")
+        self.assertEqual(len(learn_more), 1)
+        self.assertIn("'/library'", learn_more[0].get('t-att-href'))
+        self.assertIn(
+            'record.website.raw_value', learn_more[0].get('t-att-href'))
 
     def test_staff_login_redirects_portal_users_to_public_library(self):
         self.authenticate(

@@ -135,9 +135,8 @@
                             </dl>
                             <div class="library-payment-instructions">
                                 <h2>Secure checkout</h2>
-                                <p>Bank transfer: <t t-esc="bank_name or 'Bank name to be configured'"/> · Account <t t-esc="bank_account or 'number to be configured'"/> · <t t-esc="bank_holder or 'Account holder to be configured'"/>.</p>
-                                <p>Card and bank transfer options are shown only when an Odoo payment provider is configured. MTN MoMo is unavailable until an approved provider integration is configured.</p>
-                                <p>Never enter card numbers, security codes, or MoMo PINs on this website.</p>
+                                <p>Pay with Flutterwave using a bank card or mobile money. Your receipt is created automatically as soon as the payment is confirmed.</p>
+                                <p>Never enter card numbers, security codes, or mobile money PINs anywhere except on the secure Flutterwave page.</p>
                             </div>
                             <div t-if="notice"
                                  t-att-class="'alert alert-%s' % notice['level']"

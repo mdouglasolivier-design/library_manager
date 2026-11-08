@@ -11,25 +11,86 @@
         <field name="print_report_name">'library-payment-%s' % object.reference</field>
     </record>
 
+    <!-- Transaction-record style slip: monospaced label/value rows, built
+         only from the verified payment. It carries the library's own name. -->
     <template id="report_library_payment_receipt">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="tx">
-                <t t-call="web.external_layout">
-                    <div class="page">
-                        <h2>Odoo Library Payment Receipt</h2>
-                        <p><strong>Reference:</strong> <span t-esc="tx.reference"/></p>
-                        <p><strong>Member:</strong> <span t-esc="tx.partner_id.name"/></p>
-                        <p t-if="tx.library_receipt_item"><strong>Item:</strong> <span t-esc="tx.library_receipt_item"/></p>
-                        <p><strong>Provider:</strong> <span t-esc="tx.provider_id.name"/></p>
-                        <p><strong>Amount:</strong>
-                            <span t-field="tx.amount"
-                                  t-options="{'widget': 'monetary', 'display_currency': tx.currency_id}"/>
-                        </p>
-                        <p><strong>Status:</strong> Paid and verified</p>
-                        <p><strong>Date:</strong> <span t-field="tx.last_state_change"/></p>
-                        <p>This receipt confirms the payment provider reported this transaction as successful.</p>
+                <div class="page library-receipt">
+                    <style>
+                        .library-receipt { font-family: "DejaVu Sans Mono", "Courier New", monospace; font-size: 12px; color: #1d2433; }
+                        .library-receipt .slip { width: 520px; margin: 30px auto 0; border: 1px solid #c9ced8; padding: 22px 26px 26px; }
+                        .library-receipt .head { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+                        .library-receipt .brand { font-family: Helvetica, Arial, sans-serif; font-size: 17px; font-weight: bold; color: #243b8f; }
+                        .library-receipt .kind { font-family: Helvetica, Arial, sans-serif; font-size: 12px; color: #4a5fb0; text-align: right; line-height: 1.35; }
+                        .library-receipt .title { letter-spacing: 2px; margin: 26px 0 4px; }
+                        .library-receipt .rows { width: 100%; border-collapse: collapse; }
+                        .library-receipt .rows td { padding: 7px 0; vertical-align: top; letter-spacing: 0.5px; }
+                        .library-receipt .rows td.label { width: 42%; color: #4d5565; text-transform: uppercase; }
+                        .library-receipt .rows td.value { text-align: right; word-break: break-all; }
+                        .library-receipt .rows tr.total td { border-top: 1px solid #1d2433; border-bottom: 1px solid #1d2433; font-weight: bold; }
+                        .library-receipt .stamp { margin: 26px auto 0; width: 220px; border: 2px solid #1d2433; text-align: center; padding: 8px 6px; font-weight: bold; line-height: 1.5; }
+                        .library-receipt .stamp.unpaid { border-color: #a33; color: #a33; }
+                        .library-receipt .foot { margin-top: 18px; text-align: center; color: #4d5565; font-size: 10px; letter-spacing: 1px; }
+                    </style>
+                    <div class="slip">
+                        <table class="head">
+                            <tr>
+                                <td class="brand">Odoo Library</td>
+                                <td class="kind">Payment receipt /<br/>Transaction record</td>
+                            </tr>
+                        </table>
+                        <div class="title">PAYMENT RECEIPT</div>
+                        <table class="rows">
+                            <tr>
+                                <td class="label">Receipt no.</td>
+                                <td class="value" t-esc="tx.reference"/>
+                            </tr>
+                            <tr>
+                                <td class="label">Transaction date</td>
+                                <td class="value"><span t-field="tx.last_state_change" t-options="{'widget': 'datetime', 'format': 'yyyy-MM-dd HH:mm'}"/></td>
+                            </tr>
+                            <tr>
+                                <td class="label">Paid with</td>
+                                <td class="value">
+                                    <t t-esc="tx.provider_id.name"/>
+                                    <t t-if="tx.payment_method_id"> / <t t-esc="tx.payment_method_id.name"/></t>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label">Member name</td>
+                                <td class="value" t-esc="tx.partner_id.name"/>
+                            </tr>
+                            <tr t-if="tx.library_receipt_item">
+                                <td class="label">Item</td>
+                                <td class="value" t-esc="tx.library_receipt_item"/>
+                            </tr>
+                            <tr t-if="tx.provider_reference">
+                                <td class="label">Provider ref.</td>
+                                <td class="value" t-esc="tx.provider_reference"/>
+                            </tr>
+                            <tr>
+                                <td class="label">Status</td>
+                                <td class="value">
+                                    <t t-if="tx.state == 'done'">PAID - VERIFIED</t>
+                                    <t t-else="">NOT PAID</t>
+                                </td>
+                            </tr>
+                            <tr class="total">
+                                <td class="label">Amount paid</td>
+                                <td class="value">
+                                    <t t-esc="tx.currency_id.name"/>
+                                    <span t-field="tx.amount" t-options="{'widget': 'float', 'precision': tx.currency_id.decimal_places}"/>
+                                </td>
+                            </tr>
+                        </table>
+                        <div t-attf-class="stamp #{'' if tx.state == 'done' else 'unpaid'}">
+                            <t t-if="tx.state == 'done'">ODOO LIBRARY<br/>PAID<br/><span t-field="tx.last_state_change" t-options="{'widget': 'date', 'format': 'dd MMM yyyy'}"/></t>
+                            <t t-else="">NOT PAID</t>
+                        </div>
+                        <div class="foot">Created automatically when the payment was confirmed.<br/>Keep this receipt for your records.</div>
                     </div>
-                </t>
+                </div>
             </t>
         </t>
     </template>

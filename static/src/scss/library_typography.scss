@@ -1,7 +1,11 @@
 // Compact typography for the Odoo Library website.
-// Loaded after library_portal.scss. To go back to the previous look, delete
-// this file and its line in __manifest__.py.
+//
+// This file only overrides type (font, size, weight, tracking). It is loaded
+// after library_portal.scss, so to go back to the previous look, delete this
+// file and its line in __manifest__.py.
+//
 // Scale (desktop):  h1 22-28px  |  h2 17-20px  |  h3 14-15px  |  body 14px
+// Weights: h1 medium (550), h2 and smaller regular (400).
 
 @font-face {
     font-family: "LibraryInter";
@@ -14,6 +18,7 @@
 $library-font: "LibraryInter", Inter, "Segoe UI Variable Text", "Segoe UI",
     system-ui, -apple-system, sans-serif;
 
+// Base text -------------------------------------------------------------
 #wrapwrap .library-portal {
     font-family: $library-font;
     font-size: 14px;
@@ -24,6 +29,7 @@ $library-font: "LibraryInter", Inter, "Segoe UI Variable Text", "Segoe UI",
     text-rendering: optimizeLegibility;
 }
 
+// Headings (same selectors as library_portal.scss, so they win by order) --
 #wrapwrap {
     h1 {
         font-size: clamp(1.35rem, 2.2vw, 1.75rem);
@@ -31,25 +37,30 @@ $library-font: "LibraryInter", Inter, "Segoe UI Variable Text", "Segoe UI",
         letter-spacing: -0.022em;
         line-height: 1.2;
     }
+
     h2 {
         font-size: clamp(1.05rem, 1.6vw, 1.25rem);
-        font-weight: 550;
+        font-weight: 400;
         letter-spacing: -0.018em;
         line-height: 1.3;
     }
+
     h3,
     h4,
-    h5 {
+    h5,
+    h6 {
         font-size: 0.95rem;
-        font-weight: 600;
+        font-weight: 400;
         letter-spacing: -0.01em;
     }
+
     strong,
     b {
         font-weight: 600;
     }
 }
 
+// Page headings and hero ------------------------------------------------
 #wrapwrap .library-page__heading h1,
 #wrapwrap .library-detail__content h1 {
     font-size: clamp(22px, 3vw, 28px);
@@ -69,8 +80,14 @@ $library-font: "LibraryInter", Inter, "Segoe UI Variable Text", "Segoe UI",
     h3 {
         font-size: 1.1rem;
     }
+
+    h2,
+    h3 {
+        font-weight: 400;
+    }
 }
 
+// Supporting text -------------------------------------------------------
 #wrapwrap .library-hero__content > p,
 #wrapwrap .library-detail__author {
     font-size: 14.5px;
@@ -82,6 +99,7 @@ $library-font: "LibraryInter", Inter, "Segoe UI Variable Text", "Segoe UI",
     font-size: 14px;
 }
 
+// Brand names -----------------------------------------------------------
 #wrapwrap .library-portal-brand,
 #wrapwrap .library-website-brand {
     font-size: 14.5px;
@@ -95,6 +113,7 @@ $library-font: "LibraryInter", Inter, "Segoe UI Variable Text", "Segoe UI",
     font-weight: 600;
 }
 
+// Statistic numbers -----------------------------------------------------
 #wrapwrap .library-stats strong {
     font-size: 20px;
     font-weight: 600;
@@ -107,19 +126,4 @@ $library-font: "LibraryInter", Inter, "Segoe UI Variable Text", "Segoe UI",
 #wrapwrap .library-member-stats strong {
     font-size: 21px;
     font-weight: 600;
-}
-// h2 and smaller: regular weight (h1 stays medium).
-#wrapwrap {
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
-        font-weight: 400;
-    }
-
-    .oe_website_login_container h2,
-    .oe_website_login_container h3 {
-        font-weight: 400;
-    }
 }

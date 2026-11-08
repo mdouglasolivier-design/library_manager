@@ -1,0 +1,75 @@
+// Header layout for signed-in members.
+//
+// Members see about ten menu links plus the account buttons, which cannot fit
+// on one row. For them the header becomes two rows: brand and account buttons
+// on top, the full menu on its own row below. Visitors who are not signed in
+// keep the original single-row header.
+//
+// To go back: delete this file, its line in __manifest__.py, and the
+// "library-portal-header--member" class in views/portal_templates.xml.
+
+#wrapwrap .library-portal-header--member .library-portal-header__inner {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    min-height: 0;
+    padding-top: 12px;
+    padding-bottom: 0;
+    gap: 0 24px;
+
+    // The page container adds empty ::before/::after items that would push the
+    // brand away from the left edge once the row wraps.
+    &::before,
+    &::after {
+        display: none;
+    }
+
+    .library-portal-brand {
+        order: 1;
+    }
+
+    .library-portal-header__actions {
+        order: 2;
+        margin-left: auto;
+    }
+
+    .library-portal-nav {
+        order: 3;
+        flex: 0 0 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 4px 26px;
+        margin-top: 10px;
+        padding: 10px 0 12px;
+        border-top: 1px solid var(--library-line);
+
+        a {
+            padding: 2px 0;
+            border-bottom: 1px solid transparent;
+            transition: color 0.15s, border-color 0.15s;
+
+            &:hover {
+                color: var(--library-navy);
+                border-bottom-color: currentColor;
+            }
+        }
+    }
+}
+
+@media (max-width: 575.98px) {
+    #wrapwrap .library-portal-header--member .library-portal-header__inner {
+        gap: 0 12px;
+
+        .library-portal-header__actions {
+            gap: 10px;
+
+            .btn {
+                min-height: 36px;
+                padding: 6px 12px;
+            }
+        }
+
+        .library-portal-nav {
+            gap: 6px 18px;
+        }
+    }
+}

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- MTN Mobile Money (Rwanda) through Flutterwave. Flutterwave's
+             option name is "mobilemoneyrwanda"; the method only appears when
+             Flutterwave is switched on, and Flutterwave must have it enabled
+             on the merchant account. -->
+        <record id="payment_method_mobilemoneyrwanda" model="payment.method">
+            <field name="name">MTN Mobile Money (Rwanda)</field>
+            <field name="code">mobilemoneyrwanda</field>
+            <field name="sequence">20</field>
+            <field name="active" eval="True"/>
+            <field name="support_tokenization" eval="False"/>
+            <field name="support_express_checkout" eval="False"/>
+        </record>
+        <record id="payment.payment_provider_flutterwave" model="payment.provider">
+            <field name="payment_method_ids"
+                   eval="[(4, ref('library_manager.payment_method_mobilemoneyrwanda'))]"/>
+        </record>
+    </data>
+</odoo>

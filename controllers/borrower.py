@@ -88,7 +88,7 @@ class LibraryBorrowerController(http.Controller):
                 'library.ebook.request'
             ].submit_for_current_user(
                 ebook_id,
-                payment_method='bank',
+                payment_method='flutterwave',
                 payment_reference=post.get('payment_reference'))
         except (AccessError, UserError, ValidationError) as error:
             self._set_notice(str(error), 'warning')

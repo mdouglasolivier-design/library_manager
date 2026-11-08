@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!--
+        In Settings > Apps, make "Module Info" (three-dot menu) and the card's
+        "Learn More" button open the public Odoo Library website (/library)
+        for this module only. Every other module keeps its default behaviour.
+
+        The xpaths match on the visible label instead of internal attributes
+        (type="open" / name="more_info"), so they keep working if Odoo changes
+        how the default link is wired.
+    -->
     <record id="view_apps_kanban_library_module_info" model="ir.ui.view">
         <field name="name">Apps kanban: Odoo Library website link</field>
         <field name="model">ir.module.module</field>

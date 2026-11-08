@@ -40,18 +40,9 @@
                             <field name="library_payment_currency"/>
                         </setting>
                     </block>
-                    <block title="Manual bank-transfer details">
-                        <setting string="MTN MoMo recipient">
-                            <field name="library_momo_recipient_name"/>
-                            <field name="library_momo_recipient_phone"/>
-                        </setting>
-                        <setting string="Bank transfer details">
-                            <field name="library_bank_name"/>
-                            <field name="library_bank_account_holder"/>
-                            <field name="library_bank_account_number"/>
-                        </setting>
+                    <block title="Online payments">
                         <p class="text-muted">
-                            MTN MoMo is unavailable until an approved provider integration is configured. Bank transfers remain pending until library staff verify the funds. Configure card processing in Odoo Payment Providers; never collect card numbers, security codes, or MoMo PINs.
+                            All payments go through Flutterwave (cards and mobile money). Enter the Flutterwave keys under Payment Providers. Members are never asked to type card numbers or PINs on this website, and nobody uploads proof of payment: receipts are created automatically when Flutterwave confirms a payment.
                         </p>
                     </block>
                 </app>
