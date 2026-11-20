@@ -177,6 +177,13 @@ class LibraryPaymentPortal(PaymentPortal):
         website=True, sitemap=False)
     def library_payment_history(self, **kwargs):
         partner_id = request.env.user.partner_id.id
+        # Settle anything Flutterwave has already finished before listing.
+        request.env['payment.transaction'].sudo().search([
+            ('partner_id', '=', partner_id),
+            ('provider_code', '=', 'flutterwave'),
+            ('state', 'in', ('draft', 'pending')),
+            ('library_payment_record_ref', '!=', False),
+        ], limit=10)._library_reconcile_with_flutterwave()
         payments = []
         for model in _PAYMENT_RECORD_MODELS:
             records = request.env[model].sudo().search([
@@ -218,6 +225,30 @@ class LibraryPaymentPortal(PaymentPortal):
                 'is_public': request.env.user._is_public(),
             })
 
+    @http.route(
+        '/my/library/payment-confirmation/status', type='http',
+        auth='public', website=True, sitemap=False)
+    def library_payment_status(self, tx_id, access_token, **kwargs):
+        """Polled by the payment status page until the payment is final."""
+        try:
+            tx_id = int(tx_id)
+        except (TypeError, ValueError):
+            return request.not_found()
+        tx = request.env['payment.transaction'].sudo().browse(tx_id).exists()
+        if (
+                not tx
+                or not tx.library_payment_record_ref
+                or not payment_utils.check_access_token(
+                    access_token, tx.partner_id.id, tx.amount,
+                    tx.currency_id.id)):
+            return request.not_found()
+        tx._library_reconcile_with_flutterwave()
+        return request.make_json_response(
+            {
+                'state': tx.state,
+                'final': tx.state in ('done', 'cancel', 'error'),
+            },
+            headers=[('Cache-Control', 'no-store')])
     def _paid_transaction(self, tx_id):
         return request.env['payment.transaction'].sudo().search([
             ('id', '=', tx_id),

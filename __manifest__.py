@@ -38,6 +38,7 @@
         'report/library_payment_receipt.xml',
         'data/library_payment_receipt_mail.xml',
         'data/library_payment_method_data.xml',
+        'data/library_payment_reconcile_cron.xml',
         'report/library_loan_receipt_templates.xml',
         'report/library_overdue_report_templates.xml',
         'report/library_member_card_templates.xml',

@@ -141,6 +141,8 @@
                     <div t-if="tx.state == 'done'" class="alert alert-success">
                         Payment received and verified. Your receipt has been created.
                         <a t-att-href="'/my/library/payments/%s/receipt' % tx.id">Download receipt (PDF)</a>
+                        <a t-att-href="'/my/library/payments/%s/receipt/view' % tx.id"
+                           target="_blank">View receipt</a>
                     </div>
                     <div t-elif="tx.state in ('pending', 'authorized', 'draft')"
                          class="alert alert-info">
@@ -164,6 +166,30 @@
                         <dd class="col-sm-9" t-esc="tx.provider_id.name"/>
                     </dl>
                     <a class="library-button" href="/my/library/payments">View payment history</a>
+                    <div t-if="tx.state in ('pending', 'authorized', 'draft')"
+                         id="library-payment-poll"
+                         t-att-data-url="'/my/library/payment-confirmation/status?tx_id=%s&amp;access_token=%s' % (tx.id, request.httprequest.args.get('access_token', ''))"/>
+                    <script>
+                        (function () {
+                            var box = document.getElementById('library-payment-poll');
+                            if (!box) { return; }
+                            var url = box.getAttribute('data-url');
+                            var tries = 0;
+                            function check() {
+                                tries += 1;
+                                fetch(url, {credentials: 'same-origin', cache: 'no-store'})
+                                    .then(function (r) { return r.json(); })
+                                    .then(function (data) {
+                                        if (data.final) { window.location.reload(); return; }
+                                        if (tries !== 60) { setTimeout(check, 5000); }
+                                    })
+                                    .catch(function () {
+                                        if (tries !== 60) { setTimeout(check, 8000); }
+                                    });
+                            }
+                            setTimeout(check, 2000);
+                        })();
+                    </script>
                 </main>
                 <t t-call="library_manager.portal_library_footer"/>
             </div>
