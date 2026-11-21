@@ -16,6 +16,7 @@
                 <field name="available_copies"/>
                 <field name="borrowed_copies"/>
                 <field name="returned_copies"/>
+                <field name="website_published" string="On website" widget="boolean_toggle"/>
                 <field name="borrower_id"/>
                 <field name="due_date"/>
                 <field name="is_overdue" string="Overdue" widget="boolean"/>
@@ -113,6 +114,8 @@
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
+                        <field name="website_published" widget="boolean_button"
+                               options="{'terminology': {'string_true': 'Published on website', 'hover_true': 'Unpublish', 'string_false': 'Not on website', 'hover_false': 'Publish'}}"/>
                         <button name="action_view_loans" type="object"
                                 class="oe_stat_button" icon="fa-history">
                             <field name="loan_count" widget="statinfo" string="Loans"/>
@@ -194,6 +197,8 @@
                 <filter name="borrowed" string="Borrowed" domain="[('state', '=', 'borrowed')]"/>
                 <filter name="overdue" string="Overdue" domain="[('is_overdue', '=', True)]"/>
                 <filter name="lost" string="Lost" domain="[('state', '=', 'lost')]"/>
+                <filter name="published" string="Published on website" domain="[('website_published', '=', True)]"/>
+                <filter name="unpublished" string="Not published" domain="[('website_published', '=', False)]"/>
                 <separator/>
                 <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
                 <group expand="0" string="Group By">

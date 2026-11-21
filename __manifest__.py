@@ -43,6 +43,7 @@
         'report/library_overdue_report_templates.xml',
         'report/library_member_card_templates.xml',
         'views/library_book_views.xml',
+        'views/library_book_actions.xml',
         'views/library_book_request_views.xml',
         'views/library_loan_views.xml',
         'views/library_ebook_views.xml',

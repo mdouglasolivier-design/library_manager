@@ -35,7 +35,7 @@ class LibraryBook(models.Model):
     returned_copies = fields.Integer(
         compute='_compute_copy_counts', store=True)
     website_published = fields.Boolean(
-        string='Published on Website', default=False, index=True)
+        string='Published on Website', default=True, index=True)
     pages = fields.Integer()
     published_date = fields.Date()
     active = fields.Boolean(default=True)
