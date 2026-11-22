@@ -38,7 +38,7 @@ class LibraryPaymentMixin(models.AbstractModel):
     ], string='Payment Status', default='pending', required=True, index=True)
     payment_amount = fields.Monetary(
         string='Amount', currency_field='payment_currency_id',
-        digits=(12, 2), readonly=True)
+        readonly=True)
     payment_currency_id = fields.Many2one(
         'res.currency', string='Payment Currency', readonly=True,
         default=lambda self: self._library_payment_currency())
