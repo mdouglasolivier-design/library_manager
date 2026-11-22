@@ -133,11 +133,14 @@
                                 <div><dt>Total copies</dt><dd t-esc="book.total_copies"/></div>
                                 <div><dt>Available copies</dt><dd t-esc="book.available_copies"/></div>
                             </dl>
+<<<<<<< HEAD
                             <div class="library-payment-instructions">
                                 <h2>Pay instantly or by bank transfer</h2>
                                 <p>Pay by card or mobile money and your receipt is created the moment the payment succeeds. You can also choose bank transfer, which a librarian confirms.</p>
                                 <p>Never share card numbers, security codes, or PINs with anyone.</p>
                             </div>
+=======
+>>>>>>> origin/bank-only
                             <div t-if="notice"
                                  t-att-class="'alert alert-%s' % notice['level']"
                                  role="status" t-esc="notice['message']"/>

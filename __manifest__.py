@@ -1,6 +1,10 @@
 {
     'name': 'Odoo Library',
+<<<<<<< HEAD
     'version': '18.0.2.3.0',
+=======
+    'version': '18.0.2.4.0',
+>>>>>>> origin/bank-only
     'summary': 'Your Integrated Digital Library Management Platform.',
     'category': 'Services',
     'author': 'Douglas',
