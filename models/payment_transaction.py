@@ -1,3 +1,4 @@
+from datetime import timedelta
 import logging
 
 from odoo import api, fields, models
@@ -129,6 +130,35 @@ class PaymentTransaction(models.Model):
                     return
         return super()._process_notification_data(notification_data)
 
+    def _library_reconcile_with_flutterwave(self):
+        """Ask Flutterwave for the real status of unfinished library payments.
+
+        The answer goes through Odoo's normal notification path, so the
+        payment is confirmed and the receipt email is queued without any
+        admin action, even when the webhook or browser redirect never came.
+        """
+        for transaction in self.sudo().filtered(
+                lambda tx: tx.provider_code == 'flutterwave'
+                and tx.library_payment_record_ref
+                and tx.state in ('draft', 'pending')):
+            try:
+                with self.env.cr.savepoint():
+                    transaction._handle_notification_data(
+                        'flutterwave', {'tx_ref': transaction.reference})
+            except Exception:  # never break the portal page or the cron
+                _logger.warning(
+                    "Flutterwave reconciliation failed for %s.",
+                    transaction.reference, exc_info=True)
+
+    @api.model
+    def _cron_library_reconcile_flutterwave(self):
+        since = fields.Datetime.now() - timedelta(days=2)
+        self.search([
+            ('provider_code', '=', 'flutterwave'),
+            ('state', 'in', ('draft', 'pending')),
+            ('library_payment_record_ref', '!=', False),
+            ('create_date', '>=', since),
+        ], limit=100)._library_reconcile_with_flutterwave()
     def _library_send_receipt(self):
         """Queue the PDF receipt email once per verified library payment."""
         template = self.env.ref(
