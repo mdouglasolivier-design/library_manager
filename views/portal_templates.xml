@@ -381,8 +381,8 @@
                                 </t>
                             </div>
                             <div class="library-payment-instructions">
-                                <h2>Pay by bank transfer</h2>
-                                <p>After you request this eBook you will see the bank details and your payment reference. Once the library confirms your transfer, your receipt is created automatically.</p>
+                                <h2>Pay instantly or by bank transfer</h2>
+                                <p>Pay by card or mobile money and your receipt is created the moment the payment succeeds. You can also choose bank transfer, which a librarian confirms.</p>
                                 <p>Never share card numbers, security codes, or PINs with anyone.</p>
                             </div>
                             <div t-if="notice" t-att-class="'alert alert-%s' % notice['level']"
@@ -417,15 +417,15 @@
                                   t-att-action="'/my/library/ebooks/%s/request' % ebook.id"
                                   method="post">
                                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                <p>You will receive the bank details at the next step. No payment is treated as successful until the library confirms your transfer.</p>
-                                <button class="library-button" type="submit">Continue to bank transfer details</button>
+                                <p>You choose how to pay at the next step. No payment is treated as successful until it is verified.</p>
+                                <button class="library-button" type="submit">Continue to payment</button>
                             </form>
                             <form t-else=""
                                   t-att-action="'/my/library/ebooks/%s/request' % ebook.id"
                                   method="post">
                                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                <p>You will receive the bank details at the next step. Your receipt appears automatically once the library confirms your transfer.</p>
-                                <button class="library-button" type="submit">Continue to bank transfer details</button>
+                                <p>You choose how to pay at the next step. Card and mobile money payments are confirmed instantly and your receipt appears automatically.</p>
+                                <button class="library-button" type="submit">Continue to payment</button>
                             </form>
                             <aside class="library-detail__notice mt-3">
                                 Loan requests follow the library's borrowing policy. An active loan is required before reading.

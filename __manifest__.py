@@ -1,6 +1,6 @@
 {
     'name': 'Odoo Library',
-    'version': '18.0.2.2.0',
+    'version': '18.0.2.3.0',
     'summary': 'Your Integrated Digital Library Management Platform.',
     'category': 'Services',
     'author': 'Douglas',
@@ -8,6 +8,7 @@
     'depends': [
         'base', 'mail', 'website', 'portal', 'auth_signup', 'auth_oauth',
         'contacts', 'stock', 'payment', 'payment_custom',
+        'payment_flutterwave',
     ],
     'external_dependencies': {
         'python': ['pymupdf', 'PIL'],
@@ -37,6 +38,8 @@
         'report/library_report_actions.xml',
         'report/library_payment_receipt.xml',
         'data/library_payment_receipt_mail.xml',
+        'data/library_payment_method_data.xml',
+        'data/library_payment_reconcile_cron.xml',
         'report/library_loan_receipt_templates.xml',
         'report/library_overdue_report_templates.xml',
         'report/library_member_card_templates.xml',

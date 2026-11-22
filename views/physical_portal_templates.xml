@@ -134,8 +134,8 @@
                                 <div><dt>Available copies</dt><dd t-esc="book.available_copies"/></div>
                             </dl>
                             <div class="library-payment-instructions">
-                                <h2>Pay by bank transfer</h2>
-                                <p>After you submit your request you will see the bank details and your payment reference. Once the library confirms your transfer, your receipt is created automatically.</p>
+                                <h2>Pay instantly or by bank transfer</h2>
+                                <p>Pay by card or mobile money and your receipt is created the moment the payment succeeds. You can also choose bank transfer, which a librarian confirms.</p>
                                 <p>Never share card numbers, security codes, or PINs with anyone.</p>
                             </div>
                             <div t-if="notice"
@@ -171,7 +171,7 @@
                                 <input id="physical-due-date" name="due_date"
                                        type="date" required="required"
                                        t-att-value="expected_return"/>
-                                <p>You will pay by bank transfer at the next step. A librarian must confirm the transfer before your request can be approved.</p>
+                                <p>You choose how to pay at the next step. Your request can be approved once the payment is verified.</p>
                                 <button class="library-button" type="submit"
                                         t-att-disabled="not book.available_copies">
                                     Submit borrowing request

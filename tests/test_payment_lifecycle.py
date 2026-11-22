@@ -279,17 +279,18 @@ class TestLibraryBankTransferFlow(LibraryPaymentFixtureMixin, TransactionCase):
         self.assertEqual(self.request_record.payment_status, 'rejected')
         self.assertFalse(self._receipt_mails(self.transaction))
 
-    def test_library_checkout_offers_only_bank_transfer(self):
+    def test_library_checkout_offers_only_flutterwave_and_bank_transfer(self):
         self.provider.write({'state': 'test'})
         other = self.env['payment.provider'].search([
-            ('code', '!=', 'custom'),
+            ('code', 'not in', ('custom', 'flutterwave')),
             ('state', 'in', ('enabled', 'test')),
         ])
         compatible = self.env['payment.provider']._get_compatible_providers(
             self.env.company.id, self.member.partner_id.id, 5.0,
             currency_id=self.request_record.payment_currency_id.id,
             library_checkout=True)
-        self.assertEqual(compatible.mapped('code'), ['custom'])
+        self.assertIn('custom', compatible.mapped('code'))
+        self.assertFalse(set(compatible.mapped('code')) - {'custom', 'flutterwave'})
         self.assertFalse(compatible & other)
 
 

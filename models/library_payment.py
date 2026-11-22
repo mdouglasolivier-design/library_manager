@@ -19,13 +19,13 @@ class LibraryPaymentMixin(models.AbstractModel):
     _description = 'Library Payment'
 
     payment_method = fields.Selection([
+        ('flutterwave', 'Flutterwave (card / mobile money)'),
         ('bank', 'Bank transfer'),
-        # Kept so payments made before bank transfer stay readable.
-        ('flutterwave', 'Flutterwave (legacy)'),
+        # Kept so payments made before Flutterwave stay readable.
         ('momo', 'MTN Mobile Money (legacy)'),
         ('card', 'Bank card (legacy)'),
         ('external_card', 'External card provider (legacy)'),
-    ], string='Payment Method', default='bank', required=True,
+    ], string='Payment Method', default='flutterwave', required=True,
         index=True)
     payment_status = fields.Selection([
         ('pending', 'Pending'),
