@@ -12,3 +12,5 @@ __pycache__/
 
 *.backup
 .venv*/
+
+.venv-1/
