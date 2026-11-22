@@ -98,9 +98,13 @@ class LibraryPaymentPortal(PaymentPortal):
             provider_id).exists()
         if not provider or provider.state not in ('enabled', 'test'):
             raise ValidationError("Select an enabled payment provider.")
-        if provider.code != 'flutterwave':
+        if not (
+                provider.code == 'flutterwave'
+                or (provider.code == 'custom'
+                    and provider.custom_mode == 'wire_transfer')):
             raise ValidationError(
-                "Only Flutterwave is supported by the library checkout.")
+                "Only Flutterwave or bank transfer is supported by the "
+                "library checkout.")
 
         payment_method = request.env['payment.method'].sudo().browse(
             payment_method_id).exists()
@@ -115,7 +119,11 @@ class LibraryPaymentPortal(PaymentPortal):
             is_validation=is_validation,
             custom_create_values=custom_create_values, **kwargs)
         tx._library_link_payment_record(payment)
-        payment.sudo().write({'payment_method': 'flutterwave'})
+        payment.sudo().write({
+            'payment_method': (
+                'flutterwave' if provider.code == 'flutterwave'
+                else 'bank'),
+        })
         return tx
 
     @staticmethod
@@ -249,6 +257,7 @@ class LibraryPaymentPortal(PaymentPortal):
                 'final': tx.state in ('done', 'cancel', 'error'),
             },
             headers=[('Cache-Control', 'no-store')])
+
     def _paid_transaction(self, tx_id):
         return request.env['payment.transaction'].sudo().search([
             ('id', '=', tx_id),

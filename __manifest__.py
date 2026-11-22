@@ -1,13 +1,14 @@
 {
     'name': 'Odoo Library',
-    'version': '18.0.2.0.0',
+    'version': '18.0.2.3.0',
     'summary': 'Your Integrated Digital Library Management Platform.',
     'category': 'Services',
     'author': 'Douglas',
     'website': 'https://github.com/mdouglasolivier-design/library_manager',
     'depends': [
         'base', 'mail', 'website', 'portal', 'auth_signup', 'auth_oauth',
-        'contacts', 'stock', 'payment', 'payment_flutterwave',
+        'contacts', 'stock', 'payment', 'payment_custom',
+        'payment_flutterwave',
     ],
     'external_dependencies': {
         'python': ['pymupdf', 'PIL'],

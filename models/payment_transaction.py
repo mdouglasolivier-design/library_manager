@@ -159,6 +159,7 @@ class PaymentTransaction(models.Model):
             ('library_payment_record_ref', '!=', False),
             ('create_date', '>=', since),
         ], limit=100)._library_reconcile_with_flutterwave()
+
     def _library_send_receipt(self):
         """Queue the PDF receipt email once per verified library payment."""
         template = self.env.ref(
@@ -215,5 +216,7 @@ class PaymentTransaction(models.Model):
         payment.sudo().write({
             'payment_transaction_id': self.id,
             'payment_reference': self.reference,
-            'payment_method': 'flutterwave',
+            'payment_method': (
+                'flutterwave' if self.provider_code == 'flutterwave'
+                else 'bank'),
         })

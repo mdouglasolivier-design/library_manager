@@ -35,7 +35,11 @@ class LibraryBook(models.Model):
     returned_copies = fields.Integer(
         compute='_compute_copy_counts', store=True)
     website_published = fields.Boolean(
-        string='Published on Website', default=True, index=True)
+        string='Published on Website', default=True, index=True,
+        tracking=True,
+        help="Published physical books appear on the member website "
+             "under Physical Books (/library/books).")
+    website_url = fields.Char(compute='_compute_website_url')
     pages = fields.Integer()
     published_date = fields.Date()
     active = fields.Boolean(default=True)
@@ -58,6 +62,12 @@ class LibraryBook(models.Model):
     _sql_constraints = [
         ('isbn_unique', 'unique(isbn)', 'This ISBN already exists!'),
     ]
+
+    @api.depends('website_published')
+    def _compute_website_url(self):
+        for book in self:
+            book.website_url = (
+                '/library/books/%s' % book.id if book.id else False)
 
     @api.depends('state', 'due_date')
     def _compute_is_overdue(self):
@@ -206,6 +216,20 @@ class LibraryBook(models.Model):
         if 'price' in vals:
             vals = {**vals, 'price': 6.0}
         return super().write(vals)
+
+    def action_open_website(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_url',
+            'url': '/library/books/%s' % self.id,
+            'target': 'new',
+        }
+
+    def action_publish_website(self):
+        self.write({'website_published': True})
+
+    def action_unpublish_website(self):
+        self.write({'website_published': False})
 
     def action_view_loans(self):
         self.ensure_one()
