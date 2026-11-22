@@ -1,49 +1,45 @@
-# Payment setup (Flutterwave)
+# Payment setup (bank transfer)
 
-The library takes every payment through **Flutterwave** (bank cards and mobile
-money). Members pay on Flutterwave's secure page; card numbers and mobile money
-PINs are never typed into, or stored by, the library website. Nobody uploads
-proof of payment: when Flutterwave confirms a payment, Odoo marks it paid,
-creates the receipt, shows it on the member's **Payments** page and emails the
-PDF.
+The library takes every payment by **bank transfer** through Odoo's built-in
+**Wire Transfer** payment provider. Members never type card numbers or PINs on
+the website and nobody uploads proof of payment. After a member requests a
+book, the website shows your bank details and a payment reference. When you
+see the money in your bank account, a librarian confirms it in Odoo and the
+receipt is created and emailed automatically.
 
-## 1. Flutterwave account
+## 1. Enable Wire Transfer
 
-1. Create a Flutterwave merchant account and stay in **test mode** first.
-2. In the Flutterwave dashboard: Settings -> API keys. Copy the **public key**
-   and **secret key**.
-3. Settings -> Webhooks. Set the URL to
-   `https://YOUR-SITE/payment/flutterwave/webhook` and choose a **secret hash**
-   (any long random text). Keep it for the next step.
+1. Open **Apps**, search for **Payment Provider: Custom Payment Modes**
+   (`payment_custom`). It is installed automatically with the library module.
+2. Open **Settings -> Technical -> Payment Providers** (turn on developer mode
+   if you do not see Technical) and open **Wire Transfer**. Without the
+   Invoicing app, use that path; with it, use Invoicing -> Configuration ->
+   Payment Providers.
+3. Set the state to **Enabled**.
+4. On the **Messages** tab, edit the **Pending Message**. This text is shown to
+   the member after they request a book, so put your real bank details in it:
+   bank name, account name, account number, and an instruction to quote the
+   payment reference on the transfer.
+5. Save.
 
-Flutterwave must be able to reach your site over the internet for webhooks.
-Without that (for example on a home computer) payments are still confirmed when
-the member returns to the site, but not if they close the page early.
-
-## 2. Odoo
-
-1. Open **Flutterwave** under Payment Providers. Without the Invoicing app, use
-   `http://localhost:8069/odoo/action-payment.action_payment_provider`.
-2. On the Credentials tab paste the public key, secret key and the webhook
-   secret hash.
-3. Payment methods: keep **Card** and **MTN Mobile Money (Rwanda)** ticked. Untick
-   any you do not want (for example M-Pesa).
-4. Set the state to **Test Mode**, save, and try a payment with Flutterwave's
-   test cards. When ready for real money use live keys and set **Enabled**.
-
-## 3. Library settings
+## 2. Currency and price
 
 In **Settings -> Library** set the eBook and physical book prices and the
-currency code. The currency must be active in Odoo and supported by
-Flutterwave (for example RWF or USD). Rwandan francs have no decimals.
+payment currency (for example RWF or USD). Rwandan francs have no decimals.
 
-## 4. What members see
+## 3. Confirming a payment
 
-- **Checkout** shows only Flutterwave.
-- **My Library -> Payments** lists each payment. As soon as one is confirmed the
-  **Receipt (PDF)** and **View** buttons appear. The PDF is also emailed once.
-- A receipt is only ever created for a payment Flutterwave has verified. Odoo
-  re-checks every payment with Flutterwave's API before accepting it.
+1. Check your bank statement for the transfer and its payment reference.
+2. Open **Odoo Library -> Payment Review** and choose the matching list
+   (eBook or Physical Book Payment Requests), then open the request.
+3. Click **Confirm Payment**. Odoo marks the transaction done, shows the
+   receipt on the member's **Payments** page and emails the PDF receipt.
+4. Click **Reject Payment** if the money never arrived.
+5. For a physical book, click **Approve** afterwards to create the loan.
 
-The member needs an email address on their account and Odoo needs an outgoing
-mail server (Settings -> Technical -> Outgoing Mail Servers) for the email.
+## Notes
+
+- Bank transfers cannot be confirmed automatically: Odoo does not see your
+  bank account, so a librarian must confirm each transfer.
+- A receipt is only ever created for a payment a librarian confirmed.
+- Payments made earlier with Flutterwave keep their records and receipts.

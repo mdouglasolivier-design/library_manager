@@ -29,7 +29,7 @@ class LibraryEbookRequest(models.Model):
 
     @api.model
     def submit_for_current_user(
-            self, ebook_id, payment_method='flutterwave', momo_phone=None,
+            self, ebook_id, payment_method='bank', momo_phone=None,
             payment_reference=None):
         user = self.env.user
         if user._is_public() or not user.partner_id:
@@ -43,7 +43,7 @@ class LibraryEbookRequest(models.Model):
         if not ebook:
             raise UserError("This eBook is not available in the public catalog.")
         ebook._check_file_available()
-        if payment_method != 'flutterwave':
+        if payment_method != 'bank':
             raise ValidationError("Select a supported payment method.")
 
         self.env.cr.execute(
@@ -99,7 +99,7 @@ class LibraryEbookRequest(models.Model):
                     'state': 'pending',
                     'payment_status': 'pending',
                     'payment_amount': 5.0,
-                    'payment_method': 'flutterwave',
+                    'payment_method': 'bank',
                     'payment_reference': values.get('payment_reference'),
                 }
                 for values in vals_list

@@ -16,7 +16,6 @@
                 <field name="available_copies"/>
                 <field name="borrowed_copies"/>
                 <field name="returned_copies"/>
-                <field name="website_published" string="On website" widget="boolean_toggle"/>
                 <field name="borrower_id"/>
                 <field name="due_date"/>
                 <field name="is_overdue" string="Overdue" widget="boolean"/>
@@ -45,6 +44,7 @@
                 <field name="borrower_id"/>
                 <field name="due_date"/>
                 <field name="is_overdue"/>
+                <field name="website_published"/>
                 <templates>
                     <t t-name="card">
                         <article class="d-flex h-100 gap-3">
@@ -81,6 +81,10 @@
                                           class="badge text-bg-danger">Overdue</span>
                                     <span t-if="record.state.raw_value == 'lost'"
                                           class="badge text-bg-secondary">Lost</span>
+                                    <span t-if="record.website_published.raw_value"
+                                          class="badge text-bg-info ms-1">On website</span>
+                                    <span t-else=""
+                                          class="badge text-bg-light ms-1">Hidden</span>
                                 </div>
                                 <div t-if="record.state.raw_value == 'borrowed'" class="small mt-1">
                                     <field name="borrower_id"/>
@@ -109,13 +113,22 @@
                             class="btn-primary" invisible="state != 'borrowed'"/>
                     <button name="action_mark_lost" string="Mark as Lost" type="object"
                             invisible="state == 'lost'"/>
+                    <button name="action_publish_website" string="Publish on Website"
+                            type="object" invisible="website_published"/>
+                    <button name="action_unpublish_website" string="Unpublish"
+                            type="object" invisible="not website_published"/>
                     <field name="state" widget="statusbar"
                            statusbar_visible="available,borrowed,lost"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <field name="website_published" widget="boolean_button"
-                               options="{'terminology': {'string_true': 'Published on website', 'hover_true': 'Unpublish', 'string_false': 'Not on website', 'hover_false': 'Publish'}}"/>
+                        <button name="action_open_website" type="object"
+                                class="oe_stat_button" icon="fa-globe"
+                                invisible="not website_published or not id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">View on Website</span>
+                            </div>
+                        </button>
                         <button name="action_view_loans" type="object"
                                 class="oe_stat_button" icon="fa-history">
                             <field name="loan_count" widget="statinfo" string="Loans"/>
@@ -141,9 +154,17 @@
                             <field name="returned_copies" readonly="1"/>
                             <field name="available_copies" readonly="1"/>
                             <field name="lost_copies"/>
-                            <field name="website_published"/>
                             <field name="pages"/>
                             <field name="published_date"/>
+                        </group>
+                        <group string="Member Website">
+                            <field name="website_published" widget="boolean_toggle"/>
+                            <field name="website_url" widget="url" readonly="1"
+                                   invisible="not website_published or not id"/>
+                            <div class="text-muted" colspan="2">
+                                Published books appear under Physical Books on the member
+                                website, where signed-in members can request to borrow them.
+                            </div>
                         </group>
                         <group string="Availability">
                             <field name="borrower_id" readonly="state != 'available'"/>
@@ -197,8 +218,6 @@
                 <filter name="borrowed" string="Borrowed" domain="[('state', '=', 'borrowed')]"/>
                 <filter name="overdue" string="Overdue" domain="[('is_overdue', '=', True)]"/>
                 <filter name="lost" string="Lost" domain="[('state', '=', 'lost')]"/>
-                <filter name="published" string="Published on website" domain="[('website_published', '=', True)]"/>
-                <filter name="unpublished" string="Not published" domain="[('website_published', '=', False)]"/>
                 <separator/>
                 <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
                 <group expand="0" string="Group By">
@@ -216,12 +235,12 @@
 
     <!-- ACTION -->
     <record id="action_library_book" model="ir.actions.act_window">
-        <field name="name">Books</field>
+        <field name="name">Physical Books</field>
         <field name="res_model">library.book</field>
         <field name="view_mode">kanban,list,form</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">Add your first book</p>
-            <p>Add cover art to browse your catalog visually and quickly check availability.</p>
+            <p class="o_view_nocontent_smiling_face">Add your first physical book</p>
+            <p>New books are published on the member website automatically. Switch "Published on Website" off to hide one.</p>
         </field>
     </record>
 

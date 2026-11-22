@@ -98,9 +98,9 @@ class LibraryPaymentPortal(PaymentPortal):
             provider_id).exists()
         if not provider or provider.state not in ('enabled', 'test'):
             raise ValidationError("Select an enabled payment provider.")
-        if provider.code != 'flutterwave':
+        if provider.code != 'custom' or provider.custom_mode != 'wire_transfer':
             raise ValidationError(
-                "Only Flutterwave is supported by the library checkout.")
+                "Only bank transfer is supported by the library checkout.")
 
         payment_method = request.env['payment.method'].sudo().browse(
             payment_method_id).exists()
@@ -115,7 +115,7 @@ class LibraryPaymentPortal(PaymentPortal):
             is_validation=is_validation,
             custom_create_values=custom_create_values, **kwargs)
         tx._library_link_payment_record(payment)
-        payment.sudo().write({'payment_method': 'flutterwave'})
+        payment.sudo().write({'payment_method': 'bank'})
         return tx
 
     @staticmethod
@@ -177,13 +177,6 @@ class LibraryPaymentPortal(PaymentPortal):
         website=True, sitemap=False)
     def library_payment_history(self, **kwargs):
         partner_id = request.env.user.partner_id.id
-        # Settle anything Flutterwave has already finished before listing.
-        request.env['payment.transaction'].sudo().search([
-            ('partner_id', '=', partner_id),
-            ('provider_code', '=', 'flutterwave'),
-            ('state', 'in', ('draft', 'pending')),
-            ('library_payment_record_ref', '!=', False),
-        ], limit=10)._library_reconcile_with_flutterwave()
         payments = []
         for model in _PAYMENT_RECORD_MODELS:
             records = request.env[model].sudo().search([
@@ -242,13 +235,13 @@ class LibraryPaymentPortal(PaymentPortal):
                     access_token, tx.partner_id.id, tx.amount,
                     tx.currency_id.id)):
             return request.not_found()
-        tx._library_reconcile_with_flutterwave()
         return request.make_json_response(
             {
                 'state': tx.state,
                 'final': tx.state in ('done', 'cancel', 'error'),
             },
             headers=[('Cache-Control', 'no-store')])
+
     def _paid_transaction(self, tx_id):
         return request.env['payment.transaction'].sudo().search([
             ('id', '=', tx_id),

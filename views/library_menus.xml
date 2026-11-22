@@ -14,7 +14,7 @@
               action="action_library_dashboard" sequence="5"
               groups="library_manager.group_library_librarian,base.group_system"/>
 
-    <menuitem id="menu_library_books" name="Books"
+    <menuitem id="menu_library_books" name="Physical Books"
               parent="menu_library_root"
               action="action_library_book" sequence="10"/>
 

@@ -134,9 +134,9 @@
                                 <div><dt>Available copies</dt><dd t-esc="book.available_copies"/></div>
                             </dl>
                             <div class="library-payment-instructions">
-                                <h2>Secure checkout</h2>
-                                <p>Pay with Flutterwave using a bank card or mobile money. Your receipt is created automatically as soon as the payment is confirmed.</p>
-                                <p>Never enter card numbers, security codes, or mobile money PINs anywhere except on the secure Flutterwave page.</p>
+                                <h2>Pay by bank transfer</h2>
+                                <p>After you submit your request you will see the bank details and your payment reference. Once the library confirms your transfer, your receipt is created automatically.</p>
+                                <p>Never share card numbers, security codes, or PINs with anyone.</p>
                             </div>
                             <div t-if="notice"
                                  t-att-class="'alert alert-%s' % notice['level']"
@@ -171,7 +171,7 @@
                                 <input id="physical-due-date" name="due_date"
                                        type="date" required="required"
                                        t-att-value="expected_return"/>
-                                <p>Choose an available payment provider at the next step. Payment must be verified before your request can be approved.</p>
+                                <p>You will pay by bank transfer at the next step. A librarian must confirm the transfer before your request can be approved.</p>
                                 <button class="library-button" type="submit"
                                         t-att-disabled="not book.available_copies">
                                     Submit borrowing request

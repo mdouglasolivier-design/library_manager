@@ -18,5 +18,7 @@ class PaymentProvider(models.Model):
             **kwargs)
         if kwargs.get('library_checkout'):
             providers = providers.filtered(
-                lambda provider: provider.code == 'flutterwave')
+                lambda provider: (
+                    provider.code == 'custom'
+                    and provider.custom_mode == 'wire_transfer'))
         return providers

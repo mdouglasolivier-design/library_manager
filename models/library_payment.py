@@ -19,13 +19,13 @@ class LibraryPaymentMixin(models.AbstractModel):
     _description = 'Library Payment'
 
     payment_method = fields.Selection([
-        ('flutterwave', 'Flutterwave (card / mobile money)'),
-        # Kept so payments made before Flutterwave stay readable.
+        ('bank', 'Bank transfer'),
+        # Kept so payments made before bank transfer stay readable.
+        ('flutterwave', 'Flutterwave (legacy)'),
         ('momo', 'MTN Mobile Money (legacy)'),
-        ('bank', 'Bank transfer (legacy)'),
         ('card', 'Bank card (legacy)'),
         ('external_card', 'External card provider (legacy)'),
-    ], string='Payment Method', default='flutterwave', required=True,
+    ], string='Payment Method', default='bank', required=True,
         index=True)
     payment_status = fields.Selection([
         ('pending', 'Pending'),
@@ -149,9 +149,20 @@ class LibraryPaymentMixin(models.AbstractModel):
                 raise UserError("Only a pending payment can be confirmed.")
             transaction = record.payment_transaction_id
             if transaction:
-                raise UserError(
-                    "Online payments are confirmed automatically once "
-                    "Flutterwave reports them as successful.")
+                if transaction.provider_code != 'custom':
+                    raise UserError(
+                        "Online payments are confirmed automatically by "
+                        "their payment provider.")
+                if transaction.state not in ('draft', 'pending'):
+                    raise UserError(
+                        "This bank transfer is no longer waiting for "
+                        "confirmation.")
+                # Marking the Odoo transaction done confirms the library
+                # payment and emails the receipt exactly once.
+                transaction.sudo()._set_done(
+                    state_message="Bank transfer confirmed by %s." %
+                    self.env.user.name)
+                continue
             record.with_context(_library_payment_action=True).write({
                 'payment_status': 'confirmed',
             })
