@@ -98,7 +98,7 @@ class PhysicalLibraryController(http.Controller):
                 borrow_date=post.get('borrow_date'),
                 due_date=post.get('due_date'),
                 borrower_phone=post.get('borrower_phone'),
-                payment_method='flutterwave',
+                payment_method='bank',
                 payment_reference=post.get('payment_reference'))
         except (AccessError, UserError, ValidationError, ValueError) as error:
             request.session['library_portal_notice'] = {

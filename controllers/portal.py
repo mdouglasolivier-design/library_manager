@@ -35,7 +35,17 @@ class LibraryCatalogController(http.Controller):
                 ('website_published', '=', True),
             ]),
         ]
+        Book = request.env['library.book'].sudo()
+        physical_domain = [
+            ('active', '=', True),
+            ('website_published', '=', True),
+        ]
         return request.render('library_manager.portal_library_home', {
+            'physical_books': Book.search(
+                physical_domain, order='create_date desc, id desc', limit=4),
+            'physical_count': Book.search_count(physical_domain),
+            'physical_price': request.env[
+                'library.payment.mixin']._library_service_price('physical'),
             'featured_ebooks': featured,
             'recent_ebooks': recent,
             'categories': categories,

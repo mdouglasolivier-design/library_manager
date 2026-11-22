@@ -2,7 +2,7 @@ import uuid
 
 from unittest.mock import patch
 
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tests import HttpCase, TransactionCase, tagged
 
 from .common import create_test_ebook_file
@@ -37,8 +37,9 @@ class LibraryPaymentFixtureMixin:
             'website_published': True,
         })
         create_test_ebook_file(self.env, self.ebook)
-        self.provider = self.env.ref('payment.payment_provider_flutterwave')
-        self.payment_method = self.env.ref('payment.payment_method_card')
+        self.provider = self.env.ref('payment.payment_provider_transfer')
+        self.payment_method = self.env.ref(
+            'payment_custom.payment_method_wire_transfer')
 
     def _new_request(self, user=None):
         user = user or self.member
@@ -233,10 +234,7 @@ class TestLibraryPaymentLifecycle(
         self.assertNotIn('100212701941', template.body_html)
 
 
-class TestLibraryFlutterwaveFlow(LibraryPaymentFixtureMixin, TransactionCase):
-
-    API = ('odoo.addons.payment_flutterwave.models.payment_provider.'
-           'PaymentProvider._flutterwave_make_request')
+class TestLibraryBankTransferFlow(LibraryPaymentFixtureMixin, TransactionCase):
 
     def setUp(self):
         super().setUp()
@@ -246,76 +244,53 @@ class TestLibraryFlutterwaveFlow(LibraryPaymentFixtureMixin, TransactionCase):
         self.transaction._library_link_payment_record(self.request_record)
         self.transaction._set_pending()
 
-    def _verified(self, **overrides):
-        data = {
-            'id': 987654, 'status': 'successful',
-            'tx_ref': self.transaction.reference,
-            'amount': self.transaction.amount,
-            'currency': self.transaction.currency_id.name,
-            'payment_type': 'card', 'card': {'type': 'VISA'},
-            'customer': {'email': 'member@example.test'},
-        }
-        data.update(overrides)
-        return {'status': 'success', 'data': data}
+    def test_new_transfer_waits_for_librarian(self):
+        self.assertEqual(self.transaction.state, 'pending')
+        self.assertEqual(self.request_record.payment_status, 'pending')
+        self.assertEqual(self.request_record.payment_method, 'bank')
+        self.assertFalse(self._receipt_mails(self.transaction))
 
-    def _notify(self, response):
-        with patch(self.API, return_value=response):
-            self.env['payment.transaction']._handle_notification_data(
-                'flutterwave', {
-                    'tx_ref': self.transaction.reference,
-                    'status': 'successful'})
-
-    def test_verified_flutterwave_payment_creates_receipt(self):
-        self._notify(self._verified())
+    def test_librarian_confirmation_creates_receipt(self):
+        self.request_record.with_user(self.librarian).action_confirm_payment()
 
         self.assertEqual(self.transaction.state, 'done')
         self.assertEqual(self.request_record.payment_status, 'confirmed')
-        self.assertEqual(self.request_record.payment_method, 'flutterwave')
-        self.assertEqual(self.transaction.provider_reference, '987654')
         self.assertEqual(len(self._receipt_mails(self.transaction)), 1)
 
-    def test_repeated_notification_keeps_a_single_receipt(self):
-        self._notify(self._verified())
-        self._notify(self._verified())
+    def test_confirming_twice_keeps_a_single_receipt(self):
+        self.request_record.with_user(self.librarian).action_confirm_payment()
+        with self.assertRaises(UserError):
+            self.request_record.with_user(
+                self.librarian).action_confirm_payment()
 
         self.assertEqual(len(self._receipt_mails(self.transaction)), 1)
 
-    def test_wrong_amount_is_not_accepted(self):
-        self._notify(self._verified(amount=self.transaction.amount - 1))
+    def test_member_cannot_confirm_own_transfer(self):
+        with self.assertRaises(AccessError):
+            self.request_record.with_user(self.member).action_confirm_payment()
 
-        self.assertEqual(self.transaction.state, 'error')
-        self.assertEqual(self.request_record.payment_status, 'failed')
+        self.assertEqual(self.transaction.state, 'pending')
         self.assertFalse(self._receipt_mails(self.transaction))
 
-    def test_wrong_currency_is_not_accepted(self):
-        other = 'EUR' if self.transaction.currency_id.name != 'EUR' else 'USD'
-        self._notify(self._verified(currency=other))
+    def test_rejected_transfer_has_no_receipt(self):
+        self.request_record.with_user(self.librarian).action_reject_payment()
 
-        self.assertEqual(self.transaction.state, 'error')
+        self.assertEqual(self.transaction.state, 'cancel')
+        self.assertEqual(self.request_record.payment_status, 'rejected')
         self.assertFalse(self._receipt_mails(self.transaction))
 
-    def test_failed_flutterwave_payment_has_no_receipt(self):
-        self._notify(self._verified(status='failed'))
-
-        self.assertEqual(self.request_record.payment_status, 'failed')
-        self.assertFalse(self._receipt_mails(self.transaction))
-
-    def test_library_checkout_offers_only_flutterwave(self):
-        self.provider.write({
-            'state': 'test',
-            'flutterwave_public_key': 'FLWPUBK_TEST-x',
-            'flutterwave_secret_key': 'FLWSECK_TEST-x',
-            'flutterwave_webhook_secret': 'secret-hash',
-        })
+    def test_library_checkout_offers_only_flutterwave_and_bank_transfer(self):
+        self.provider.write({'state': 'test'})
         other = self.env['payment.provider'].search([
-            ('code', '!=', 'flutterwave'),
+            ('code', 'not in', ('custom', 'flutterwave')),
             ('state', 'in', ('enabled', 'test')),
         ])
         compatible = self.env['payment.provider']._get_compatible_providers(
             self.env.company.id, self.member.partner_id.id, 5.0,
             currency_id=self.request_record.payment_currency_id.id,
             library_checkout=True)
-        self.assertEqual(compatible.mapped('code'), ['flutterwave'])
+        self.assertIn('custom', compatible.mapped('code'))
+        self.assertFalse(set(compatible.mapped('code')) - {'custom', 'flutterwave'})
         self.assertFalse(compatible & other)
 
 

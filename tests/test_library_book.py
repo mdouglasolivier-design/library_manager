@@ -51,3 +51,21 @@ class TestLibraryBook(TransactionCase):
         self.book.due_date = fields.Date.today() - timedelta(days=1)
         overdue = self.env['library.book'].search([('is_overdue', '=', True)])
         self.assertIn(self.book, overdue)
+
+    def test_new_physical_book_is_published_by_default(self):
+        self.assertTrue(self.book.website_published)
+        self.assertEqual(
+            self.book.website_url, '/library/books/%s' % self.book.id)
+
+    def test_unpublish_and_publish_book(self):
+        self.book.action_unpublish_website()
+        self.assertFalse(self.book.website_published)
+        self.book.action_publish_website()
+        self.assertTrue(self.book.website_published)
+
+    def test_published_book_is_in_public_catalog_domain(self):
+        domain = [('active', '=', True), ('website_published', '=', True)]
+        self.assertIn(self.book, self.env['library.book'].search(domain))
+        self.book.action_unpublish_website()
+        self.assertNotIn(self.book, self.env['library.book'].search(domain))
+

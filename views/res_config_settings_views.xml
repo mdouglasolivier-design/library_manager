@@ -42,7 +42,7 @@
                     </block>
                     <block title="Online payments">
                         <p class="text-muted">
-                            All payments go through Flutterwave (cards and mobile money). Enter the Flutterwave keys under Payment Providers. Members are never asked to type card numbers or PINs on this website, and nobody uploads proof of payment: receipts are created automatically when Flutterwave confirms a payment.
+                            Members can pay with Flutterwave (card or mobile money), which confirms automatically and issues the receipt instantly, or with Odoo's Wire Transfer provider, which a librarian confirms. Enable them under Payment Providers. Members never type card numbers or PINs on this website.
                         </p>
                     </block>
                 </app>

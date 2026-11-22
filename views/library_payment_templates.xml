@@ -21,7 +21,7 @@
             </section>
             <div t-if="library_no_payment_providers"
                  class="alert alert-warning">
-                Online payment is not available yet because Flutterwave has not been switched on. Contact the library team; no payment has been taken.
+                No payment method is switched on yet. Contact the library team; no payment has been taken.
             </div>
         </xpath>
     </template>
@@ -146,7 +146,12 @@
                     </div>
                     <div t-elif="tx.state in ('pending', 'authorized', 'draft')"
                          class="alert alert-info">
-                        Your payment is being confirmed by Flutterwave. This page and your payment history update automatically; do not pay again for this reference.
+                        <t t-if="tx.provider_code == 'flutterwave'">
+                            Your card or mobile money payment is being confirmed. This page updates by itself and your receipt appears the moment the payment is verified. Do not pay twice for this reference.
+                        </t>
+                        <t t-else="">
+                            Your request is waiting for your bank transfer. Transfer the amount below using the bank details shown here and quote your payment reference. A librarian confirms the transfer, then your receipt is created automatically. This page updates by itself once it is confirmed. Do not pay twice for this reference.
+                        </t>
                     </div>
                     <div t-elif="tx.state == 'cancel'" class="alert alert-warning">
                         This payment was cancelled.
@@ -154,8 +159,12 @@
                     <div t-else="" class="alert alert-danger">
                         This payment was not completed. Contact the library team before trying again.
                     </div>
+                    <section t-if="tx.state in ('pending', 'authorized', 'draft') and tx.provider_id.sudo().pending_msg"
+                             class="border rounded p-3 mb-3">
+                        <t t-out="tx.provider_id.sudo().pending_msg"/>
+                    </section>
                     <dl class="row">
-                        <dt class="col-sm-3">Reference</dt>
+                        <dt class="col-sm-3">Payment reference</dt>
                         <dd class="col-sm-9" t-esc="tx.reference"/>
                         <dt class="col-sm-3">Amount</dt>
                         <dd class="col-sm-9">

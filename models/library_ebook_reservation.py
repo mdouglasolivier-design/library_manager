@@ -42,7 +42,7 @@ class LibraryEbookReservation(models.Model):
                     'ebook_id': values.get('ebook_id'),
                     'borrower_id': partner_id,
                     'state': 'pending',
-                    'payment_method': 'flutterwave',
+                    'payment_method': 'bank',
                     'payment_status': 'pending',
                     'payment_amount': 5.0,
                     'payment_reference': values.get('payment_reference'),
